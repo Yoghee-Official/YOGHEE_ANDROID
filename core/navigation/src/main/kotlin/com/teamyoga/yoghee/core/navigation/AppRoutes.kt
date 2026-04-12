@@ -1,0 +1,15 @@
+package com.teamyoga.yoghee.core.navigation
+
+sealed class AppRoute(val route: String) {
+    data object Main : AppRoute("main")
+    data object Search : AppRoute("search")
+    data object Category : AppRoute("category")
+    data object Profile : AppRoute("profile")
+
+    data object Detail : AppRoute("detail/{id}") {
+        const val ARG_ID = "id"
+
+        fun createRoute(id: String): String = "detail/$id"
+    }
+}
+

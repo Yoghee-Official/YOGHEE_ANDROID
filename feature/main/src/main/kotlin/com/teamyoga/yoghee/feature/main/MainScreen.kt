@@ -2,22 +2,20 @@ package com.teamyoga.yoghee.feature.main
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.teamyoga.yoghee.core.domain.MainItem
-import com.teamyoga.yoghee.feature.main.components.AdItem
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.feature.main.components.BannerItem
 import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
 import com.teamyoga.yoghee.feature.main.components.MainHeader
-import com.teamyoga.yoghee.feature.main.components.ProductItem
 
 @Composable
 fun MainScreen(
@@ -26,13 +24,32 @@ fun MainScreen(
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: MainViewModel = hiltViewModel()
 ) {
-    val vm: MainViewModel = viewModel()
-    val state by vm.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    MainScreen(
+        onGoSearch = onGoSearch,
+        onGoCategory = onGoCategory,
+        onGoProfile = onGoProfile,
+        onGoDetail = onGoDetail,
+        uiState = state,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun MainScreen(
+    onGoSearch: () -> Unit,
+    onGoCategory: () -> Unit,
+    onGoProfile: () -> Unit,
+    onGoDetail: (String) -> Unit,
+    uiState: MainUiState,
+    modifier: Modifier
+) {
 
     Scaffold(
         topBar = { MainHeader() },
-        containerColor = MaterialTheme.colorScheme.background, // 테마에 등록한 #EFEDEB 적용
+        containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         Box(
@@ -40,25 +57,49 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // 1. 메인 목록 (세로 스크롤)
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
-                items(
-                    items = state.items,
-                    key = { it.id },
-                    contentType = { it::class.java }
-                ) { item ->
-                    when (item) {
-                        is MainItem.Banner -> BannerItem(banner = item)
-                        is MainItem.Product -> ProductItem(product = item, onClick = { onGoDetail(item.id) })
-                        is MainItem.Ad -> AdItem(ad = item)
+            when (uiState) {
+                is MainUiState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+                is MainUiState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
+                        uiState.data.banners.forEach { banner ->
+                            item(key = banner.classId) {
+                                BannerItem(banner = banner)
+                            }
+                        }
+
                     }
+
+//                    LazyColumn(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentPadding = PaddingValues(bottom = 100.dp)
+//                    ) {
+//                        items(
+//                            items = state.items,
+//                            key = { it.id },
+//                            contentType = { it::class.java }
+//                        ) { item ->
+//                            when (item) {
+//                                is MainItem.Banner -> BannerItem(banner = item)
+//                                is MainItem.Product -> ProductItem(product = item, onClick = { onGoDetail(item.id) })
+//                                is MainItem.Ad -> AdItem(ad = item)
+//                            }
+//                        }
+//                    }
+                }
+                is MainUiState.Error -> {   // 방어화면
+                    Text(
+                        text = uiState.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
 
-            // 2. 하단 플로팅 네비게이션 메뉴
             FloatingBottomNavigation(
                 onGoSearch = onGoSearch,
                 onGoCategory = onGoCategory,

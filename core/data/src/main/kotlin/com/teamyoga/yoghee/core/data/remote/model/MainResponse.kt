@@ -40,7 +40,7 @@ data class CenterDto(
 data class ReviewDto(
     val reviewId: String,
     val content: String,
-    val rating: Int,
+    val rating: Double,
     val thumbnail: String? = null
 )
 

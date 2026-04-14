@@ -1,0 +1,20 @@
+package com.teamyoga.yoghee.core.data.di
+
+import com.teamyoga.yoghee.core.data.repository.MainRepositoryImpl
+import com.teamyoga.yoghee.core.domain.repository.MainRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+interface DataModule {
+
+    @Binds
+    @Singleton
+    fun bindMainRepository(
+        mainRepositoryImpl: MainRepositoryImpl
+    ): MainRepository
+}

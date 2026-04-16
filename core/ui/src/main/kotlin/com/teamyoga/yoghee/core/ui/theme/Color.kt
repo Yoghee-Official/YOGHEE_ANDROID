@@ -10,8 +10,8 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// 추가된 배경색
 val Background = Color(0xFFEFEDEB)
 val Green_D6F695 = Color(0xFFD6F695)
 
+val SAND_BEIGE = Color(0xFFFCFAF4)
 val White = Color(0xFFFFFFFF)

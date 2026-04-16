@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation(libs.coil.compose)
+
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

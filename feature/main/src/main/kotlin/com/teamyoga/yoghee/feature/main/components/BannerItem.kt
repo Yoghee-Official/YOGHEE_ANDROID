@@ -1,35 +1,103 @@
 package com.teamyoga.yoghee.feature.main.components
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.teamyoga.yoghee.core.domain.MainItem
+import coil.compose.AsyncImage
+import com.teamyoga.yoghee.core.domain.model.MainBanner
+import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
+import kotlinx.coroutines.delay
 
 @Composable
-fun BannerItem(
-    banner: MainItem.Banner,
+fun BannerPager(
+    banners: List<MainBanner>,
+    modifier: Modifier = Modifier
+) {
+    if (banners.isEmpty()) return
+
+    val pageCount = banners.size
+    val startPage = Int.MAX_VALUE / 2
+    val initialPage = startPage - startPage % pageCount
+
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = { Int.MAX_VALUE }
+    )
+
+    LaunchedEffect(pagerState) {
+        while (true) {
+            delay(3000)
+            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+        }
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
+        pageSpacing = 8.dp
+    ) { page ->
+        BannerItem(banner = banners[page % pageCount])
+    }
+}
+
+@Composable
+private fun BannerItem(
+    banner: MainBanner,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .padding(16.dp),
+            .padding(vertical = 8.dp)
+            .aspectRatio(328f / 245f),
         colors = CardDefaults.cardColors(containerColor = Color.LightGray)
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Text(text = "배너 광고 공간 (${banner.id})", fontWeight = FontWeight.Bold)
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = banner.thumbnail,
+                contentDescription = banner.className,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = banner.className,
+                    color = SAND_BEIGE,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = banner.description,
+                    color = SAND_BEIGE,
+                    fontSize = 10.sp
+                )
+            }
         }
     }
 }

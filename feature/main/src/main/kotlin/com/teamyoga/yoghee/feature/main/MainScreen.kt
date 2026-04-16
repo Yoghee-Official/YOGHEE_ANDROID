@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.teamyoga.yoghee.feature.main.components.BannerItem
+import com.teamyoga.yoghee.feature.main.components.BannerPager
 import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
 import com.teamyoga.yoghee.feature.main.components.MainHeader
 
@@ -66,10 +66,8 @@ internal fun MainScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
-                        uiState.data.banners.forEach { banner ->
-                            item(key = banner.classId) {
-                                BannerItem(banner = banner)
-                            }
+                        item {
+                            BannerPager(banners = uiState.data.banners)
                         }
 
                     }

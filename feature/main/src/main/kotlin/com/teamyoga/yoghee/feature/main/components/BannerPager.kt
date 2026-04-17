@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Card
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -30,7 +34,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun BannerPager(
     banners: List<MainBanner>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundColor: Color
 ) {
     if (banners.isEmpty()) return
 
@@ -50,13 +55,27 @@ fun BannerPager(
         }
     }
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
-        pageSpacing = 8.dp
-    ) { page ->
-        BannerItem(banner = banners[page % pageCount])
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .drawWithContent {
+                drawContent()
+                // 콘텐츠 위에 왼쪽 16dp 영역을 덧칠해 이전 페이지를 가림
+                drawRect(
+                    color = backgroundColor,
+                    topLeft = Offset.Zero,
+                    size = Size(16.dp.toPx(), size.height)
+                )
+            }
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
+            pageSpacing = 8.dp,
+        ) { page ->
+            BannerItem(banner = banners[page % pageCount])
+        }
     }
 }
 
@@ -68,7 +87,6 @@ private fun BannerItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
             .aspectRatio(328f / 245f),
         colors = CardDefaults.cardColors(containerColor = Color.LightGray)
     ) {
@@ -76,7 +94,7 @@ private fun BannerItem(
             AsyncImage(
                 model = banner.thumbnail,
                 contentDescription = banner.className,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxSize()
             )
             Column(
@@ -90,12 +108,16 @@ private fun BannerItem(
                     text = banner.className,
                     color = SAND_BEIGE,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = banner.description,
                     color = SAND_BEIGE,
-                    fontSize = 10.sp
+                    fontSize = 10.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

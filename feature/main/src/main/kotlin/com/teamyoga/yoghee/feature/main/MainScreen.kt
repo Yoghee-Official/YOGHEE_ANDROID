@@ -46,10 +46,10 @@ internal fun MainScreen(
     uiState: MainUiState,
     modifier: Modifier
 ) {
-
+    val bgColor = MaterialTheme.colorScheme.background
     Scaffold(
         topBar = { MainHeader() },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = bgColor,
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
         Box(
@@ -67,7 +67,7 @@ internal fun MainScreen(
                         contentPadding = PaddingValues(bottom = 100.dp)
                     ) {
                         item {
-                            BannerPager(banners = uiState.data.banners)
+                            BannerPager(banners = uiState.data.banners, backgroundColor = bgColor)
                         }
 
                     }

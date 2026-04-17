@@ -128,8 +128,8 @@ fun CategoryToggle(
         val selectedIndex = if (isSecondChecked) 1 else 0
         Row(modifier = Modifier.fillMaxSize()) {
             listOf(
-                stringResource(R.string.toggle_daily_training),
-                stringResource(R.string.toggle_regular_training)
+                stringResource(R.string.daily_training),
+                stringResource(R.string.regular_training)
             ).forEachIndexed { index, label ->
                 val isSelected = index == selectedIndex
                 Box(

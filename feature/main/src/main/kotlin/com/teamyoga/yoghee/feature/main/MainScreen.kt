@@ -11,7 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.feature.main.components.BannerPager
 import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
@@ -27,15 +27,16 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val isSecondChecked by viewModel.isSecondChecked.collectAsStateWithLifecycle()
+    val trainingType by viewModel.trainingType.collectAsStateWithLifecycle()
+    
     MainScreen(
         onGoSearch = onGoSearch,
         onGoCategory = onGoCategory,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
         uiState = state,
-        isSecondChecked = isSecondChecked,
-        onToggleChanged = viewModel::onToggleChanged,
+        trainingType = trainingType,
+        onTrainingTypeChanged = viewModel::onTrainingTypeChanged,
         modifier = modifier
     )
 }
@@ -47,16 +48,16 @@ internal fun MainScreen(
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     uiState: MainUiState,
-    isSecondChecked: Boolean,
-    onToggleChanged: (Boolean) -> Unit,
+    trainingType: TrainingType,
+    onTrainingTypeChanged: (TrainingType) -> Unit,
     modifier: Modifier
 ) {
     val bgColor = MaterialTheme.colorScheme.background
     Scaffold(
         topBar = {
             MainHeader(
-                isSecondChecked = isSecondChecked,
-                onToggleChanged = onToggleChanged
+                trainingType = trainingType,
+                onTrainingTypeChanged = onTrainingTypeChanged
             )
         },
         containerColor = bgColor,
@@ -79,27 +80,25 @@ internal fun MainScreen(
                         item {
                             BannerPager(banners = uiState.data.banners, backgroundColor = bgColor)
                         }
-
                     }
-
-//                    LazyColumn(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentPadding = PaddingValues(bottom = 100.dp)
-//                    ) {
-//                        items(
-//                            items = state.items,
-//                            key = { it.id },
-//                            contentType = { it::class.java }
-//                        ) { item ->
-//                            when (item) {
-//                                is MainItem.Banner -> BannerItem(banner = item)
-//                                is MainItem.Product -> ProductItem(product = item, onClick = { onGoDetail(item.id) })
-//                                is MainItem.Ad -> AdItem(ad = item)
-//                            }
-//                        }
-//                    }
+                    //                    LazyColumn(
+                    //                        modifier = Modifier.fillMaxSize(),
+                    //                        contentPadding = PaddingValues(bottom = 100.dp)
+                    //                    ) {
+                    //                        items(
+                    //                            items = state.items,
+                    //                            key = { it.id },
+                    //                            contentType = { it::class.java }
+                    //                        ) { item ->
+                    //                            when (item) {
+                    //                                is MainItem.Banner -> BannerItem(banner = item)
+                    //                                is MainItem.Product -> ProductItem(product = item, onClick = { onGoDetail(item.id) })
+                    //                                is MainItem.Ad -> AdItem(ad = item)
+                    //                            }
+                    //                        }
+                    //                    }
                 }
-                is MainUiState.Error -> {   // 방어화면
+                is MainUiState.Error -> {
                     Text(
                         text = uiState.message,
                         color = MaterialTheme.colorScheme.error,

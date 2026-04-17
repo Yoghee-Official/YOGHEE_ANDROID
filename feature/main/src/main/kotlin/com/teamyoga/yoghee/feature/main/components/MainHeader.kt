@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.painterResource
@@ -39,12 +38,14 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.shadow
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.feature.main.TrainingType
 
 @Composable
 fun MainHeader(
-    isSecondChecked: Boolean,
-    onToggleChanged: (Boolean) -> Unit
+    trainingType: TrainingType,
+    onTrainingTypeChanged: (TrainingType) -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -68,8 +69,8 @@ fun MainHeader(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CategoryToggle(
-                    isSecondChecked = isSecondChecked,
-                    onCheckedChange = onToggleChanged
+                    trainingType = trainingType,
+                    onTrainingTypeChanged = onTrainingTypeChanged
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Image(
@@ -86,12 +87,12 @@ fun MainHeader(
 
 @Composable
 fun CategoryToggle(
-    isSecondChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    trainingType: TrainingType,
+    onTrainingTypeChanged: (TrainingType) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pillOffsetX by animateDpAsState(
-        targetValue = if (isSecondChecked) 68.dp else 0.dp,
+        targetValue = if (trainingType == TrainingType.REGULAR) 68.dp else 0.dp,
         animationSpec = tween(durationMillis = 200),
         label = "toggleIndicator"
     )
@@ -107,7 +108,7 @@ fun CategoryToggle(
                     radius = 4.dp,
                     spread = 1.dp,
                     color = Color.Black.copy(alpha = 0.15f),
-                    offset = DpOffset(x = 0.dp, 0.dp)
+                    offset = DpOffset(x = 0.dp, y = 0.dp)
                 )
             )
             .background(Color.White)
@@ -124,13 +125,13 @@ fun CategoryToggle(
         )
 
         // 토글 텍스트
-        val selectedIndex = if (isSecondChecked) 1 else 0
         Row(modifier = Modifier.fillMaxSize()) {
-            listOf(
-                stringResource(R.string.daily_training),
-                stringResource(R.string.regular_training)
-            ).forEachIndexed { index, label ->
-                val isSelected = index == selectedIndex
+            TrainingType.entries.forEach { type ->
+                val isSelected = trainingType == type
+                val labelRes = when (type) {
+                    TrainingType.DAILY -> R.string.daily_training
+                    TrainingType.REGULAR -> R.string.regular_training
+                }
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -139,12 +140,12 @@ fun CategoryToggle(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            onCheckedChange(index == 1)
+                            onTrainingTypeChanged(type)
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = label,
+                        text = stringResource(labelRes),
                         fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         color = Color.Black.copy(alpha = if (isSelected) 1f else 0.2f)

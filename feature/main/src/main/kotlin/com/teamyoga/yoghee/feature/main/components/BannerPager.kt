@@ -55,27 +55,15 @@ fun BannerPager(
         }
     }
 
-    Box(
-        modifier = modifier
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier
             .fillMaxWidth()
-            .drawWithContent {
-                drawContent()
-                // 콘텐츠 위에 왼쪽 16dp 영역을 덧칠해 이전 페이지를 가림
-                drawRect(
-                    color = backgroundColor,
-                    topLeft = Offset.Zero,
-                    size = Size(16.dp.toPx(), size.height)
-                )
-            }
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
-            pageSpacing = 8.dp,
-        ) { page ->
-            BannerItem(banner = banners[page % pageCount])
-        }
+            .padding(top = 8.dp, bottom = 8.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
+        pageSpacing = 8.dp,
+    ) { page ->
+        BannerItem(banner = banners[page % pageCount])
     }
 }
 

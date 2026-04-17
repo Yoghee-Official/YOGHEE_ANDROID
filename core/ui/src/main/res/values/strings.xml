@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="daily_training">하루수련</string>
+    <string name="regular_training">정규수련</string>
+</resources>

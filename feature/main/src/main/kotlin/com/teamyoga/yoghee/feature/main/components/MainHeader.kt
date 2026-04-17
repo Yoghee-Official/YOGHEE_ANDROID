@@ -25,9 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,9 +42,10 @@ import androidx.compose.ui.res.stringResource
 import com.teamyoga.yoghee.core.ui.R
 
 @Composable
-fun MainHeader() {
-    var isSecondChecked by remember { mutableStateOf(false) }
-
+fun MainHeader(
+    isSecondChecked: Boolean,
+    onToggleChanged: (Boolean) -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -70,7 +69,7 @@ fun MainHeader() {
             ) {
                 CategoryToggle(
                     isSecondChecked = isSecondChecked,
-                    onCheckedChange = { isSecondChecked = it }
+                    onCheckedChange = onToggleChanged
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Image(

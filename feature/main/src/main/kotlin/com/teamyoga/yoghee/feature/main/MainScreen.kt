@@ -27,12 +27,15 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isSecondChecked by viewModel.isSecondChecked.collectAsStateWithLifecycle()
     MainScreen(
         onGoSearch = onGoSearch,
         onGoCategory = onGoCategory,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
         uiState = state,
+        isSecondChecked = isSecondChecked,
+        onToggleChanged = viewModel::onToggleChanged,
         modifier = modifier
     )
 }
@@ -44,11 +47,18 @@ internal fun MainScreen(
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     uiState: MainUiState,
+    isSecondChecked: Boolean,
+    onToggleChanged: (Boolean) -> Unit,
     modifier: Modifier
 ) {
     val bgColor = MaterialTheme.colorScheme.background
     Scaffold(
-        topBar = { MainHeader() },
+        topBar = {
+            MainHeader(
+                isSecondChecked = isSecondChecked,
+                onToggleChanged = onToggleChanged
+            )
+        },
         containerColor = bgColor,
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->

@@ -18,15 +18,23 @@ class MainViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<MainUiState>(MainUiState.Loading)
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
+    private val _isSecondChecked = MutableStateFlow(false)
+    val isSecondChecked: StateFlow<Boolean> = _isSecondChecked.asStateFlow()
+
     init {
-        loadMainData()
+        loadMainData(type = "O")
     }
 
-    fun loadMainData() {
+    fun onToggleChanged(isSecondChecked: Boolean) {
+        _isSecondChecked.value = isSecondChecked
+        loadMainData(type = if (isSecondChecked) "R" else "O")
+    }
+
+    private fun loadMainData(type: String) {
         viewModelScope.launch {
             _uiState.value = MainUiState.Loading
             try {
-                val data = mainRepository.getMainData(type = "R")
+                val data = mainRepository.getMainData(type = type)
                 _uiState.value = MainUiState.Success(data)
             } catch (e: Exception) {
                 _uiState.value = MainUiState.Error(e.message ?: "Unknown error")

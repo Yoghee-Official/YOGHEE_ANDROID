@@ -40,11 +40,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.teamyoga.yoghee.core.ui.R
 
 @Composable
 fun MainHeader() {
-    var checked by remember { mutableStateOf(false) }
+    var isSecondChecked by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier
@@ -55,7 +56,7 @@ fun MainHeader() {
         Column {
             Image(
                 painter = painterResource(id = R.drawable.header_logo),
-                contentDescription = "YOGHEE 로고",
+                contentDescription = "로고",
                 modifier = Modifier
                     .padding(start = 25.dp, top = 28.dp, bottom = 9.dp)
                     .size(width = 107.dp, height = 24.dp)
@@ -68,8 +69,8 @@ fun MainHeader() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CategoryToggle(
-                    checked = checked,
-                    onCheckedChange = { checked = it }
+                    isSecondChecked = isSecondChecked,
+                    onCheckedChange = { isSecondChecked = it }
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Image(
@@ -86,12 +87,12 @@ fun MainHeader() {
 
 @Composable
 fun CategoryToggle(
-    checked: Boolean,
+    isSecondChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pillOffsetX by animateDpAsState(
-        targetValue = if (checked) 68.dp else 0.dp,
+        targetValue = if (isSecondChecked) 68.dp else 0.dp,
         animationSpec = tween(durationMillis = 200),
         label = "toggleIndicator"
     )
@@ -125,8 +126,11 @@ fun CategoryToggle(
 
         // 토글 텍스트
         Row(modifier = Modifier.fillMaxSize()) {
-            listOf("하루수련", "정규수련").forEachIndexed { index, label ->
-                val isSelected = (index == 1) == checked
+            listOf(
+                stringResource(R.string.toggle_daily_training),
+                stringResource(R.string.toggle_regular_training)
+            ).forEachIndexed { index, label ->
+                val isSelected = (index == 1) == isSecondChecked
                 Box(
                     modifier = Modifier
                         .weight(1f)

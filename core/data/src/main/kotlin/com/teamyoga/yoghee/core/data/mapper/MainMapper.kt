@@ -2,30 +2,46 @@ package com.teamyoga.yoghee.core.data.mapper
 
 import com.teamyoga.yoghee.core.data.remote.model.*
 import com.teamyoga.yoghee.core.domain.model.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
 
-fun MainResponse.toDomain(): MainHomeData {
-    return MainHomeData(
-        todayClasses = data.todayClass.map { it.toDomain() },
-        banners = data.imageBanner.map { it.toDomain() },
-        centers = data.interestedCenter.map { it.toDomain() },
-        reviews = data.newReview.map { it.toDomain() },
-        layoutOrder = data.layoutOrder.map { it.toDomain() }
-    )
+private object MainDataKey {
+    const val IMAGE_BANNER = "imageBanner"
+    const val TODAY_CLASS = "todayClass"
+    const val INTERESTED_CENTER = "interestedCenter"
+    const val NEW_REVIEW = "newReview"
+    const val LAYOUT_ORDER = "layoutOrder"
 }
 
-fun ClassDto.toDomain() = TodayClass(
+fun MainResponse.toDomain(json: Json): List<MainSection> =
+    data.entries.mapNotNull { (key, value) -> json.toSection(key, value) }
+
+private fun Json.toSection(key: String, value: JsonElement): MainSection? = when (key) {
+    MainDataKey.IMAGE_BANNER -> MainSection.Banners(decodeList<BannerDto>(value).map { it.toDomain() })
+    MainDataKey.TODAY_CLASS -> MainSection.TodayClasses(decodeList<ClassDto>(value).map { it.toDomain() })
+    MainDataKey.INTERESTED_CENTER -> MainSection.InterestedCenters(decodeList<CenterDto>(value).map { it.toDomain() })
+    MainDataKey.NEW_REVIEW -> MainSection.NewReviews(decodeList<ReviewDto>(value).map { it.toDomain() })
+    MainDataKey.LAYOUT_ORDER -> MainSection.LayoutOrders(decodeList<LayoutOrderDto>(value).map { it.toDomain() })
+    else -> null
+}
+
+private inline fun <reified T> Json.decodeList(element: JsonElement): List<T> =
+    decodeFromJsonElement(element)
+
+private fun ClassDto.toDomain() = TodayClass(
     classId = classId,
     className = className
 )
 
-fun BannerDto.toDomain() = MainBanner(
+private fun BannerDto.toDomain() = MainBanner(
     classId = classId,
     className = className,
     description = description,
     thumbnail = thumbnail
 )
 
-fun CenterDto.toDomain() = InterestedCenter(
+private fun CenterDto.toDomain() = InterestedCenter(
     centerId = centerId,
     address = address,
     name = name,
@@ -34,14 +50,14 @@ fun CenterDto.toDomain() = InterestedCenter(
     isFavorite = isFavorite
 )
 
-fun ReviewDto.toDomain() = NewReview(
+private fun ReviewDto.toDomain() = NewReview(
     reviewId = reviewId,
     content = content,
     rating = rating,
     thumbnail = thumbnail
 )
 
-fun LayoutOrderDto.toDomain() = LayoutOrder(
+private fun LayoutOrderDto.toDomain() = LayoutOrder(
     order = order,
     type = type,
     key = key,

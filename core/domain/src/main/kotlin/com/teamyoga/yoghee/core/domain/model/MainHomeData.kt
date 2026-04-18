@@ -1,23 +1,15 @@
 package com.teamyoga.yoghee.core.domain.model
 
-data class MainHomeData(
-    val todayClasses: List<TodayClass>,
-    val banners: List<MainBanner>,
-    val centers: List<InterestedCenter>,
-    val reviews: List<NewReview>,
-    val layoutOrder: List<LayoutOrder>
-)
-
 data class TodayClass(
     val classId: String,
     val className: String
 )
 
 data class MainBanner(
-    val classId: String,
-    val className: String,
-    val description: String,
-    val thumbnail: String
+    val classId: String?,
+    val className: String?,
+    val description: String?,
+    val thumbnail: String?
 )
 
 data class InterestedCenter(

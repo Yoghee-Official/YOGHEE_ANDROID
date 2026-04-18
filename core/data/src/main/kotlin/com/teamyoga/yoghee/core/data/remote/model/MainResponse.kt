@@ -1,29 +1,21 @@
 package com.teamyoga.yoghee.core.data.remote.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 data class MainResponse(
     val code: Int,
     val status: String,
-    val data: MainData
-)
-
-@Serializable
-data class MainData(
-    val todayClass: List<ClassDto> = emptyList(),
-    val imageBanner: List<BannerDto> = emptyList(),
-    val interestedCenter: List<CenterDto> = emptyList(),
-    val newReview: List<ReviewDto> = emptyList(),
-    val layoutOrder: List<LayoutOrderDto> = emptyList()
+    val data: JsonObject
 )
 
 @Serializable
 data class BannerDto(
-    val classId: String,
-    val className: String,
-    val description: String,
-    val thumbnail: String
+    val classId: String?,
+    val className: String?,
+    val description: String?,
+    val thumbnail: String?
 )
 
 @Serializable

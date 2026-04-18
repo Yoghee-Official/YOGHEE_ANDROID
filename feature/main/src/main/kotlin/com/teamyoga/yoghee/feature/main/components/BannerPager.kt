@@ -93,7 +93,7 @@ private fun BannerItem(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = banner.className,
+                    text = banner.className.orEmpty(),
                     color = SAND_BEIGE,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -101,7 +101,7 @@ private fun BannerItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = banner.description,
+                    text = banner.description.orEmpty(),
                     color = SAND_BEIGE,
                     fontSize = 10.sp,
                     maxLines = 1,

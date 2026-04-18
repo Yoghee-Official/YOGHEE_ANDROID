@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,20 +27,19 @@ class MainViewModel @Inject constructor(
     }
 
     fun onTrainingTypeChanged(type: TrainingType) {
+        if (_trainingType.value == type) return
         _trainingType.value = type
         loadMainData(type)
     }
 
     private fun loadMainData(type: TrainingType) {
         viewModelScope.launch {
-            _uiState.value = MainUiState.Loading
-            try {
-                val apiType = if (type == TrainingType.REGULAR) "R" else "O"
-                val data = mainRepository.getMainData(type = apiType)
-                _uiState.value = MainUiState.Success(data)
-            } catch (e: Exception) {
-                _uiState.value = MainUiState.Error(e.message ?: "Unknown error")
-            }
+            _uiState.update { MainUiState.Loading }
+            _uiState.value = runCatching { mainRepository.getMainData(type.apiCode) }
+                .fold(
+                    onSuccess = { MainUiState.Success(it) },
+                    onFailure = { MainUiState.Error(it.message ?: "Unknown error") }
+                )
         }
     }
 }

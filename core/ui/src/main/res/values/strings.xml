@@ -2,4 +2,5 @@
 <resources>
     <string name="daily_training">하루수련</string>
     <string name="regular_training">정규수련</string>
+    <string name="show_more">더보기</string>
 </resources>

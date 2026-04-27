@@ -14,4 +14,8 @@ val Background = Color(0xFFEFEDEB)
 val Green_D6F695 = Color(0xFFD6F695)
 
 val SAND_BEIGE = Color(0xFFFCFAF4)
-val White = Color(0xFFFFFFFF)
+val WHITE = Color(0xFFFFFFFF)
+val BLACK = Color(0xFF000000)
+
+val GRAY = Color(0xFFB3B3B3)
+val LIGHT_GRAY = Color(0xFFEFEDEB)

@@ -76,14 +76,18 @@ fun InterestedClassItem(
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = classData.masterName.orEmpty(),
+            text = classData.masterName.orEmpty().let {
+                if (it.length > 8) it.take(8) + "..." else it
+            },
             fontSize = 10.sp,
             maxLines = 1,
             color = BLACK
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = classData.className.orEmpty(),
+            text = classData.className.orEmpty().let {
+                if (it.length > 14) it.take(14) + "..." else it
+            },
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -94,13 +98,16 @@ fun InterestedClassItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
+            val reviewCount = classData.review?.let {
+                if (it > 99999) "99,999+" else "%,d".format(it)
+            } ?: 0
             Icon(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
                 modifier = Modifier.size(12.dp)
             )
             Text(
-                text = "${classData.rating ?: 0} (${classData.review ?: 0})",
+                text = "${classData.rating ?: 0} (${reviewCount})",
                 fontSize = 10.sp
             )
         }

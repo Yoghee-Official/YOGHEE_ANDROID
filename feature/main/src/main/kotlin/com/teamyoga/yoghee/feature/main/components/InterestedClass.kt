@@ -34,15 +34,21 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 
 @Composable
 fun InterestedClass(
+    title: String?,
     classData: List<InterestedClass>
 ) {
-//    Title()
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
-    ) {
-        items(classData) { item ->
-            InterestedClassItem(item)
+    Column {
+        if (!title.isNullOrEmpty()) {
+            Title(title = title)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+        ) {
+            items(classData) { item ->
+                InterestedClassItem(item)
+            }
         }
     }
 }
@@ -118,6 +124,7 @@ fun InterestedClassItem(
 @Composable
 private fun InterestedClassPreview() {
     InterestedClass(
+        title = "관심 클래스",
         classData = listOf(
             InterestedClass(
                 classId = "1",

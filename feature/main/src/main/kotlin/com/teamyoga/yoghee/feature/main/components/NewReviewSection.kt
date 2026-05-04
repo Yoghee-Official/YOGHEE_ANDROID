@@ -44,11 +44,13 @@ import java.util.Locale
 @Composable
 fun NewReviewSection(
     reviews: List<NewReview>,
-    title: String = "최신 리뷰"
+    title: String? = null
 ) {
     Column {
-        Title(title = title)
-        Spacer(modifier = Modifier.height(16.dp))
+        if (!title.isNullOrEmpty()) {
+            Title(title = title)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = 16.dp),

@@ -120,11 +120,17 @@ private fun SuccessContent(
         ) { _, section ->
             when (section) {
                 is MainSection.Banners ->
-                    BannerPager(banners = section.banners, backgroundColor = bgColor)
+                    BannerPager(banners = section.banners)
                 is MainSection.InterestedClassList ->
-                    InterestedClass(classData = section.interestedClassList)
+                    InterestedClass(
+                        title = section.title,
+                        classData = section.interestedClassList
+                    )
                 is MainSection.NewReviews ->
-                    NewReviewSection(reviews = section.reviews)
+                    NewReviewSection(
+                        reviews = section.reviews,
+                        title = section.title
+                    )
                 else -> {}
             }
         }

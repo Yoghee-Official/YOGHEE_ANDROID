@@ -30,9 +30,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun BannerPager(
-    banners: List<MainBanner>,
-    modifier: Modifier = Modifier,
-    backgroundColor: Color
+    banners: List<MainBanner>
 ) {
     if (banners.isEmpty()) return
 

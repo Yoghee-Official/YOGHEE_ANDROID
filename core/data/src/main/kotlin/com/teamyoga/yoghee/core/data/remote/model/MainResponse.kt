@@ -12,12 +12,24 @@ data class MainResponse(
 
 @Serializable
 data class BannerDto(
-    val classId: String?,
-    val className: String?,
-    val description: String?,
-    val thumbnail: String?
+    val classId: String? = null,
+    val className: String? = null,
+    val description: String? = null,
+    val thumbnail: String? = null
 )
 
+@Serializable
+data class InterestedClassDto(
+    val classId: String? = null,
+    val className: String? = null,
+    val masterId: String? = null,
+    val masterName: String? = null,
+    val review: Int? = null,
+    val price: Int? = null,
+    val rating: Double? = null,
+    val isFavorite: Boolean? = null,
+    val thumbnail: String? = null
+)
 @Serializable
 data class CenterDto(
     val centerId: String,
@@ -28,12 +40,18 @@ data class CenterDto(
     val isFavorite: Boolean
 )
 
+
 @Serializable
 data class ReviewDto(
-    val reviewId: String,
-    val content: String,
-    val rating: Double,
-    val thumbnail: String? = null
+    val reviewId: String? = null,
+    val userUuid: String? = null,
+    val thumbnail: String? = null,
+    val content: String? = null,
+    val rating: Double? = null,
+    val createdAt: String? = null,
+    val nickname: String? = null,
+    val userLevel: Int? = null,
+    val userProfile: String? = null
 )
 
 @Serializable

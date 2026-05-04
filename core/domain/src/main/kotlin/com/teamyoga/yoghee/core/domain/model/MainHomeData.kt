@@ -50,9 +50,3 @@ data class NewReview(
     val userProfile: String?
 )
 
-data class LayoutOrder(
-    val order: String,
-    val type: String,
-    val key: String,
-    val text: String?
-)

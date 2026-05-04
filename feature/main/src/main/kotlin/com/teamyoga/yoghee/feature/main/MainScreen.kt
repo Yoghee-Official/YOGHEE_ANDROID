@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -113,26 +113,18 @@ private fun SuccessContent(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
-        items(
+        itemsIndexed(
             items = sections,
-            key = { it::class.simpleName.orEmpty() },
-            contentType = { it::class }
-        ) { section ->
+            key = { index, section -> "${section::class.simpleName}-$index" },
+            contentType = { _, section -> section::class }
+        ) { _, section ->
             when (section) {
                 is MainSection.Banners ->
                     BannerPager(banners = section.banners, backgroundColor = bgColor)
                 is MainSection.InterestedClassList ->
-                    if (section.interestedClassList.size >= 3) InterestedClass(classData= section.interestedClassList)
-//                is MainSection.TodayClasses ->
-//                    TodayClassSection(classes = section.classes)
-//                is MainSection.InterestedCenters ->
-//                    InterestedCenter(centers = section.centers)
-                is MainSection.NewReviews -> {
-                    val filteredReviews = section.reviews.filter { !it.thumbnail.isNullOrEmpty() }
-                    if (filteredReviews.isNotEmpty()) NewReviewSection(reviews = filteredReviews)
-                }
-//                is MainSection.LayoutOrders ->
-//                    LayoutOrderSection(layoutOrders = section.layoutOrders)
+                    InterestedClass(classData = section.interestedClassList)
+                is MainSection.NewReviews ->
+                    NewReviewSection(reviews = section.reviews)
                 else -> {}
             }
         }

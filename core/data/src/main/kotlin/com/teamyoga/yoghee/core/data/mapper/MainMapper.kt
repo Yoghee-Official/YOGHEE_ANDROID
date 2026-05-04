@@ -92,5 +92,5 @@ private fun ReviewDto.toDomain() = NewReview(
     createdAt = createdAt,
     nickname = nickname,
     userLevel = userLevel,
-    userProfile = userProfile
+    profileUrl = profileUrl
 )

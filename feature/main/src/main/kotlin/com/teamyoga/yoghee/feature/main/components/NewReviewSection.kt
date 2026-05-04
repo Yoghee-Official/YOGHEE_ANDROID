@@ -93,7 +93,7 @@ private fun NewReviewItem(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             YogheeImage(
-                model = review.userProfile,
+                model = review.profileUrl,
                 modifier = Modifier
                     .width(33.dp)
                     .height(33.dp)
@@ -188,7 +188,7 @@ fun NewReviewSectionPreview() {
                     createdAt = "2025-11-04T12:34:00.000+00:00",
                     nickname = "요가러버",
                     userLevel = 3,
-                    userProfile = null
+                    profileUrl = null
                 ),
                 NewReview(
                     reviewId = "2",
@@ -199,7 +199,7 @@ fun NewReviewSectionPreview() {
                     createdAt = "2025-10-20T09:00:00.000+00:00",
                     nickname = "필라테스왕",
                     userLevel = 7,
-                    userProfile = null
+                    profileUrl = null
                 ),
                 NewReview(
                     reviewId = "3",
@@ -210,7 +210,7 @@ fun NewReviewSectionPreview() {
                     createdAt = "2025-09-15T15:20:00.000+00:00",
                     nickname = "건강지킴이",
                     userLevel = 1,
-                    userProfile = null
+                    profileUrl = null
                 )
             )
         )

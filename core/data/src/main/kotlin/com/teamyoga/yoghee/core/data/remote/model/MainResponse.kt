@@ -60,7 +60,7 @@ data class ReviewDto(
     val createdAt: String? = null,
     val nickname: String? = null,
     val userLevel: Int? = null,
-    val userProfile: String? = null
+    val profileUrl: String? = null
 )
 
 @Serializable

@@ -47,6 +47,6 @@ data class NewReview(
     val createdAt: String?,
     val nickname: String?,
     val userLevel: Int?,
-    val userProfile: String?
+    val profileUrl: String?
 )
 

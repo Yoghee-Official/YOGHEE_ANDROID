@@ -11,30 +11,44 @@ private object MainDataKey {
     const val NEW_REVIEW = "newReview"
 }
 
-fun MainResponse.toDomain(): List<MainSection> {
-    val sectionsByKey: Map<String, MainSection?> = mapOf(
-        MainDataKey.IMAGE_BANNER to data.imageBanner?.let { bannerDtoList ->
-            MainSection.Banners(bannerDtoList.map { dto -> dto.toDomain() })
-        },
-        MainDataKey.INTERESTED_CLASS to data.interestedClass?.let { interestedClassDtoList ->
-            val items = interestedClassDtoList.map { dto -> dto.toDomain() }
-            if (items.size >= 3) MainSection.InterestedClassList(items) else null
-        },
-        MainDataKey.TODAY_CLASS to data.todayClass?.let {
-            MainSection.TodayClasses(it.map { dto -> dto.toDomain() })
-        },
-        MainDataKey.INTERESTED_CENTER to data.interestedCenter?.let {
-            MainSection.InterestedCenters(it.map { dto -> dto.toDomain() })
-        },
-        MainDataKey.NEW_REVIEW to data.newReview?.let {
-            val items = it.filter { dto -> !dto.thumbnail.isNullOrEmpty() }
-                .map { dto -> dto.toDomain() }
-            if (items.isNotEmpty()) MainSection.NewReviews(items) else null
+fun MainResponse.toDomain(): List<MainSection> =
+    data.layoutOrder.orEmpty().mapNotNull { entry ->
+        when (entry.key) {
+            MainDataKey.IMAGE_BANNER -> data.imageBanner?.let { bannerDtoList ->
+                MainSection.Banners(
+                    banners = bannerDtoList.map { dto -> dto.toDomain() }
+                )
+            }
+            MainDataKey.INTERESTED_CLASS -> data.interestedClass?.let { interestedClassDtoList ->
+                val items = interestedClassDtoList.map { dto -> dto.toDomain() }
+                if (items.size >= 3) MainSection.InterestedClassList(
+                    title = entry.text,
+                    interestedClassList = items
+                ) else null
+            }
+            MainDataKey.TODAY_CLASS -> data.todayClass?.let {
+                MainSection.TodayClasses(
+                    title = entry.text,
+                    classes = it.map { dto -> dto.toDomain() }
+                )
+            }
+            MainDataKey.INTERESTED_CENTER -> data.interestedCenter?.let {
+                MainSection.InterestedCenters(
+                    title = entry.text,
+                    centers = it.map { dto -> dto.toDomain() }
+                )
+            }
+            MainDataKey.NEW_REVIEW -> data.newReview?.let {
+                val items = it.filter { dto -> !dto.thumbnail.isNullOrEmpty() }
+                    .map { dto -> dto.toDomain() }
+                if (items.isNotEmpty()) MainSection.NewReviews(
+                    title = entry.text,
+                    reviews = items
+                ) else null
+            }
+            else -> null
         }
-    )
-
-    return data.layoutOrder.orEmpty().mapNotNull { sectionsByKey[it.key] }
-}
+    }
 
 private fun ClassDto.toDomain() = TodayClass(
     classId = classId,

@@ -13,13 +13,24 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 @Composable
 fun Title(
     title: String,
-    modifier: Modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+    modifier: Modifier = Modifier
 ) {
     Text(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         text = title,
         color = BLACK,
         fontSize = 20.sp,
         fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+fun SubTitle(subTitle: String, modifier: Modifier) {
+    Text(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        text = subTitle,
+        color = BLACK,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium
     )
 }

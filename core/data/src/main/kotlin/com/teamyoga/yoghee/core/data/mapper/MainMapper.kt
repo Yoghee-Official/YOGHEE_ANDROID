@@ -7,6 +7,7 @@ private object MainDataKey {
     const val IMAGE_BANNER = "imageBanner"
     const val INTERESTED_CLASS = "interestedClass"
     const val TOP10_CLASS = "top10Class"
+    const val YOGA_CATEGORY = "yogaCategory"
     const val TODAY_CLASS = "todayClass"
     const val INTERESTED_CENTER = "interestedCenter"
     const val NEW_REVIEW = "newReview"
@@ -34,6 +35,7 @@ fun MainResponse.toDomain(): List<MainSection> =
                     classes = items.take(10)
                 ) else null
             }
+            MainDataKey.YOGA_CATEGORY -> MainSection.YogaCategory(title = entry.text)
             MainDataKey.TODAY_CLASS -> data.todayClass?.let {
                 MainSection.TodayClasses(
                     title = entry.text,

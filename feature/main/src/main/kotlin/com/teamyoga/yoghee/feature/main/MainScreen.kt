@@ -26,6 +26,7 @@ import com.teamyoga.yoghee.feature.main.components.MainHeader
 import com.teamyoga.yoghee.feature.main.components.NewReviewSection
 import com.teamyoga.yoghee.feature.main.components.RegisterClass
 import com.teamyoga.yoghee.feature.main.components.Top10Class
+import com.teamyoga.yoghee.feature.main.components.YogaCategorySection
 
 @Composable
 fun MainScreen(
@@ -134,6 +135,11 @@ private fun SuccessContent(
                     Top10Class(
                         title = section.title,
                         classData = section.classes,
+                        modifier = sectionModifier
+                    )
+                is MainSection.YogaCategory ->
+                    YogaCategorySection(
+                        title = section.title,
                         modifier = sectionModifier
                     )
                 is MainSection.NewReviews ->

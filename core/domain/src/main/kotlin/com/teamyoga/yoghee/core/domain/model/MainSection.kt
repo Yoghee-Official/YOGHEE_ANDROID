@@ -13,6 +13,8 @@ sealed class MainSection {
         val classes: List<InterestedClass>
     ) : MainSection()
 
+    data class YogaCategory(val title: String?) : MainSection()
+
     data class TodayClasses(
         val title: String?,
         val classes: List<TodayClass>

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.teamyoga.yoghee.core.domain.model.InterestedClass
 import com.teamyoga.yoghee.core.ui.R
@@ -33,7 +36,7 @@ import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 
 @Composable
-fun InterestedClass(
+fun Top10Class(
     title: String?,
     classData: List<InterestedClass>,
     modifier: Modifier = Modifier
@@ -45,17 +48,18 @@ fun InterestedClass(
         }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            items(classData) { item ->
-                InterestedClassItem(item)
+            itemsIndexed(classData) { index, item ->
+                Top10ClassItem(index + 1, item)
             }
         }
     }
 }
 
 @Composable
-fun InterestedClassItem(
+fun Top10ClassItem(
+    index: Int,
     classData: InterestedClass
 ) {
     Column(
@@ -71,8 +75,15 @@ fun InterestedClassItem(
                     .clip(RoundedCornerShape(8.dp))
             )
 
+            RankFlag(
+                rank = index.toString(),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+            )
+
             Image(
-                painter = painterResource(id = R.drawable.ic_flag_selected),
+                painter = painterResource(id = R.drawable.ic_flag_unselected),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -83,18 +94,14 @@ fun InterestedClassItem(
         }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = classData.masterName.orEmpty().let {
-                if (it.length > 8) it.take(8) + "..." else it
-            },
+            text = classData.masterName.orEmpty(),
             fontSize = 10.sp,
             maxLines = 1,
             color = BLACK
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = classData.className.orEmpty().let {
-                if (it.length > 14) it.take(14) + "..." else it
-            },
+            text = classData.className.orEmpty(),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -121,10 +128,30 @@ fun InterestedClassItem(
     }
 }
 
+@Composable
+fun RankFlag(rank: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(20.dp)
+            .paint(
+                painter = painterResource(id = R.drawable.ic_rank),
+                contentScale = ContentScale.Fit
+            ),
+        contentAlignment = Alignment.Center // 내부 구성 요소를 중앙 정렬
+    ) {
+        Text(
+            text = rank,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-private fun InterestedClassPreview() {
-    InterestedClass(
+private fun Top10ClassPreview() {
+    Top10Class(
         title = "관심 클래스",
         classData = listOf(
             InterestedClass(
@@ -166,7 +193,7 @@ private fun InterestedClassPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun InterestedClassItemPreview() {
+private fun Top10ClassItemPreview() {
     InterestedClassItem(
         classData = InterestedClass(
             classId = "1",

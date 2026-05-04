@@ -29,9 +29,9 @@ fun MainResponse.toDomain(): List<MainSection> =
             }
             MainDataKey.TOP10_CLASS -> data.top10Class?.let { top10ClassDtoList ->
                 val items = top10ClassDtoList.map { dto -> dto.toDomain() }
-                if (items.isNotEmpty()) MainSection.Top10Classes(
+                if (items.size >= 3) MainSection.Top10Classes(
                     title = entry.text,
-                    classes = items
+                    classes = items.take(10)
                 ) else null
             }
             MainDataKey.TODAY_CLASS -> data.todayClass?.let {

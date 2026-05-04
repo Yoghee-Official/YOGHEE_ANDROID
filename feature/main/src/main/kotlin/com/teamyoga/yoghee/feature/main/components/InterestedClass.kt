@@ -1,10 +1,13 @@
 package com.teamyoga.yoghee.feature.main.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,8 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.ui.tooling.preview.Preview
-import coil.compose.AsyncImage
 import com.teamyoga.yoghee.core.domain.model.InterestedClass
+import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 
@@ -50,14 +54,26 @@ fun InterestedClassItem(
     Column(
         modifier = Modifier.width(145.dp)
     ) {
-        YogheeImage(
-            model = classData.thumbnail,
-            contentDescription = classData.className,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(145.dp)
-                .clip(RoundedCornerShape(8.dp))
-        )
+        Box(modifier = Modifier.size(145.dp)) {
+            YogheeImage(
+                model = classData.thumbnail,
+                contentDescription = classData.className,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(145.dp)
+                    .clip(RoundedCornerShape(8.dp))
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_flag),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .width(16.dp)
+                    .height(19.dp)
+            )
+        }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = classData.masterName.orEmpty(),

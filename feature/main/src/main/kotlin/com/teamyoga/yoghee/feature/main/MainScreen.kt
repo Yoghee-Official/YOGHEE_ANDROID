@@ -21,11 +21,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.domain.model.MainSection
 import com.teamyoga.yoghee.feature.main.components.BannerPager
 import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
-//import com.teamyoga.yoghee.feature.main.components.InterestedCenterSection
-//import com.teamyoga.yoghee.feature.main.components.LayoutOrderSection
+import com.teamyoga.yoghee.feature.main.components.InterestedClass
 import com.teamyoga.yoghee.feature.main.components.MainHeader
-//import com.teamyoga.yoghee.feature.main.components.NewReviewSection
-//import com.teamyoga.yoghee.feature.main.components.TodayClassSection
+import com.teamyoga.yoghee.feature.main.components.NewReviewSection
 
 @Composable
 fun MainScreen(
@@ -123,12 +121,16 @@ private fun SuccessContent(
             when (section) {
                 is MainSection.Banners ->
                     BannerPager(banners = section.banners, backgroundColor = bgColor)
+                is MainSection.InterestedClassList ->
+                    if (section.interestedClassList.size >= 3) InterestedClass(classData= section.interestedClassList)
 //                is MainSection.TodayClasses ->
 //                    TodayClassSection(classes = section.classes)
 //                is MainSection.InterestedCenters ->
-//                    InterestedCenterSection(centers = section.centers)
-//                is MainSection.NewReviews ->
-//                    NewReviewSection(reviews = section.reviews)
+//                    InterestedCenter(centers = section.centers)
+                is MainSection.NewReviews -> {
+                    val filteredReviews = section.reviews.filter { !it.thumbnail.isNullOrEmpty() }
+                    if (filteredReviews.isNotEmpty()) NewReviewSection(reviews = filteredReviews)
+                }
 //                is MainSection.LayoutOrders ->
 //                    LayoutOrderSection(layoutOrders = section.layoutOrders)
                 else -> {}

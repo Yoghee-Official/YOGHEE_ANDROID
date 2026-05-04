@@ -35,9 +35,10 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 @Composable
 fun InterestedClass(
     title: String?,
-    classData: List<InterestedClass>
+    classData: List<InterestedClass>,
+    modifier: Modifier = Modifier
 ) {
-    Column {
+    Column(modifier = modifier) {
         if (!title.isNullOrEmpty()) {
             Title(title = title)
             Spacer(modifier = Modifier.height(12.dp))

@@ -54,7 +54,7 @@ fun BannerPager(
         state = pagerState,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp),
+            .padding(top = 8.dp, bottom = 32.dp),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
         pageSpacing = 8.dp,
     ) { page ->

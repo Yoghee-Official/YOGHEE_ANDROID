@@ -44,9 +44,10 @@ import java.util.Locale
 @Composable
 fun NewReviewSection(
     reviews: List<NewReview>,
+    modifier: Modifier = Modifier,
     title: String? = null
 ) {
-    Column {
+    Column(modifier = modifier) {
         if (!title.isNullOrEmpty()) {
             Title(title = title)
             Spacer(modifier = Modifier.height(16.dp))

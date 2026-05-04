@@ -109,6 +109,7 @@ private fun SuccessContent(
     bgColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val sectionModifier = Modifier.padding(top = 8.dp, bottom = 40.dp)
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 100.dp)
@@ -124,12 +125,14 @@ private fun SuccessContent(
                 is MainSection.InterestedClassList ->
                     InterestedClass(
                         title = section.title,
-                        classData = section.interestedClassList
+                        classData = section.interestedClassList,
+                        modifier = sectionModifier
                     )
                 is MainSection.NewReviews ->
                     NewReviewSection(
                         reviews = section.reviews,
-                        title = section.title
+                        title = section.title,
+                        modifier = sectionModifier
                     )
                 else -> {}
             }

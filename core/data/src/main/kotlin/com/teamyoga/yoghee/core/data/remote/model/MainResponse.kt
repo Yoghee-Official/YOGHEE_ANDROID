@@ -1,13 +1,22 @@
 package com.teamyoga.yoghee.core.data.remote.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 @Serializable
 data class MainResponse(
     val code: Int,
     val status: String,
-    val data: JsonObject
+    val data: MainData
+)
+
+@Serializable
+data class MainData(
+    val imageBanner: List<BannerDto>? = null,
+    val interestedClass: List<InterestedClassDto>? = null,
+    val todayClass: List<ClassDto>? = null,
+    val interestedCenter: List<CenterDto>? = null,
+    val newReview: List<ReviewDto>? = null,
+    val layoutOrder: List<LayoutOrderDto>? = null
 )
 
 @Serializable
@@ -30,16 +39,16 @@ data class InterestedClassDto(
     val isFavorite: Boolean? = null,
     val thumbnail: String? = null
 )
+
 @Serializable
 data class CenterDto(
-    val centerId: String,
-    val address: String,
-    val name: String,
+    val centerId: String? = null,
+    val address: String? = null,
+    val name: String? = null,
     val thumbnail: String? = null,
-    val favoriteCount: Int,
-    val isFavorite: Boolean
+    val favoriteCount: Int? = null,
+    val isFavorite: Boolean? = null
 )
-
 
 @Serializable
 data class ReviewDto(
@@ -56,14 +65,14 @@ data class ReviewDto(
 
 @Serializable
 data class LayoutOrderDto(
-    val order: String,
-    val type: String,
-    val key: String,
+    val order: String? = null,
+    val type: String? = null,
+    val key: String? = null,
     val text: String? = null
 )
 
 @Serializable
 data class ClassDto(
-    val classId: String,
-    val className: String
+    val classId: String? = null,
+    val className: String? = null
 )

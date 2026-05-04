@@ -2,36 +2,39 @@ package com.teamyoga.yoghee.core.data.mapper
 
 import com.teamyoga.yoghee.core.data.remote.model.*
 import com.teamyoga.yoghee.core.domain.model.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.decodeFromJsonElement
 
 private object MainDataKey {
     const val IMAGE_BANNER = "imageBanner"
     const val INTERESTED_CLASS = "interestedClass"
     const val TODAY_CLASS = "todayClass"
     const val INTERESTED_CENTER = "interestedCenter"
-
     const val NEW_REVIEW = "newReview"
-    const val LAYOUT_ORDER = "layoutOrder"
 }
 
-fun MainResponse.toDomain(json: Json): List<MainSection> =
-    data.entries.mapNotNull { (key, value) -> json.toSection(key, value) }
+fun MainResponse.toDomain(): List<MainSection> {
+    val sectionsByKey: Map<String, MainSection?> = mapOf(
+        MainDataKey.IMAGE_BANNER to data.imageBanner?.let { bannerDtoList ->
+            MainSection.Banners(bannerDtoList.map { dto -> dto.toDomain() })
+        },
+        MainDataKey.INTERESTED_CLASS to data.interestedClass?.let { interestedClassDtoList ->
+            val items = interestedClassDtoList.map { dto -> dto.toDomain() }
+            if (items.size >= 3) MainSection.InterestedClassList(items) else null
+        },
+        MainDataKey.TODAY_CLASS to data.todayClass?.let {
+            MainSection.TodayClasses(it.map { dto -> dto.toDomain() })
+        },
+        MainDataKey.INTERESTED_CENTER to data.interestedCenter?.let {
+            MainSection.InterestedCenters(it.map { dto -> dto.toDomain() })
+        },
+        MainDataKey.NEW_REVIEW to data.newReview?.let {
+            val items = it.filter { dto -> !dto.thumbnail.isNullOrEmpty() }
+                .map { dto -> dto.toDomain() }
+            if (items.isNotEmpty()) MainSection.NewReviews(items) else null
+        }
+    )
 
-private fun Json.toSection(key: String, value: JsonElement): MainSection? = when (key) {
-    MainDataKey.IMAGE_BANNER -> MainSection.Banners(decodeList<BannerDto>(value).map { it.toDomain() })
-    MainDataKey.INTERESTED_CLASS -> MainSection.InterestedClassList(decodeList<InterestedClassDto>(value).map { it.toDomain() })
-
-    MainDataKey.TODAY_CLASS -> MainSection.TodayClasses(decodeList<ClassDto>(value).map { it.toDomain() })
-    MainDataKey.INTERESTED_CENTER -> MainSection.InterestedCenters(decodeList<CenterDto>(value).map { it.toDomain() })
-    MainDataKey.NEW_REVIEW -> MainSection.NewReviews(decodeList<ReviewDto>(value).map { it.toDomain() })
-    MainDataKey.LAYOUT_ORDER -> MainSection.LayoutOrders(decodeList<LayoutOrderDto>(value).map { it.toDomain() })
-    else -> null
+    return data.layoutOrder.orEmpty().mapNotNull { sectionsByKey[it.key] }
 }
-
-private inline fun <reified T> Json.decodeList(element: JsonElement): List<T> =
-    decodeFromJsonElement(element)
 
 private fun ClassDto.toDomain() = TodayClass(
     classId = classId,
@@ -76,11 +79,4 @@ private fun ReviewDto.toDomain() = NewReview(
     nickname = nickname,
     userLevel = userLevel,
     userProfile = userProfile
-)
-
-private fun LayoutOrderDto.toDomain() = LayoutOrder(
-    order = order,
-    type = type,
-    key = key,
-    text = text
 )

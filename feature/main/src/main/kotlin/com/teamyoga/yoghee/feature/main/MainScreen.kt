@@ -24,6 +24,7 @@ import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
 import com.teamyoga.yoghee.feature.main.components.InterestedClass
 import com.teamyoga.yoghee.feature.main.components.MainHeader
 import com.teamyoga.yoghee.feature.main.components.NewReviewSection
+import com.teamyoga.yoghee.feature.main.components.Top10ClassSection
 
 @Composable
 fun MainScreen(
@@ -126,6 +127,12 @@ private fun SuccessContent(
                     InterestedClass(
                         title = section.title,
                         classData = section.interestedClassList,
+                        modifier = sectionModifier
+                    )
+                is MainSection.Top10Classes ->
+                    Top10ClassSection(
+                        title = section.title,
+                        classes = section.classes,
                         modifier = sectionModifier
                     )
                 is MainSection.NewReviews ->

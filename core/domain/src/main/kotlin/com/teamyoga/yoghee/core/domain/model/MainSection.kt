@@ -8,6 +8,11 @@ sealed class MainSection {
         val interestedClassList: List<InterestedClass>
     ) : MainSection()
 
+    data class Top10Classes(
+        val title: String?,
+        val classes: List<InterestedClass>
+    ) : MainSection()
+
     data class TodayClasses(
         val title: String?,
         val classes: List<TodayClass>

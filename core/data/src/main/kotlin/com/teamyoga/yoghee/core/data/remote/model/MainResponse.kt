@@ -13,6 +13,7 @@ data class MainResponse(
 data class MainData(
     val imageBanner: List<BannerDto>? = null,
     val interestedClass: List<InterestedClassDto>? = null,
+    val top10Class: List<InterestedClassDto>? = null,
     val todayClass: List<ClassDto>? = null,
     val interestedCenter: List<CenterDto>? = null,
     val newReview: List<ReviewDto>? = null,

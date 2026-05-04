@@ -6,6 +6,7 @@ import com.teamyoga.yoghee.core.domain.model.*
 private object MainDataKey {
     const val IMAGE_BANNER = "imageBanner"
     const val INTERESTED_CLASS = "interestedClass"
+    const val TOP10_CLASS = "top10Class"
     const val TODAY_CLASS = "todayClass"
     const val INTERESTED_CENTER = "interestedCenter"
     const val NEW_REVIEW = "newReview"
@@ -24,6 +25,13 @@ fun MainResponse.toDomain(): List<MainSection> =
                 if (items.size >= 3) MainSection.InterestedClassList(
                     title = entry.text,
                     interestedClassList = items
+                ) else null
+            }
+            MainDataKey.TOP10_CLASS -> data.top10Class?.let { top10ClassDtoList ->
+                val items = top10ClassDtoList.map { dto -> dto.toDomain() }
+                if (items.isNotEmpty()) MainSection.Top10Classes(
+                    title = entry.text,
+                    classes = items
                 ) else null
             }
             MainDataKey.TODAY_CLASS -> data.todayClass?.let {

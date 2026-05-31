@@ -19,6 +19,7 @@ import com.teamyoga.yoghee.core.navigation.AppRoute
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.CategoryScreen
 import com.teamyoga.yoghee.feature.detail.DetailScreen
+import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
@@ -59,7 +60,19 @@ private fun AppNavGraph(
                 onGoSearch = { navController.navigate(AppRoute.Search.route) },
                 onGoCategory = { navController.navigate(AppRoute.Category.route) },
                 onGoProfile = { navController.navigate(AppRoute.Profile.route) },
-                onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) }
+                onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
+                onGoLogin = { navController.navigate(AppRoute.Login.route) },
+            )
+        }
+
+        composable(AppRoute.Login.route) {
+            LoginRoute(
+                onLoginSuccess = { // 로그인 성공 시 이전 화면으로 복귀
+                    navController.popBackStack(AppRoute.Login.route, inclusive = true)
+                },
+                onNaverClick = { navController.popBackStack() },
+                onGoogleClick = { navController.popBackStack() },
+                onAppleClick = { navController.popBackStack() },
             )
         }
 

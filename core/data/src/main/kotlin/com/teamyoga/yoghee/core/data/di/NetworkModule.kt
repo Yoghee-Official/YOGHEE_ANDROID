@@ -1,5 +1,6 @@
 package com.teamyoga.yoghee.core.data.di
 
+import com.teamyoga.yoghee.core.data.remote.AuthService
 import com.teamyoga.yoghee.core.data.remote.MainService
 import dagger.Module
 import dagger.Provides
@@ -54,5 +55,11 @@ object NetworkModule {
     @Singleton
     fun provideMainService(retrofit: Retrofit): MainService {
         return retrofit.create(MainService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthService(retrofit: Retrofit): AuthService {
+        return retrofit.create(AuthService::class.java)
     }
 }

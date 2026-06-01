@@ -34,6 +34,7 @@ fun MainScreen(
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
+    onGoLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -45,6 +46,7 @@ fun MainScreen(
         onGoCategory = onGoCategory,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
+        onGoLogin = onGoLogin,
         uiState = uiState,
         trainingType = trainingType,
         onTrainingTypeChanged = viewModel::onTrainingTypeChanged,
@@ -58,6 +60,7 @@ internal fun MainScreen(
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
+    onGoLogin: () -> Unit,
     uiState: MainUiState,
     trainingType: TrainingType,
     onTrainingTypeChanged: (TrainingType) -> Unit,
@@ -98,6 +101,7 @@ internal fun MainScreen(
                 onGoSearch = onGoSearch,
                 onGoCategory = onGoCategory,
                 onGoProfile = onGoProfile,
+                onGoLogin = onGoLogin,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp)

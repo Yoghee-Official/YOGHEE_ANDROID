@@ -19,6 +19,7 @@ fun FloatingBottomNavigation(
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
+    onGoLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -35,6 +36,7 @@ fun FloatingBottomNavigation(
             TextButton(onClick = onGoSearch) { Text("검색") }
             TextButton(onClick = onGoCategory) { Text("카테고리") }
             TextButton(onClick = onGoProfile) { Text("내정보") }
+            TextButton(onClick = onGoLogin) { Text("로그인") }
         }
     }
 }

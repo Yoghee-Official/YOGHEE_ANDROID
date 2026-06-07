@@ -6,28 +6,38 @@ import com.teamyoga.yoghee.core.domain.model.AuthState
 import com.teamyoga.yoghee.core.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /**
- * Splash 화면 ViewModel.
- *
- * 역할:
- *  - 앱 시작 직후 [AuthRepository.authState]가 [AuthState.Unknown]에서 벗어날 때까지 대기.
- *  - 토큰 상태가 확정되면 [isReady]가 true로 전환되어 Splash 화면이 Main으로 이동.
+ * 앱 시작 시 자동로그인 수행 후 Main으로 이동시킨다.
  */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    authRepository: AuthRepository,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
-    val isReady: StateFlow<Boolean> = authRepository.authState
-        .map { it !is AuthState.Unknown }   // 인증 상태가 Unknown이 아니면 true, Unknown이면 false
-        .stateIn( // flow -> stateFlow 변환, 항상 최신값 보유
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,   // 구독자가 없어도 즉시 수집 시작
-            initialValue = false,   // 초기값
-        )
+    private val _isReady = MutableStateFlow(false)
+    val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            // 1. 초기 인증 상태 확정 대기
+            val initialState = authRepository.authState
+                .filter { it !is AuthState.Unknown }
+                .first() // 플로우가 값을 방출할 때까지 코루틴이 일시중단,첫 값이 들어오면 그 값을 반환하고 플로우 구독 해제
+
+            // 2. 유효한 refresh token이 있으면 새 access token 발급 시도
+            if (initialState is AuthState.Authenticated) {
+                authRepository.refreshAccessToken()
+            }
+
+            // 3. Main으로 이동시키도록 신호.
+            _isReady.value = true
+        }
+    }
 }

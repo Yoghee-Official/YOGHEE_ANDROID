@@ -16,10 +16,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FloatingBottomNavigation(
+    isLoggedIn: Boolean,
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
     onGoLogin: () -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -36,7 +38,14 @@ fun FloatingBottomNavigation(
             TextButton(onClick = onGoSearch) { Text("검색") }
             TextButton(onClick = onGoCategory) { Text("카테고리") }
             TextButton(onClick = onGoProfile) { Text("내정보") }
-            TextButton(onClick = onGoLogin) { Text("로그인") }
+            // 로그인 상태에 따라 버튼이 토글된다.
+            // - 비로그인: 로그인 화면으로 이동
+            // - 로그인 중: 토큰 삭제 → authState 전환 → 화면 자동 리프레시
+            if (isLoggedIn) {
+                TextButton(onClick = onLogout) { Text("로그아웃") }
+            } else {
+                TextButton(onClick = onGoLogin) { Text("로그인") }
+            }
         }
     }
 }

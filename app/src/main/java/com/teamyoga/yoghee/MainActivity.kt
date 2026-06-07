@@ -23,6 +23,7 @@ import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
+import com.teamyoga.yoghee.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -52,9 +53,20 @@ private fun AppNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppRoute.Main.route,
+        startDestination = AppRoute.Splash.route,
         modifier = modifier,
     ) {
+        composable(AppRoute.Splash.route) {
+            // 토큰 상태 확정 후 Main으로 이동, Splash는 back stack에서 제거
+            SplashScreen(
+                onReady = {
+                    navController.navigate(AppRoute.Main.route) {
+                        popUpTo(AppRoute.Splash.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(AppRoute.Main.route) {
             MainScreen(
                 onGoSearch = { navController.navigate(AppRoute.Search.route) },

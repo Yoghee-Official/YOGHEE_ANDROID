@@ -19,9 +19,11 @@ import com.teamyoga.yoghee.core.navigation.AppRoute
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.CategoryScreen
 import com.teamyoga.yoghee.feature.detail.DetailScreen
+import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
+import com.teamyoga.yoghee.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -51,15 +53,38 @@ private fun AppNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppRoute.Main.route,
+        startDestination = AppRoute.Splash.route,
         modifier = modifier,
     ) {
+        composable(AppRoute.Splash.route) {
+            // 토큰 상태 확정 후 Main으로 이동, Splash는 back stack에서 제거
+            SplashScreen(
+                onReady = {
+                    navController.navigate(AppRoute.Main.route) {
+                        popUpTo(AppRoute.Splash.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(AppRoute.Main.route) {
             MainScreen(
                 onGoSearch = { navController.navigate(AppRoute.Search.route) },
                 onGoCategory = { navController.navigate(AppRoute.Category.route) },
                 onGoProfile = { navController.navigate(AppRoute.Profile.route) },
-                onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) }
+                onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
+                onGoLogin = { navController.navigate(AppRoute.Login.route) },
+            )
+        }
+
+        composable(AppRoute.Login.route) {
+            LoginRoute(
+                onLoginSuccess = { // 로그인 성공 시 이전 화면으로 복귀
+                    navController.popBackStack(AppRoute.Login.route, inclusive = true)
+                },
+                onNaverClick = { navController.popBackStack() },
+                onGoogleClick = { navController.popBackStack() },
+                onAppleClick = { navController.popBackStack() },
             )
         }
 

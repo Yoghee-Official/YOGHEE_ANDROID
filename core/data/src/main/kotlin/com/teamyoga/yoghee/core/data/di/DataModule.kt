@@ -1,6 +1,8 @@
 package com.teamyoga.yoghee.core.data.di
 
+import com.teamyoga.yoghee.core.data.repository.AuthRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.MainRepositoryImpl
+import com.teamyoga.yoghee.core.domain.repository.AuthRepository
 import com.teamyoga.yoghee.core.domain.repository.MainRepository
 import dagger.Binds
 import dagger.Module
@@ -17,4 +19,10 @@ interface DataModule {
     fun bindMainRepository(
         mainRepositoryImpl: MainRepositoryImpl
     ): MainRepository
+
+    @Binds
+    @Singleton
+    fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
 }

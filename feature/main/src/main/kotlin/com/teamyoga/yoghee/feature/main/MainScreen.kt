@@ -34,17 +34,22 @@ fun MainScreen(
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
+    onGoLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val trainingType by viewModel.trainingType.collectAsStateWithLifecycle()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
 
     MainScreen(
         onGoSearch = onGoSearch,
         onGoCategory = onGoCategory,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
+        onGoLogin = onGoLogin,
+        onLogout = viewModel::logout,
+        isLoggedIn = isLoggedIn,
         uiState = uiState,
         trainingType = trainingType,
         onTrainingTypeChanged = viewModel::onTrainingTypeChanged,
@@ -58,6 +63,9 @@ internal fun MainScreen(
     onGoCategory: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
+    onGoLogin: () -> Unit,
+    onLogout: () -> Unit,
+    isLoggedIn: Boolean,
     uiState: MainUiState,
     trainingType: TrainingType,
     onTrainingTypeChanged: (TrainingType) -> Unit,
@@ -95,9 +103,12 @@ internal fun MainScreen(
             }
 
             FloatingBottomNavigation(
+                isLoggedIn = isLoggedIn,
                 onGoSearch = onGoSearch,
                 onGoCategory = onGoCategory,
                 onGoProfile = onGoProfile,
+                onGoLogin = onGoLogin,
+                onLogout = onLogout,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp)

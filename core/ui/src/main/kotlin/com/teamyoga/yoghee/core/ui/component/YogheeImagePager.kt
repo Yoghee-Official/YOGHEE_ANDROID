@@ -110,29 +110,11 @@ private fun PageIndicator(
     }
 }
 
-@Preview(showBackground = true, widthDp = 360)
+@Preview(widthDp = 360)
 @Composable
 private fun YogheeImagePagerMultiPreview() {
     YogheeImagePager(
         images = listOf("a", "b", "c"),
-        isFavorite = false,
-    )
-}
-
-@Preview(showBackground = true, widthDp = 360)
-@Composable
-private fun YogheeImagePagerFavoritePreview() {
-    YogheeImagePager(
-        images = listOf("a", "b", "c"),
-        isFavorite = true,
-    )
-}
-
-@Preview(showBackground = true, widthDp = 360)
-@Composable
-private fun YogheeImagePagerSinglePreview() {
-    YogheeImagePager(
-        images = listOf("a"),
         isFavorite = false,
     )
 }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +45,8 @@ fun CategoryClassItem(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = BLACK,
-            maxLines = 2,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -99,7 +101,7 @@ private fun CategoryClassItemPreview() {
     CategoryClassItem(
         item = CategoryClass(
             classId = "0fe4dfb5-ecac-4e53-8545-549e1c52c4cf",
-            className = "봄맞이 힐링 요가 원데이 클래스",
+            className = "봄맞이 힐링 요가 원데이 클래스봄맞이 힐링 요가 원데이 클래스봄맞이 힐링 요가 원데이 클래스",
             address = "경기 남양주시 다산동",
             images = listOf("a", "b", "c"),
             masterId = "1a48d9d4-eeb4-4781-b816-9e8c2b4b0ba7",

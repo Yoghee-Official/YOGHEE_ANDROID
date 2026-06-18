@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ fun RatingLabel(
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 10.sp,
     color: Color = BLACK,
+    fontWeight: FontWeight = FontWeight.Normal
 ) {
     // 리뷰 수는 99,999를 넘으면 "99,999+"로 표기한다.
     val reviewCount = review?.let {
@@ -46,6 +48,7 @@ fun RatingLabel(
         Text(
             text = "${rating ?: 0} ($reviewCount)",
             fontSize = fontSize,
+            fontWeight = fontWeight,
             color = color,
         )
     }

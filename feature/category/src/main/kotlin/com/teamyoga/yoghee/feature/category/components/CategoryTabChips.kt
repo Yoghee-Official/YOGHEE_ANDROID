@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.theme.BLACK
@@ -52,6 +53,7 @@ private fun CategoryChip(
     Text(
         text = name,
         fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
         color = BLACK,
         modifier = Modifier
             .clip(RoundedCornerShape(32.dp))

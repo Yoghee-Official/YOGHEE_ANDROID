@@ -20,31 +20,31 @@ class CategoryViewModel @Inject constructor(
     val uiState: StateFlow<CategoryUiState> = _uiState.asStateFlow()
 
     init {
-        loadTab(_uiState.value.selectedTabId)
+        val state = _uiState.value
+        loadTab(state.selectedTabId, state.selectedSort)
     }
 
     fun onTabSelected(tabId: String) {
         if (_uiState.value.selectedTabId == tabId) return
         _uiState.update { it.copy(selectedTabId = tabId) }
-
-        // 캐시된 Success는 재호출하지 않는다. 실패/로딩 상태였다면 재시도.
-        val cached = _uiState.value.tabStates[tabId]
-        if (cached !is TabContentState.Success) loadTab(tabId)
+        loadTab(tabId, _uiState.value.selectedSort)
     }
 
-    private fun loadTab(tabId: String) {
-        _uiState.update { state ->
-            state.copy(tabStates = state.tabStates + (tabId to TabContentState.Loading))    // 현재 값에서 tabStates만 바꿈
-        }
+    fun onSortSelected(sort: CategorySort) {
+        if (_uiState.value.selectedSort == sort) return
+        _uiState.update { it.copy(selectedSort = sort) }
+        loadTab(_uiState.value.selectedTabId, sort)
+    }
+
+    private fun loadTab(tabId: String, sort: CategorySort) {
+        _uiState.update { it.copy(tabState = TabContentState.Loading) }
         viewModelScope.launch {
-            val next = runCatching { categoryRepository.getClassesByCategory(tabId) }
+            val next = runCatching { categoryRepository.getClassesByCategory(tabId, sort.id) }
                 .fold(
                     onSuccess = { TabContentState.Success(it) },
                     onFailure = { TabContentState.Error(it.message ?: "Unknown error") },
                 )
-            _uiState.update { state ->
-                state.copy(tabStates = state.tabStates + (tabId to next))
-            }
+            _uiState.update { it.copy(tabState = next) }
         }
     }
 }

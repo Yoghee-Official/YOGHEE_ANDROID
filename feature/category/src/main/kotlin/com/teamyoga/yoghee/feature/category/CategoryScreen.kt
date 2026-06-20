@@ -26,6 +26,7 @@ import com.teamyoga.yoghee.core.domain.model.CategoryClass
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.components.CategoryClassItem
 import com.teamyoga.yoghee.feature.category.components.CategoryHeader
+import com.teamyoga.yoghee.feature.category.components.CategorySortDropdown
 import com.teamyoga.yoghee.feature.category.components.CategoryTabChips
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.GRAY
@@ -42,6 +43,7 @@ fun CategoryScreen(
         onBack = onBack,
         state = state,
         onTabSelected = viewModel::onTabSelected,
+        onSortSelected = viewModel::onSortSelected,
         modifier = modifier,
     )
 }
@@ -51,6 +53,7 @@ internal fun CategoryScreen(
     onBack: () -> Unit,
     state: CategoryUiState,
     onTabSelected: (String) -> Unit,
+    onSortSelected: (CategorySort) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -63,10 +66,16 @@ internal fun CategoryScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+
             CategoryTabChips(
                 tabs = state.tabs,
                 selectedTabId = state.selectedTabId,
                 onTabSelected = onTabSelected,
+            )
+
+            CategorySortDropdown(
+                selected = state.selectedSort,
+                onSortSelected = onSortSelected,
             )
 
             Box(
@@ -75,7 +84,7 @@ internal fun CategoryScreen(
                     .weight(1f),
                 contentAlignment = Alignment.Center,
             ) {
-                when (val tabState = state.currentTabState) {
+                when (val tabState = state.tabState) {
                     TabContentState.Loading -> CircularProgressIndicator()
 
                     is TabContentState.Error -> ErrorScreen()
@@ -148,11 +157,10 @@ private fun CategoryScreenSuccessPreview() {
         CategoryScreen(
             onBack = {},
             state = CategoryUiState(
-                tabStates = mapOf(
-                    CategoryTabs.first().id to TabContentState.Success(previewClasses),
-                ),
+                tabState = TabContentState.Success(previewClasses),
             ),
             onTabSelected = {},
+            onSortSelected = {},
         )
     }
 }
@@ -165,6 +173,7 @@ private fun CategoryScreenLoadingPreview() {
             onBack = {},
             state = CategoryUiState(),
             onTabSelected = {},
+            onSortSelected = {},
         )
     }
 }
@@ -176,11 +185,10 @@ private fun CategoryScreenEmptyPreview() {
         CategoryScreen(
             onBack = {},
             state = CategoryUiState(
-                tabStates = mapOf(
-                    CategoryTabs.first().id to TabContentState.Success(emptyList()),
-                ),
+                tabState = TabContentState.Success(emptyList()),
             ),
             onTabSelected = {},
+            onSortSelected = {},
         )
     }
 }
@@ -192,11 +200,10 @@ private fun CategoryScreenErrorPreview() {
         CategoryScreen(
             onBack = {},
             state = CategoryUiState(
-                tabStates = mapOf(
-                    CategoryTabs.first().id to TabContentState.Error("네트워크 오류가 발생했어요"),
-                ),
+                tabState = TabContentState.Error("네트워크 오류가 발생했어요"),
             ),
             onTabSelected = {},
+            onSortSelected = {},
         )
     }
 }

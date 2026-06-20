@@ -9,6 +9,9 @@ import javax.inject.Inject
 class CategoryRepositoryImpl @Inject constructor(
     private val categoryService: CategoryService,
 ) : CategoryRepository {
-    override suspend fun getClassesByCategory(categoryId: String): List<CategoryClass> =
-        categoryService.getClassesByCategory(categoryId).data.map { it.toDomain() }
+    override suspend fun getClassesByCategory(
+        categoryId: String,
+        sort: String,
+    ): List<CategoryClass> =
+        categoryService.getClassesByCategory(categoryId, sort).data.map { it.toDomain() }
 }

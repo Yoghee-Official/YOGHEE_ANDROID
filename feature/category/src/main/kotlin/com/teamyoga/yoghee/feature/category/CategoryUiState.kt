@@ -16,7 +16,7 @@ sealed interface TabContentState {
 }
 
 enum class CategorySort(val id: String, val label: String) {
-    RECOMMEND("recommane", "추천순"),
+    RECOMMEND("recommend", "추천순"),
     REVIEW("review", "리뷰많은순"),
     RECENT("recent", "최신순"),
     FAVORITE("favorite", "찜순"),

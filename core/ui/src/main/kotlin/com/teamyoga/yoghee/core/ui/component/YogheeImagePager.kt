@@ -48,7 +48,7 @@ fun YogheeImagePager(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(328f / 265f)
+            .aspectRatio(328f / 211f)
             .clip(RoundedCornerShape(cornerRadius)),
     ) {
         HorizontalPager(

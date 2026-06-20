@@ -96,7 +96,7 @@ private fun AppNavGraph(
 
         composable(AppRoute.Category.route) {
             CategoryScreen(
-                onGoMain = { navController.navigate(AppRoute.Main.route) },
+                onBack = { navController.popBackStack() },
             )
         }
 

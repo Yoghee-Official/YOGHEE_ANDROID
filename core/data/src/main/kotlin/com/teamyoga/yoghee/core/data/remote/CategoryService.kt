@@ -11,4 +11,10 @@ interface CategoryService {
         @Path("categoryId") categoryId: String,
         @Query("sort") sort: String,
     ): CategoryClassResponse
+
+    @GET("api/class/address")
+    suspend fun getClassesByAddress(
+        @Query("address") address: String,
+        @Query("sort") sort: String,
+    ): CategoryClassResponse
 }

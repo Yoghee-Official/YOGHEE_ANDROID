@@ -14,4 +14,10 @@ class CategoryRepositoryImpl @Inject constructor(
         sort: String,
     ): List<CategoryClass> =
         categoryService.getClassesByCategory(categoryId, sort).data.map { it.toDomain() }
+
+    override suspend fun getClassesByAddress(
+        address: String,
+        sort: String,
+    ): List<CategoryClass> =
+        categoryService.getClassesByAddress(address, sort).data.map { it.toDomain() }
 }

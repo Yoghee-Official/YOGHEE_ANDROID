@@ -25,6 +25,7 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
 @Composable
 fun CategoryHeader(
+    title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -50,7 +51,7 @@ fun CategoryHeader(
                 contentDescription = "뒤로가기"
             )
             Text(
-                text = stringResource(R.string.category_title),
+                text = title,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = BLACK,
@@ -64,6 +65,7 @@ fun CategoryHeader(
 @Composable
 fun CategoryHeaderPreview() {
     CategoryHeader(
-        {},
+        title = stringResource(R.string.category_title),
+        onBack = {},
     )
 }

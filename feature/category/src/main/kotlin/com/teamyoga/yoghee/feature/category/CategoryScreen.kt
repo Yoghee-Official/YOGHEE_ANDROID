@@ -40,24 +40,47 @@ fun CategoryScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     CategoryScreen(
+        title = stringResource(R.string.category_title),
         onBack = onBack,
         state = state,
         onTabSelected = viewModel::onTabSelected,
         onSortSelected = viewModel::onSortSelected,
+        isLocation = false,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun LocationRoute(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: LocationViewModel = hiltViewModel(),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    CategoryScreen(
+        title = stringResource(R.string.location_title),
+        onBack = onBack,
+        state = state,
+        onTabSelected = viewModel::onTabSelected,
+        onSortSelected = viewModel::onSortSelected,
+        isLocation = true,
         modifier = modifier,
     )
 }
 
 @Composable
 internal fun CategoryScreen(
+    title: String,
     onBack: () -> Unit,
     state: CategoryUiState,
     onTabSelected: (String) -> Unit,
     onSortSelected: (CategorySort) -> Unit,
+    isLocation: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        topBar = { CategoryHeader(onBack = onBack) },
+        topBar = { CategoryHeader(title = title, onBack = onBack) },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize(),
     ) { innerPadding ->
@@ -101,7 +124,15 @@ internal fun CategoryScreen(
                                     items = tabState.classes,
                                     key = { "${state.selectedTabId}-${it.classId}" },
                                 ) { item ->
-                                    CategoryClassItem(item = item)
+                                    val extraInfo = if (isLocation) {
+                                        item.address.orEmpty()
+                                    } else {
+                                        item.masterName.orEmpty()
+                                    }
+                                    CategoryClassItem(
+                                        item = item,
+                                        extraInfo = extraInfo,
+                                    )
                                 }
                             }
                         }
@@ -155,12 +186,14 @@ private val previewClasses = listOf(
 private fun CategoryScreenSuccessPreview() {
     YogheeTheme {
         CategoryScreen(
+            title = stringResource(R.string.category_title),
             onBack = {},
             state = CategoryUiState(
                 tabState = TabContentState.Success(previewClasses),
             ),
             onTabSelected = {},
             onSortSelected = {},
+            isLocation = false,
         )
     }
 }
@@ -170,10 +203,12 @@ private fun CategoryScreenSuccessPreview() {
 private fun CategoryScreenLoadingPreview() {
     YogheeTheme {
         CategoryScreen(
+            title = stringResource(R.string.category_title),
             onBack = {},
             state = CategoryUiState(),
             onTabSelected = {},
             onSortSelected = {},
+            isLocation = false,
         )
     }
 }
@@ -183,12 +218,14 @@ private fun CategoryScreenLoadingPreview() {
 private fun CategoryScreenEmptyPreview() {
     YogheeTheme {
         CategoryScreen(
+            title = stringResource(R.string.category_title),
             onBack = {},
             state = CategoryUiState(
                 tabState = TabContentState.Success(emptyList()),
             ),
             onTabSelected = {},
             onSortSelected = {},
+            isLocation = false,
         )
     }
 }
@@ -198,12 +235,14 @@ private fun CategoryScreenEmptyPreview() {
 private fun CategoryScreenErrorPreview() {
     YogheeTheme {
         CategoryScreen(
+            title = stringResource(R.string.category_title),
             onBack = {},
             state = CategoryUiState(
                 tabState = TabContentState.Error("네트워크 오류가 발생했어요"),
             ),
             onTabSelected = {},
             onSortSelected = {},
+            isLocation = false,
         )
     }
 }

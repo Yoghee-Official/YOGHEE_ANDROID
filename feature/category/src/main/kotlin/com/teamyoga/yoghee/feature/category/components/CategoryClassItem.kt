@@ -25,6 +25,7 @@ import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 @Composable
 fun CategoryClassItem(
     item: CategoryClass,
+    extraInfo: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -52,9 +53,9 @@ fun CategoryClassItem(
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 강사명
+            // 강사명 또는 주소
             Text(
-                text = item.masterName.orEmpty(),
+                text = extraInfo,
                 fontSize = 12.sp,
                 color = BLACK,
                 fontWeight = FontWeight.Medium,
@@ -112,5 +113,6 @@ private fun CategoryClassItemPreview() {
             favoriteCount = 10,
             isFavorite = false,
         ),
+        extraInfo = "김의영",
     )
 }

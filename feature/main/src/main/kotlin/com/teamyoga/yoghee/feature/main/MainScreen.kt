@@ -32,6 +32,7 @@ import com.teamyoga.yoghee.feature.main.components.YogaCategorySection
 fun MainScreen(
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
@@ -45,6 +46,7 @@ fun MainScreen(
     MainScreen(
         onGoSearch = onGoSearch,
         onGoCategory = onGoCategory,
+        onGoLocation = onGoLocation,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
         onGoLogin = onGoLogin,
@@ -61,6 +63,7 @@ fun MainScreen(
 internal fun MainScreen(
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
@@ -107,6 +110,7 @@ internal fun MainScreen(
                 isLoggedIn = isLoggedIn,
                 onGoSearch = onGoSearch,
                 onGoCategory = onGoCategory,
+                onGoLocation = onGoLocation,
                 onGoProfile = onGoProfile,
                 onGoLogin = onGoLogin,
                 onLogout = onLogout,

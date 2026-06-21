@@ -19,6 +19,7 @@ fun FloatingBottomNavigation(
     isLoggedIn: Boolean,
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     onGoProfile: () -> Unit,
     onGoLogin: () -> Unit,
     onLogout: () -> Unit,
@@ -37,6 +38,7 @@ fun FloatingBottomNavigation(
         ) {
             TextButton(onClick = onGoSearch) { Text("검색") }
             TextButton(onClick = onGoCategory) { Text("카테고리") }
+            TextButton(onClick = onGoLocation) { Text("위치") }
             TextButton(onClick = onGoProfile) { Text("내정보") }
             // 로그인 상태에 따라 버튼이 토글된다.
             // - 비로그인: 로그인 화면으로 이동

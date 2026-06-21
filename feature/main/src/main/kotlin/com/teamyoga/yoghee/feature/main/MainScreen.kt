@@ -93,7 +93,8 @@ internal fun MainScreen(
                 )
                 is MainUiState.Success -> SuccessContent(
                     sections = uiState.sections,
-                    bgColor = bgColor
+                    bgColor = bgColor,
+                    onGoCategory = onGoCategory,
                 )
                 is MainUiState.Error -> Text(
                     text = uiState.message,
@@ -121,6 +122,7 @@ internal fun MainScreen(
 private fun SuccessContent(
     sections: List<MainSection>,
     bgColor: Color,
+    onGoCategory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val sectionModifier = Modifier.padding(top = 8.dp, bottom = 40.dp)
@@ -151,6 +153,7 @@ private fun SuccessContent(
                 is MainSection.YogaCategory ->
                     YogaCategorySection(
                         title = section.title,
+                        onCategoryClick = onGoCategory,
                         modifier = sectionModifier
                     )
                 is MainSection.NewReviews ->

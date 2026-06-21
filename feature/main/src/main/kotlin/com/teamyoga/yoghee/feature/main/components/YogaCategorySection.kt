@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
 @Composable
 fun YogaCategorySection(
     title: String?,
+    onCategoryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -52,6 +54,7 @@ fun YogaCategorySection(
                         painter = painterResource(R.drawable.bg_category_unique),
                         contentScale = ContentScale.Crop
                     )
+                    .noRippleClickable(onCategoryClick)
             ) {
                 Text(
                     text = stringResource(R.string.category_always_fresh),
@@ -72,12 +75,14 @@ fun YogaCategorySection(
                 YogaCategoryItem(
                     name = stringResource(R.string.category_relax),
                     bg = R.drawable.bg_category_relax,
+                    onClick = onCategoryClick,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 YogaCategoryItem(
                     name = stringResource(R.string.category_flow),
                     bg = R.drawable.bg_category_flow,
+                    onClick = onCategoryClick,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -85,12 +90,14 @@ fun YogaCategorySection(
                 YogaCategoryItem(
                     name = stringResource(R.string.category_power),
                     bg = R.drawable.bg_category_power,
+                    onClick = onCategoryClick,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 YogaCategoryItem(
                     name = stringResource(R.string.category_traditional_yoga),
                     bg = R.drawable.bg_category_traditional,
+                    onClick = onCategoryClick,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -99,7 +106,12 @@ fun YogaCategorySection(
 }
 
 @Composable
-private fun YogaCategoryItem(name: String, @DrawableRes bg: Int, modifier: Modifier = Modifier) {
+private fun YogaCategoryItem(
+    name: String,
+    @DrawableRes bg: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -107,6 +119,7 @@ private fun YogaCategoryItem(name: String, @DrawableRes bg: Int, modifier: Modif
             .paint(
                 painter = painterResource(bg)
             )
+            .noRippleClickable(onClick)
     ) {
         Text(
             text = name,
@@ -120,5 +133,5 @@ private fun YogaCategoryItem(name: String, @DrawableRes bg: Int, modifier: Modif
 @Preview(showBackground = true)
 @Composable
 private fun YogaCategorySectionPreview() {
-    YogaCategorySection(title = "요가 카테고리")
+    YogaCategorySection(title = "요가 카테고리", onCategoryClick = {})
 }

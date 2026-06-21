@@ -10,5 +10,6 @@
     <string name="category_unique_yoga">이색요가</string>
     <string name="category_always_fresh">언제나 새로운</string>
     <string name="category_title">취향 탐색</string>
+    <string name="location_title">위치 탐색</string>
     <string name="no_available_class">예약 가능한 수업이 없습니다.</string>
 </resources>

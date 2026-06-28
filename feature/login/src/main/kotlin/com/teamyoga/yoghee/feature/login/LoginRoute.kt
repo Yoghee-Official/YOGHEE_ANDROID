@@ -2,6 +2,7 @@ package com.teamyoga.yoghee.feature.login
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -42,7 +43,7 @@ fun LoginRoute(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().systemBarsPadding()) {
         LoginScreen(
             onKakaoClick = { viewModel.onKakaoLogin(context) },
             onNaverClick = onNaverClick,

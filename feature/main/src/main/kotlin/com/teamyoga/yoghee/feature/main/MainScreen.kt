@@ -32,6 +32,7 @@ import com.teamyoga.yoghee.feature.main.components.YogaCategorySection
 fun MainScreen(
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
@@ -45,6 +46,7 @@ fun MainScreen(
     MainScreen(
         onGoSearch = onGoSearch,
         onGoCategory = onGoCategory,
+        onGoLocation = onGoLocation,
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
         onGoLogin = onGoLogin,
@@ -61,6 +63,7 @@ fun MainScreen(
 internal fun MainScreen(
     onGoSearch: () -> Unit,
     onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
@@ -93,7 +96,10 @@ internal fun MainScreen(
                 )
                 is MainUiState.Success -> SuccessContent(
                     sections = uiState.sections,
-                    bgColor = bgColor
+                    bgColor = bgColor,
+                    trainingType = trainingType,
+                    onGoCategory = onGoCategory,
+                    onGoLocation = onGoLocation,
                 )
                 is MainUiState.Error -> Text(
                     text = uiState.message,
@@ -105,7 +111,6 @@ internal fun MainScreen(
             FloatingBottomNavigation(
                 isLoggedIn = isLoggedIn,
                 onGoSearch = onGoSearch,
-                onGoCategory = onGoCategory,
                 onGoProfile = onGoProfile,
                 onGoLogin = onGoLogin,
                 onLogout = onLogout,
@@ -121,8 +126,12 @@ internal fun MainScreen(
 private fun SuccessContent(
     sections: List<MainSection>,
     bgColor: Color,
+    trainingType: TrainingType,
+    onGoCategory: () -> Unit,
+    onGoLocation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isRegular = trainingType == TrainingType.REGULAR
     val sectionModifier = Modifier.padding(top = 8.dp, bottom = 40.dp)
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -151,6 +160,8 @@ private fun SuccessContent(
                 is MainSection.YogaCategory ->
                     YogaCategorySection(
                         title = section.title,
+                        showLocations = isRegular,
+                        onClick = if (isRegular) onGoLocation else onGoCategory,
                         modifier = sectionModifier
                     )
                 is MainSection.NewReviews ->

@@ -9,4 +9,13 @@
     <string name="category_traditional_yoga">전통요가</string>
     <string name="category_unique_yoga">이색요가</string>
     <string name="category_always_fresh">언제나 새로운</string>
+    <string name="category_title">취향 탐색</string>
+    <string name="location_title">위치 탐색</string>
+    <string name="location_subtitle">도시의 호흡</string>
+    <string name="location_seoul">서울</string>
+    <string name="location_gyeonggi">경기도</string>
+    <string name="location_gyeongsang">경상도</string>
+    <string name="location_jeolla">전라도</string>
+    <string name="location_chungcheong">충청도</string>
+    <string name="no_available_class">예약 가능한 수업이 없습니다.</string>
 </resources>

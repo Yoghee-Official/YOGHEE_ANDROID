@@ -5,8 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -18,6 +16,7 @@ import androidx.navigation.navArgument
 import com.teamyoga.yoghee.core.navigation.AppRoute
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.CategoryScreen
+import com.teamyoga.yoghee.feature.category.LocationRoute
 import com.teamyoga.yoghee.feature.detail.DetailScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
@@ -35,12 +34,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             YogheeTheme {
                 val navController = rememberNavController()
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavGraph(
-                        navController = navController,
-                        modifier = Modifier.padding(innerPadding),
-                    )
-                }
+                AppNavGraph(
+                    navController = navController,
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
         }
     }
@@ -71,6 +68,7 @@ private fun AppNavGraph(
             MainScreen(
                 onGoSearch = { navController.navigate(AppRoute.Search.route) },
                 onGoCategory = { navController.navigate(AppRoute.Category.route) },
+                onGoLocation = { navController.navigate(AppRoute.Location.route) },
                 onGoProfile = { navController.navigate(AppRoute.Profile.route) },
                 onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
                 onGoLogin = { navController.navigate(AppRoute.Login.route) },
@@ -96,7 +94,13 @@ private fun AppNavGraph(
 
         composable(AppRoute.Category.route) {
             CategoryScreen(
-                onGoMain = { navController.navigate(AppRoute.Main.route) },
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(AppRoute.Location.route) {
+            LocationRoute(
+                onBack = { navController.popBackStack() },
             )
         }
 

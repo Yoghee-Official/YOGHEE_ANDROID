@@ -12,11 +12,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CategoryViewModel @Inject constructor(
+class LocationViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CategoryUiState())
+    private val _uiState = MutableStateFlow(
+        CategoryUiState(
+            tabs = LocationTabs,
+            selectedTabId = LocationTabs.first().id,
+        )
+    )
     val uiState: StateFlow<CategoryUiState> = _uiState.asStateFlow()
 
     init {
@@ -36,10 +41,10 @@ class CategoryViewModel @Inject constructor(
         loadTab(_uiState.value.selectedTabId, sort)
     }
 
-    private fun loadTab(tabId: String, sort: CategorySort) {
+    private fun loadTab(address: String, sort: CategorySort) {
         _uiState.update { it.copy(tabState = TabContentState.Loading) }
         viewModelScope.launch {
-            val next = runCatching { categoryRepository.getClassesByCategory(tabId, sort.id) }
+            val next = runCatching { categoryRepository.getClassesByAddress(address, sort.id) }
                 .fold(
                     onSuccess = { TabContentState.Success(it) },
                     onFailure = { TabContentState.Error(it.message ?: "Unknown error") },

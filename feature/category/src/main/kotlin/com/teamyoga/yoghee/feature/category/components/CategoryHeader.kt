@@ -38,13 +38,13 @@ fun CategoryHeader(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 22.dp, bottom = 14.dp, start = 24.dp),
+                .padding(top = 22.dp, bottom = 14.dp),
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_back),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(top = 2.dp)
+                    .padding(top = 2.dp, start = 24.dp)
                     .width(23.dp)
                     .height(20.dp)
                     .noRippleClickable(onBack),

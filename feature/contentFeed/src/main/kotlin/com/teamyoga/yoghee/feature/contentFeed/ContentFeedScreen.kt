@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import com.teamyoga.yoghee.core.domain.model.FeedContent
 import com.teamyoga.yoghee.core.domain.model.FeedItem
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.FLOW_BLUE
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
@@ -103,7 +104,7 @@ internal fun ContentFeedScreen(
                     tint = BLACK,
                 )
             }
-            Text(
+            YogheeText(
                 text = stringResource(R.string.content_feed_title),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -198,7 +199,7 @@ private fun FeedList(
             }
         }
         Row() {
-            Text(
+            YogheeText(
                 modifier = Modifier
                     .border(
                         width = 1.dp,
@@ -213,14 +214,14 @@ private fun FeedList(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column() {
-                Text(
+                YogheeText(
                     text = current.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp, bottom = 12.dp),
                     color = BLACK,
                 )
-                Text(
+                YogheeText(
                     text = current.description,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,

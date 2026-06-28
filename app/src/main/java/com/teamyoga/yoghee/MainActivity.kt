@@ -78,7 +78,9 @@ private fun AppNavGraph(
         }
 
         composable(AppRoute.ContentFeed.route) {
-            ContentFeedScreen()
+            ContentFeedScreen(
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(AppRoute.Login.route) {

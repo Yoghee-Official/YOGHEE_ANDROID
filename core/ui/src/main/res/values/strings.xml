@@ -18,4 +18,8 @@
     <string name="location_jeolla">전라도</string>
     <string name="location_chungcheong">충청도</string>
     <string name="no_available_class">예약 가능한 수업이 없습니다.</string>
+    <string name="content_feed_title">눈요기 콘텐츠</string>
+    <string name="content_feed_back">뒤로가기</string>
+    <string name="content_feed_empty_title">이번주 콘텐츠는 잠시 쉬어가요.</string>
+    <string name="content_feed_empty_subtitle">다음주에 더 좋은 콘텐츠로 만나요.</string>
 </resources>

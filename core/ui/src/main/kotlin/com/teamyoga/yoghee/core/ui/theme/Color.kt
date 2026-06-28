@@ -12,6 +12,7 @@ val Pink40 = Color(0xFF7D5260)
 val Green_D6F695 = Color(0xFFD6F695)
 
 val SAND_BEIGE = Color(0xFFFCFAF4)
+val FLOW_BLUE = Color(0xFFCAE1FD)
 val WHITE = Color(0xFFFFFFFF)
 val BLACK = Color(0xFF000000)
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.teamyoga.yoghee.core.data.remote.AuthService
 import com.teamyoga.yoghee.core.data.remote.CategoryService
+import com.teamyoga.yoghee.core.data.remote.FeedService
 import com.teamyoga.yoghee.core.data.remote.MainService
 import com.teamyoga.yoghee.core.data.remote.auth.AuthInterceptor
 import com.teamyoga.yoghee.core.data.remote.auth.TokenAuthenticator
@@ -122,6 +123,11 @@ object NetworkModule {
     @Singleton
     fun provideCategoryService(@AppHttp retrofit: Retrofit): CategoryService =
         retrofit.create(CategoryService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFeedService(@AppHttp retrofit: Retrofit): FeedService =
+        retrofit.create(FeedService::class.java)
 
     private fun buildRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
         val contentType = "application/json".toMediaType()

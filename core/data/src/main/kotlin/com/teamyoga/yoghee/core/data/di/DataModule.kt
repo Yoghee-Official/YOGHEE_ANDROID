@@ -2,9 +2,11 @@ package com.teamyoga.yoghee.core.data.di
 
 import com.teamyoga.yoghee.core.data.repository.AuthRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.CategoryRepositoryImpl
+import com.teamyoga.yoghee.core.data.repository.FeedRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.MainRepositoryImpl
 import com.teamyoga.yoghee.core.domain.repository.AuthRepository
 import com.teamyoga.yoghee.core.domain.repository.CategoryRepository
+import com.teamyoga.yoghee.core.domain.repository.FeedRepository
 import com.teamyoga.yoghee.core.domain.repository.MainRepository
 import dagger.Binds
 import dagger.Module
@@ -33,4 +35,10 @@ interface DataModule {
     fun bindCategoryRepository(
         categoryRepositoryImpl: CategoryRepositoryImpl
     ): CategoryRepository
+
+    @Binds
+    @Singleton
+    fun bindFeedRepository(
+        feedRepositoryImpl: FeedRepositoryImpl
+    ): FeedRepository
 }

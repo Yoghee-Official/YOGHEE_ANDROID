@@ -1,0 +1,58 @@
+package com.teamyoga.yoghee.core.ui.component
+
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+
+/**
+ * 기본 [Text]와 동일하지만 [lineHeight]가 지정되지 않으면 [fontSize]와 같은 값으로 설정된다.
+ * 줄간격 100%가 기본값.
+ */
+@Composable
+fun YogheeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = fontSize,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    style: TextStyle = LocalTextStyle.current,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        minLines = minLines,
+        style = style,
+    )
+}

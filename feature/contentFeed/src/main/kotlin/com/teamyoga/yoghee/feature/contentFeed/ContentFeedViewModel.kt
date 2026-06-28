@@ -1,4 +1,4 @@
-package com.teamyoga.yoghee.feature.content
+package com.teamyoga.yoghee.feature.contentFeed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,12 +11,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ContentViewModel @Inject constructor(
+class ContentFeedViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ContentUiState>(ContentUiState.Loading)
-    val uiState: StateFlow<ContentUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<ContentFeedUiState>(ContentFeedUiState.Loading)
+    val uiState: StateFlow<ContentFeedUiState> = _uiState.asStateFlow()
 
     init {
         loadFeed()
@@ -24,11 +24,11 @@ class ContentViewModel @Inject constructor(
 
     private fun loadFeed() {
         viewModelScope.launch {
-            _uiState.value = ContentUiState.Loading
+            _uiState.value = ContentFeedUiState.Loading
             _uiState.value = runCatching { feedRepository.getFeed() }
                 .fold(
-                    onSuccess = { ContentUiState.Success(it) },
-                    onFailure = { ContentUiState.Error(it.message ?: "Unknown error") },
+                    onSuccess = { ContentFeedUiState.Success(it) },
+                    onFailure = { ContentFeedUiState.Error(it.message ?: "Unknown error") },
                 )
         }
     }

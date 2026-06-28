@@ -36,5 +36,5 @@ include(":feature:category")
 include(":feature:profile")
 include(":feature:detail")
 include(":feature:login")
-include(":feature:content")
+include(":feature:contentFeed")
  

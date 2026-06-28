@@ -17,7 +17,7 @@ import com.teamyoga.yoghee.core.navigation.AppRoute
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.CategoryScreen
 import com.teamyoga.yoghee.feature.category.LocationRoute
-import com.teamyoga.yoghee.feature.content.ContentScreen
+import com.teamyoga.yoghee.feature.contentFeed.ContentFeedScreen
 import com.teamyoga.yoghee.feature.detail.DetailScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
@@ -73,12 +73,12 @@ private fun AppNavGraph(
                 onGoProfile = { navController.navigate(AppRoute.Profile.route) },
                 onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
                 onGoLogin = { navController.navigate(AppRoute.Login.route) },
-                onGoContent = { navController.navigate(AppRoute.Content.route) },
+                onGoContentFeed = { navController.navigate(AppRoute.ContentFeed.route) },
             )
         }
 
-        composable(AppRoute.Content.route) {
-            ContentScreen()
+        composable(AppRoute.ContentFeed.route) {
+            ContentFeedScreen()
         }
 
         composable(AppRoute.Login.route) {

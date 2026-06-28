@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.teamyoga.yoghee.feature.content"
+    namespace = "com.teamyoga.yoghee.feature.contentFeed"
     compileSdk = 36
 
     defaultConfig {

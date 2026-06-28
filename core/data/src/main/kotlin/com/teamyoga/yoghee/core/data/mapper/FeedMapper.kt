@@ -6,8 +6,8 @@ import com.teamyoga.yoghee.core.domain.model.FeedContent
 import com.teamyoga.yoghee.core.domain.model.FeedItem
 
 fun FeedResponse.toDomain(): FeedContent = FeedContent(
-    weekLabel = weekLabel.orEmpty(),
-    items = items.orEmpty().map { it.toDomain() },
+    weekLabel = data.weekLabel.orEmpty(),
+    items = data.items.orEmpty().map { it.toDomain() },
 )
 
 private fun FeedItemDto.toDomain(): FeedItem = FeedItem(

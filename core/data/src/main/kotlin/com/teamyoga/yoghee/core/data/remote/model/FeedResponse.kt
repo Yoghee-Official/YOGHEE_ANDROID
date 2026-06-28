@@ -4,6 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FeedResponse(
+    val code: Int,
+    val status: String,
+    val data: FeedData,
+)
+
+@Serializable
+data class FeedData(
     val weekLabel: String? = null,
     val items: List<FeedItemDto>? = null,
 )

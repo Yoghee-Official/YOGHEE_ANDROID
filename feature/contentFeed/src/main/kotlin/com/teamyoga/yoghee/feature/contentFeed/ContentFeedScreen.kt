@@ -15,8 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.teamyoga.yoghee.core.domain.model.FeedContent
 import com.teamyoga.yoghee.core.domain.model.FeedItem
+import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.FLOW_BLUE
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
@@ -50,16 +58,18 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
 @Composable
 fun ContentFeedScreen(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ContentFeedViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    ContentFeedScreen(uiState = uiState, modifier = modifier)
+    ContentFeedScreen(uiState = uiState, onBack = onBack, modifier = modifier)
 }
 
 @Composable
 internal fun ContentFeedScreen(
     uiState: ContentFeedUiState,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -78,34 +88,58 @@ internal fun ContentFeedScreen(
         Spacer(
             modifier = Modifier.height(40.dp)
         )
-        Text(
-            text = "눈요기 콘텐츠",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = BLACK,
-            textAlign = TextAlign.Center,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 22.dp, bottom = 14.dp),
-        )
-
-        when (uiState) {
-            ContentFeedUiState.Loading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
-
-            is ContentFeedUiState.Error -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.CenterStart),
             ) {
-                Text(
-                    text = uiState.message,
-                    color = MaterialTheme.colorScheme.error,
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.content_feed_back),
+                    tint = BLACK,
                 )
             }
+            Text(
+                text = stringResource(R.string.content_feed_title),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = BLACK,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+            )
+        }
 
-            is ContentFeedUiState.Success -> FeedList(weekLabel = uiState.feed.weekLabel, items = uiState.feed.items)
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            when (uiState) {
+                ContentFeedUiState.Loading -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) { CircularProgressIndicator() }
+
+                is ContentFeedUiState.Error -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = uiState.message,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
+                is ContentFeedUiState.Success -> FeedList(
+                    weekLabel = uiState.feed.weekLabel,
+                    items = uiState.feed.items,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                )
+            }
         }
     }
 }
@@ -217,7 +251,7 @@ private val previewFeed = FeedContent(
 @Composable
 private fun ContentFeedScreenSuccessPreview() {
     YogheeTheme {
-        ContentFeedScreen(uiState = ContentFeedUiState.Success(previewFeed))
+        ContentFeedScreen(uiState = ContentFeedUiState.Success(previewFeed), onBack = {})
     }
 }
 
@@ -225,7 +259,7 @@ private fun ContentFeedScreenSuccessPreview() {
 @Composable
 private fun ContentFeedScreenLoadingPreview() {
     YogheeTheme {
-        ContentFeedScreen(uiState = ContentFeedUiState.Loading)
+        ContentFeedScreen(uiState = ContentFeedUiState.Loading, onBack = {})
     }
 }
 
@@ -233,6 +267,6 @@ private fun ContentFeedScreenLoadingPreview() {
 @Composable
 private fun ContentFeedScreenErrorPreview() {
     YogheeTheme {
-        ContentFeedScreen(uiState = ContentFeedUiState.Error("네트워크 오류"))
+        ContentFeedScreen(uiState = ContentFeedUiState.Error("네트워크 오류"), onBack = {})
     }
 }

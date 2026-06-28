@@ -8,6 +8,7 @@ sealed class AppRoute(val route: String) {
     data object Category : AppRoute("category")
     data object Location : AppRoute("location")
     data object Profile : AppRoute("profile")
+    data object Content : AppRoute("content")
 
     data object Detail : AppRoute("detail/{id}") {
         const val ARG_ID = "id"

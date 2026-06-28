@@ -36,6 +36,7 @@ fun MainScreen(
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
+    onGoContent: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -50,6 +51,7 @@ fun MainScreen(
         onGoProfile = onGoProfile,
         onGoDetail = onGoDetail,
         onGoLogin = onGoLogin,
+        onGoContent = onGoContent,
         onLogout = viewModel::logout,
         isLoggedIn = isLoggedIn,
         uiState = uiState,
@@ -67,6 +69,7 @@ internal fun MainScreen(
     onGoProfile: () -> Unit,
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
+    onGoContent: () -> Unit,
     onLogout: () -> Unit,
     isLoggedIn: Boolean,
     uiState: MainUiState,
@@ -111,6 +114,7 @@ internal fun MainScreen(
             FloatingBottomNavigation(
                 isLoggedIn = isLoggedIn,
                 onGoSearch = onGoSearch,
+                onGoContent = onGoContent,
                 onGoProfile = onGoProfile,
                 onGoLogin = onGoLogin,
                 onLogout = onLogout,

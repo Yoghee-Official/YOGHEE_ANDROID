@@ -77,6 +77,7 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:detail"))
     implementation(project(":feature:login"))
+    implementation(project(":feature:content"))
 
     implementation(libs.kakao.user)
 

@@ -23,8 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -123,25 +121,49 @@ internal fun ContentFeedScreen(
                     contentAlignment = Alignment.Center,
                 ) { CircularProgressIndicator() }
 
-                is ContentFeedUiState.Error -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = uiState.message,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
+                is ContentFeedUiState.Error -> EmptyContent()
 
-                is ContentFeedUiState.Success -> FeedList(
-                    weekLabel = uiState.feed.weekLabel,
-                    items = uiState.feed.items,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                )
+                is ContentFeedUiState.Success ->
+                    if (uiState.feed.items.isEmpty()) {
+                        EmptyContent()
+                    } else {
+                        FeedList(
+                            weekLabel = uiState.feed.weekLabel,
+                            items = uiState.feed.items,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                        )
+                    }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyContent(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        YogheeText(
+            text = stringResource(R.string.content_feed_empty_title),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BLACK,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        YogheeText(
+            text = stringResource(R.string.content_feed_empty_subtitle),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = BLACK,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -261,13 +283,5 @@ private fun ContentFeedScreenSuccessPreview() {
 private fun ContentFeedScreenLoadingPreview() {
     YogheeTheme {
         ContentFeedScreen(uiState = ContentFeedUiState.Loading, onBack = {})
-    }
-}
-
-@Preview(showBackground = true, name = "Error")
-@Composable
-private fun ContentFeedScreenErrorPreview() {
-    YogheeTheme {
-        ContentFeedScreen(uiState = ContentFeedUiState.Error("네트워크 오류"), onBack = {})
     }
 }

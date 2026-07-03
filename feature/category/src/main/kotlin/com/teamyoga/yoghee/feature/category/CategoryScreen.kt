@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.domain.model.CategoryClass
+import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.feature.category.components.CategoryClassItem
-import com.teamyoga.yoghee.feature.category.components.CategoryHeader
 import com.teamyoga.yoghee.feature.category.components.CategorySortDropdown
 import com.teamyoga.yoghee.feature.category.components.CategoryTabChips
 import com.teamyoga.yoghee.core.ui.R
@@ -80,7 +80,7 @@ internal fun CategoryScreen(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        topBar = { CategoryHeader(title = title, onBack = onBack) },
+        topBar = { YogheeHeader(title = title, onBack = onBack) },
         containerColor = MaterialTheme.colorScheme.background,
         modifier = modifier.fillMaxSize(),
     ) { innerPadding ->

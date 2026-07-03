@@ -39,7 +39,7 @@ fun YogheeHeader(
             contentDescription = stringResource(R.string.common_back),
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(top = 2.dp, start = 24.dp)
+                .padding(start = 24.dp)
                 .width(23.dp)
                 .height(20.dp)
                 .noRippleClickable(onBack),

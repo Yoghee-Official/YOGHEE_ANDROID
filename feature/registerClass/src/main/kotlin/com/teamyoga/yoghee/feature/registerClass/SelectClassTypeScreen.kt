@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -126,8 +128,7 @@ private fun SelectClassTypeContent(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp),
+            .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(28.dp),
     ) {
         YogheeText(
@@ -142,11 +143,25 @@ private fun SelectClassTypeContent(
         )
 
         val pagerState = rememberPagerState(pageCount = { classTypes.size })
+        val startClipDp = 12.dp
         HorizontalPager(
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 8.dp),
+            contentPadding = PaddingValues(start = 12.dp, end = 24.dp),
             pageSpacing = 8.dp,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .drawWithContent {
+                    // fillMaxWidth로 gesture 영역은 유지하되, 좌측 12dp 안쪽으로 그려지는
+                    // 이전 페이지 peek(4dp)만 draw 단계에서 클립해 감춘다.
+                    clipRect(
+                        left = startClipDp.toPx(),
+                        top = 0f,
+                        right = size.width,
+                        bottom = size.height,
+                    ) {
+                        this@drawWithContent.drawContent()
+                    }
+                },
         ) { page ->
             ClassTypeBanner(
                 type = classTypes[page],

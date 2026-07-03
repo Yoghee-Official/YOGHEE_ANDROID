@@ -37,6 +37,7 @@ fun MainScreen(
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
     onGoContentFeed: () -> Unit,
+    onGoRegisterClass: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
@@ -52,6 +53,7 @@ fun MainScreen(
         onGoDetail = onGoDetail,
         onGoLogin = onGoLogin,
         onGoContentFeed = onGoContentFeed,
+        onGoRegisterClass = onGoRegisterClass,
         onLogout = viewModel::logout,
         isLoggedIn = isLoggedIn,
         uiState = uiState,
@@ -70,6 +72,7 @@ internal fun MainScreen(
     onGoDetail: (String) -> Unit,
     onGoLogin: () -> Unit,
     onGoContentFeed: () -> Unit,
+    onGoRegisterClass: () -> Unit,
     onLogout: () -> Unit,
     isLoggedIn: Boolean,
     uiState: MainUiState,
@@ -103,6 +106,7 @@ internal fun MainScreen(
                     trainingType = trainingType,
                     onGoCategory = onGoCategory,
                     onGoLocation = onGoLocation,
+                    onGoRegisterClass = onGoRegisterClass,
                 )
                 is MainUiState.Error -> Text(
                     text = uiState.message,
@@ -133,6 +137,7 @@ private fun SuccessContent(
     trainingType: TrainingType,
     onGoCategory: () -> Unit,
     onGoLocation: () -> Unit,
+    onGoRegisterClass: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isRegular = trainingType == TrainingType.REGULAR
@@ -178,7 +183,10 @@ private fun SuccessContent(
             }
         }
         item {
-            RegisterClass(modifier = sectionModifier)
+            RegisterClass(
+                onClick = onGoRegisterClass,
+                modifier = sectionModifier,
+            )
         }
     }
 }

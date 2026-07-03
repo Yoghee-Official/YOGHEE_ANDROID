@@ -1,4 +1,4 @@
-package com.teamyoga.yoghee.feature.category.components
+package com.teamyoga.yoghee.core.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,51 +18,53 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
 @Composable
-fun CategoryHeader(
+fun YogheeHeader(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    subTitle: String = ""
 ) {
-    Surface(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .statusBarsPadding(),
-        color = MaterialTheme.colorScheme.background,
+            .statusBarsPadding()
+            .padding(top = 22.dp, bottom = 14.dp),
     ) {
-        Box(
+        Image(
+            painter = painterResource(R.drawable.ic_back),
+            contentDescription = stringResource(R.string.common_back),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 22.dp, bottom = 14.dp),
-        ) {
-            Image(
-                painter = painterResource(R.drawable.ic_back),
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(top = 2.dp, start = 24.dp)
-                    .width(23.dp)
-                    .height(20.dp)
-                    .noRippleClickable(onBack),
-                contentDescription = "뒤로가기"
-            )
-            Text(
-                text = title,
-                fontSize = 20.sp,
+                .align(Alignment.CenterStart)
+                .padding(start = 24.dp)
+                .width(23.dp)
+                .height(20.dp)
+                .noRippleClickable(onBack),
+        )
+        YogheeText(
+            text = title,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = BLACK,
+            modifier = Modifier.align(Alignment.Center),
+        )
+        if (subTitle.isNotEmpty()) {
+            YogheeText(
+                text = subTitle,
+                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = BLACK,
-                modifier = Modifier.align(Alignment.Center),
+                color = GRAY,
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 17.dp),
             )
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun CategoryHeaderPreview() {
-    CategoryHeader(
-        title = stringResource(R.string.category_title),
-        onBack = {},
-    )
+private fun YogheeHeaderPreview() {
+    YogheeHeader(title = "타이틀", onBack = {})
 }

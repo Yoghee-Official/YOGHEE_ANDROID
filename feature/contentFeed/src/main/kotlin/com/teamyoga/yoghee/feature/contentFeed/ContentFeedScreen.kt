@@ -18,11 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,6 +42,7 @@ import coil.compose.AsyncImage
 import com.teamyoga.yoghee.core.domain.model.FeedContent
 import com.teamyoga.yoghee.core.domain.model.FeedItem
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.FLOW_BLUE
@@ -84,35 +81,10 @@ internal fun ContentFeedScreen(
                 ),
             ),
     ) {
-        Spacer(
-            modifier = Modifier.height(40.dp)
+        YogheeHeader(
+            title = stringResource(R.string.content_feed_title),
+            onBack = onBack,
         )
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 22.dp, bottom = 14.dp),
-        ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.CenterStart),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.content_feed_back),
-                    tint = BLACK,
-                )
-            }
-            YogheeText(
-                text = stringResource(R.string.content_feed_title),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = BLACK,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-            )
-        }
 
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             when (uiState) {

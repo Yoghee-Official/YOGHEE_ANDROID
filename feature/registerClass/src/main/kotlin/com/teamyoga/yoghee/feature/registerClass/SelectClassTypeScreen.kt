@@ -156,7 +156,11 @@ private fun SelectClassTypeContent(
 
         YogheeText(
             text = stringResource(R.string.select_class_type_notice),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
             color = BLACK,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
         )
     }
 }

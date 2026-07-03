@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
 @Composable
@@ -25,6 +26,7 @@ fun YogheeHeader(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    subTitle: String = ""
 ) {
     Box(
         modifier = modifier
@@ -49,6 +51,15 @@ fun YogheeHeader(
             color = BLACK,
             modifier = Modifier.align(Alignment.Center),
         )
+        if (subTitle.isNotEmpty()) {
+            YogheeText(
+                text = subTitle,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = GRAY,
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 17.dp),
+            )
+        }
     }
 }
 

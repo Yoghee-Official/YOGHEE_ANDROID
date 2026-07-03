@@ -22,7 +22,7 @@ import com.teamyoga.yoghee.feature.detail.DetailScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
-import com.teamyoga.yoghee.feature.registerClass.RegisterClassScreen
+import com.teamyoga.yoghee.feature.registerClass.SelectClassTypeScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
 import com.teamyoga.yoghee.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,7 +86,7 @@ private fun AppNavGraph(
         }
 
         composable(AppRoute.RegisterClass.route) {
-            RegisterClassScreen(
+            SelectClassTypeScreen(
                 onBack = { navController.popBackStack() },
             )
         }

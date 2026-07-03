@@ -22,6 +22,7 @@ import com.teamyoga.yoghee.feature.detail.DetailScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
+import com.teamyoga.yoghee.feature.registerClass.RegisterClassScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
 import com.teamyoga.yoghee.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,11 +75,18 @@ private fun AppNavGraph(
                 onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
                 onGoLogin = { navController.navigate(AppRoute.Login.route) },
                 onGoContentFeed = { navController.navigate(AppRoute.ContentFeed.route) },
+                onGoRegisterClass = { navController.navigate(AppRoute.RegisterClass.route) },
             )
         }
 
         composable(AppRoute.ContentFeed.route) {
             ContentFeedScreen(
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(AppRoute.RegisterClass.route) {
+            RegisterClassScreen(
                 onBack = { navController.popBackStack() },
             )
         }

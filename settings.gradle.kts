@@ -37,4 +37,5 @@ include(":feature:profile")
 include(":feature:detail")
 include(":feature:login")
 include(":feature:contentFeed")
+include(":feature:registerClass")
  

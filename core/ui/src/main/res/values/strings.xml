@@ -22,4 +22,25 @@
     <string name="content_feed_back">뒤로가기</string>
     <string name="content_feed_empty_title">이번주 콘텐츠는 잠시 쉬어가요.</string>
     <string name="content_feed_empty_subtitle">다음주에 더 좋은 콘텐츠로 만나요.</string>
+
+    <string name="register_class_title">운영 방식 선택</string>
+    <string name="register_class_back">뒤로가기</string>
+    <string name="register_class_description">4가지 타입의 수련을 준비했어요.</string>
+    <string name="register_class_notice">수련 방식은 한가지만 선택 가능합니다</string>
+
+    <string name="register_class_type_oneday">하루 수련 (원데이)</string>
+    <string name="register_class_type_oneday_text1">다양한 요기니와 만나고 싶다면 추천해요</string>
+    <string name="register_class_type_oneday_text2">하루 동안 완결되는 체험형 수련\n예: 초보자 체험, 테마 워크숍, 여행자 대상 수련</string>
+
+    <string name="register_class_type_regular">정규 수련</string>
+    <string name="register_class_type_regular_text1">깊이있는 호흡을 공유하고 싶다면 추천해요</string>
+    <string name="register_class_type_regular_text2">일정 기간 반복되는 성장형 수련\n예: 주 2회 4주 과정, 아침 루틴 요가</string>
+
+    <string name="register_class_type_season">시즌 수련</string>
+    <string name="register_class_type_season_text1">빠른 시간안에 결과를 만들고 싶다면 추천해요</string>
+    <string name="register_class_type_season_text2">이때가 아니면 불가능! 지금만 가능한 시즌 수련\n예: 일주일만에 완성하는 머리서기</string>
+
+    <string name="register_class_type_workshop">워크숍</string>
+    <string name="register_class_type_workshop_text1">심도있는 수련을 나누고 싶다면 추천해요</string>
+    <string name="register_class_type_workshop_text2">다같이 참여할 수 있는 워크숍\n예: 4주 20시간 핸즈-온 워크숍</string>
 </resources>

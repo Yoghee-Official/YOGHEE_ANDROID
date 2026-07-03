@@ -1,0 +1,35 @@
+name: Qodo Merge PR Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  contents: read
+  issues: write
+
+concurrency:
+  group: pr-agent-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr_agent:
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    name: Run pr-agent on PR
+    steps:
+      - name: PR Agent action step
+        id: pragent
+        uses: qodo-ai/pr-agent@bd09b6cf89c6d6f3d16b159fa7603fa0e7768cf2 # v0.38.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG__MODEL: "gemini/gemini-2.5-flash"
+          CONFIG__FALLBACK_MODELS: '["gemini/gemini-2.0-flash"]'
+          GOOGLE_AI_STUDIO__GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CONFIG__RESPONSE_LANGUAGE: "ko-KR"
+          GITHUB_ACTION_CONFIG__AUTO_REVIEW: "true"
+          GITHUB_ACTION_CONFIG__AUTO_DESCRIBE: "true"
+          GITHUB_ACTION_CONFIG__AUTO_IMPROVE: "false"

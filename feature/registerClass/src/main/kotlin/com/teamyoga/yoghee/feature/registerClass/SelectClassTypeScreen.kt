@@ -143,25 +143,12 @@ private fun SelectClassTypeContent(
         )
 
         val pagerState = rememberPagerState(pageCount = { classTypes.size })
-        val startClipDp = 12.dp
         HorizontalPager(
             state = pagerState,
             contentPadding = PaddingValues(start = 12.dp, end = 24.dp),
             pageSpacing = 8.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .drawWithContent {
-                    // fillMaxWidth로 gesture 영역은 유지하되, 좌측 12dp 안쪽으로 그려지는
-                    // 이전 페이지 peek(4dp)만 draw 단계에서 클립해 감춘다.
-                    clipRect(
-                        left = startClipDp.toPx(),
-                        top = 0f,
-                        right = size.width,
-                        bottom = size.height,
-                    ) {
-                        this@drawWithContent.drawContent()
-                    }
-                },
         ) { page ->
             ClassTypeBanner(
                 type = classTypes[page],

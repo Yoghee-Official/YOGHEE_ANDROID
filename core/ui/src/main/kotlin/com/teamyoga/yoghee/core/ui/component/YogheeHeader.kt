@@ -26,7 +26,8 @@ fun YogheeHeader(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    subTitle: String = ""
+    subTitle: String = "",
+    onSubTitleClick: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -57,7 +58,10 @@ fun YogheeHeader(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 color = GRAY,
-                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 17.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 17.dp)
+                    .noRippleClickable(onSubTitleClick),
             )
         }
     }
@@ -67,4 +71,15 @@ fun YogheeHeader(
 @Composable
 private fun YogheeHeaderPreview() {
     YogheeHeader(title = "타이틀", onBack = {})
+}
+
+@Preview(showBackground = true, name = "YogheeHeader with subTitle")
+@Composable
+private fun YogheeHeaderWithSubTitlePreview() {
+    YogheeHeader(
+        title = "수련 설명",
+        onBack = {},
+        subTitle = "문의 하기",
+        onSubTitleClick = {},
+    )
 }

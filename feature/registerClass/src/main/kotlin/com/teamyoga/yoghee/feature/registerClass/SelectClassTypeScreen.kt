@@ -107,6 +107,7 @@ private val classTypes = listOf(
 @Composable
 fun SelectClassTypeScreen(
     onBack: () -> Unit,
+    onGoOneDayClassRegister: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -118,12 +119,15 @@ fun SelectClassTypeScreen(
             title = stringResource(R.string.select_class_type_title),
             onBack = onBack
         )
-        SelectClassTypeContent()
+        SelectClassTypeContent(
+            onGoOneDayClassRegister = onGoOneDayClassRegister,
+        )
     }
 }
 
 @Composable
 private fun SelectClassTypeContent(
+    onGoOneDayClassRegister: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -152,7 +156,11 @@ private fun SelectClassTypeContent(
         ) { page ->
             ClassTypeBanner(
                 type = classTypes[page],
-                onClick = {},
+                onClick = {
+                    // [0] 원데이, [2] 시즌, [3] 워크숍은 원데이 클래스 등록 화면으로 진입
+                    // [1] 정규 수련은 별도 화면 (별도 작업)
+                    if (page != 1) onGoOneDayClassRegister(page)
+                },
             )
         }
 
@@ -304,7 +312,7 @@ private fun ClassTypeBanner(
 @Composable
 private fun SelectClassTypeScreenPreview() {
     YogheeTheme {
-        SelectClassTypeScreen(onBack = {})
+        SelectClassTypeScreen(onBack = {}, onGoOneDayClassRegister = {})
     }
 }
 

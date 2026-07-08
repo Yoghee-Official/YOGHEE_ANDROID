@@ -11,6 +11,12 @@ sealed class AppRoute(val route: String) {
     data object ContentFeed : AppRoute("contentFeed")
     data object RegisterClass : AppRoute("registerClass")
 
+    data object OneDayClassRegister : AppRoute("oneDayClassRegister/{typeIndex}") {
+        const val ARG_TYPE_INDEX = "typeIndex"
+
+        fun createRoute(typeIndex: Int): String = "oneDayClassRegister/$typeIndex"
+    }
+
     data object Detail : AppRoute("detail/{id}") {
         const val ARG_ID = "id"
 

@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -22,9 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,12 +33,11 @@ import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
-import com.teamyoga.yoghee.core.ui.theme.GRAY_D9D9D9
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
-import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionModule
 
 private const val TOTAL_STEPS = 7
 
@@ -97,23 +91,11 @@ private fun Step1Content(
             subTitle = stringResource(R.string.inquire),
             onSubTitleClick = {},
         )
-        LazyColumn(
+        Column(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            item {
-                TextModule(
-                    title = "모듈 1 제목",
-                    body = "모듈 1 내용이 여기에 들어갑니다.",
-                )
-            }
-            item {
-                TextModule(
-                    title = "모듈 2 제목",
-                    body = "모듈 2 내용이 여기에 들어갑니다.",
-                )
-            }
+            ClassIntroductionModule()
         }
     }
 }
@@ -142,36 +124,6 @@ private fun StepPlaceholderContent(
                 fontWeight = FontWeight.Medium,
             )
         }
-    }
-}
-
-@Composable
-private fun TextModule(
-    title: String,
-    body: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(WHITE)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        YogheeText(
-            text = title,
-            color = BLACK,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        YogheeText(
-            text = body,
-            color = BLACK,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 20.sp,
-        )
     }
 }
 

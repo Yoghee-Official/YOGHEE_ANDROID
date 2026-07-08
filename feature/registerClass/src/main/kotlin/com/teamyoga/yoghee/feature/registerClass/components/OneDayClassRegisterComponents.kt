@@ -40,7 +40,9 @@ fun ClassIntroductionModule(
     var content by remember { mutableStateOf("") }
 
     Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 20.dp),
     ) {
         YogheeText(
             text = "수련에 대해 알려주세요.",
@@ -59,14 +61,16 @@ fun ClassIntroductionModule(
         HintTextField(
             value = title,
             onValueChange = { if (it.length <= TITLE_MAX_LENGTH) title = it },
-            hint = "대표 제목 (상세페이지 최상단에 노출돼요!)\n수련 테마를 한줄로 표현해주세요.",
+            hint1 = "대표 제목 (상세페이지 최상단에 노출돼요!)",
+            hint2 = "수련 테마를 한줄로 표현해주세요.",
             maxLength = TITLE_MAX_LENGTH,
             modifier = Modifier.padding(top = 10.dp)
         )
         HintTextField(
             value = content,
             onValueChange = { if (it.length <= CONTENT_MAX_LENGTH) content = it },
-            hint = "내용\n수련 관련 내용을 작성해주세요.",
+            hint1 = "내용",
+            hint2 = "수련 관련 내용을 작성해주세요.",
             maxLength = CONTENT_MAX_LENGTH,
             modifier = Modifier.padding(top = 14.dp)
         )
@@ -77,7 +81,8 @@ fun ClassIntroductionModule(
 private fun HintTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    hint: String,
+    hint1: String,
+    hint2: String,
     maxLength: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -85,24 +90,34 @@ private fun HintTextField(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(WHITE).border(width = 1.dp, color = LIGHT_GRAY)
-            .padding(top = 8.dp, bottom = 20.dp, start = 20.dp, end = 20.dp),
+            .background(WHITE)
+            .border(width = 1.dp, color = LIGHT_GRAY, shape = RoundedCornerShape(8.dp))
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             if (value.isEmpty()) {
-                YogheeText(
-                    text = hint,
-                    color = GRAY,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 36.sp,
-                )
+                Column {
+                    YogheeText(
+                        text = hint1,
+                        color = GRAY,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    YogheeText(
+                        text = hint2,
+                        color = GRAY,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
+                }
             }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 textStyle = TextStyle(
                     color = BLACK,
                     fontSize = 12.sp,
@@ -115,7 +130,7 @@ private fun HintTextField(
             color = GRAY,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.align(Alignment.Start),
+            modifier = Modifier.align(Alignment.Start).padding(top = 12.dp),
         )
     }
 }

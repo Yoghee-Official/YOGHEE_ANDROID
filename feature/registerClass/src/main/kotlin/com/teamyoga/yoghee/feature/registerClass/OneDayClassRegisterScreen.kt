@@ -2,6 +2,8 @@ package com.teamyoga.yoghee.feature.registerClass
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +39,8 @@ import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
-import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionModule
+import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
+import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 
 private const val TOTAL_STEPS = 7
 
@@ -92,10 +95,13 @@ private fun Step1Content(
             onSubTitleClick = {},
         )
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            ClassIntroductionModule()
+            ClassIntroductionSection()
+            ClassPurposeSection()
         }
     }
 }

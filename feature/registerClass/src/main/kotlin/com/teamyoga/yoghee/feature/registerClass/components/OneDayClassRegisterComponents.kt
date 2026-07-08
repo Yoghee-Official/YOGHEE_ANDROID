@@ -29,8 +29,8 @@ import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 
-private const val TITLE_MAX_LENGTH = 30
-private const val CONTENT_MAX_LENGTH = 500
+private const val TITLE_MAX_LENGTH = 22
+private const val CONTENT_MAX_LENGTH = 3000
 
 @Composable
 fun ClassIntroductionModule(
@@ -60,7 +60,7 @@ fun ClassIntroductionModule(
         )
         HintTextField(
             value = title,
-            onValueChange = { if (it.length <= TITLE_MAX_LENGTH) title = it },
+            onValueChange = { title = it },
             hint1 = "대표 제목 (상세페이지 최상단에 노출돼요!)",
             hint2 = "수련 테마를 한줄로 표현해주세요.",
             maxLength = TITLE_MAX_LENGTH,
@@ -68,7 +68,7 @@ fun ClassIntroductionModule(
         )
         HintTextField(
             value = content,
-            onValueChange = { if (it.length <= CONTENT_MAX_LENGTH) content = it },
+            onValueChange = { content = it },
             hint1 = "내용",
             hint2 = "수련 관련 내용을 작성해주세요.",
             maxLength = CONTENT_MAX_LENGTH,
@@ -115,7 +115,7 @@ private fun HintTextField(
             }
             BasicTextField(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = { if (it.length <= maxLength) onValueChange(it) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 textStyle = TextStyle(
@@ -123,6 +123,7 @@ private fun HintTextField(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                 ),
+                maxLines = 4
             )
         }
         YogheeText(

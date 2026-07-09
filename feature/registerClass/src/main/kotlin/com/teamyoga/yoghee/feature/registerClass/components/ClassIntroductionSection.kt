@@ -33,7 +33,7 @@ private const val TITLE_MAX_LENGTH = 22
 private const val CONTENT_MAX_LENGTH = 3000
 
 @Composable
-fun ClassIntroductionModule(
+fun ClassIntroductionSection(
     modifier: Modifier = Modifier,
 ) {
     var title by remember { mutableStateOf("") }
@@ -44,19 +44,9 @@ fun ClassIntroductionModule(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 20.dp),
     ) {
-        YogheeText(
-            text = "수련에 대해 알려주세요.",
-            color = BLACK,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-        YogheeText(
-            text = "[마이페이지]->[개선 수련 목록]에서 수정할 수 있습니다.",
-            color = GRAY,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 4.dp, start = 8.dp)
+        RegisterSectionTitle(
+            title = "수련에 대해 알려주세요.",
+            subTitle = "[마이페이지]->[개선 수련 목록]에서 수정할 수 있습니다.",
         )
         HintTextField(
             value = title,
@@ -136,11 +126,11 @@ private fun HintTextField(
     }
 }
 
-@Preview(showBackground = true, name = "ClassIntroductionModule")
+@Preview(showBackground = true, name = "ClassIntroductionSection")
 @Composable
-private fun ClassIntroductionModulePreview() {
+private fun ClassIntroductionSectionPreview() {
     YogheeTheme {
-        ClassIntroductionModule(
+        ClassIntroductionSection(
             modifier = Modifier.padding(24.dp),
         )
     }

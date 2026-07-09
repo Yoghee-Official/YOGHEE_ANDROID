@@ -45,6 +45,7 @@
     <string name="class_type_workshop_text2">다같이 참여할 수 있는 워크숍\n예: 4주 20시간 핸즈-온 워크숍</string>
 
     <string name="one_day_class_register_step1_title">수련 설명</string>
+    <string name="one_day_class_register_step2_title">수련 유형 선택</string>
     <string name="previous_page">이전 페이지</string>
     <string name="continue_page">계속</string>
 </resources>

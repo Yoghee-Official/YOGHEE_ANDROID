@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,8 +43,26 @@ import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
+import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 
 private const val TOTAL_STEPS = 7
+
+private val CLASS_TYPE_OPTIONS = listOf(
+    "아쉬탕가", "아헹가", "하타", "빈야사", "인요가",
+    "테라피", "명상", "쉬바난다", "비프로스플로우",
+    "인사이드플로우", "플라잉요가", "소도구요가", "파트너요가",
+    "임산부 요가", "펫요가", "키즈요가", "기타",
+)
+
+private val CLASS_CATEGORY_OPTIONS = listOf(
+    "이색 요가", "전통 요가", "파워", "릴렉스", "플로우",
+    "야외", "실내", "숙련자", "초심자",
+)
+
+private val CLASS_USER_OPTIONS = listOf(
+    "파트너 요가", "임산부 요가", "키즈 요가", "여성 전용",
+    "남성 전용", "남녀공용", "펫요가",
+)
 
 @Composable
 fun OneDayClassRegisterScreen(
@@ -70,6 +90,7 @@ fun OneDayClassRegisterScreen(
         Box(modifier = Modifier.weight(1f)) {
             when (currentStep) {
                 1 -> Step1Content(onBack = goPrevious)
+                2 -> Step2Content(onBack = goPrevious)
                 else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
             }
         }
@@ -102,6 +123,54 @@ private fun Step1Content(
         ) {
             ClassIntroductionSection()
             ClassPurposeSection()
+        }
+    }
+}
+
+@Composable
+private fun Step2Content(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var selectedClassTypes by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var selectedClassCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var selectedClassUsers by remember { mutableStateOf<Set<String>>(emptySet()) }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step2_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            MultiSelectChipsSection(
+                title = "전문 수련 유형",
+                subTitle = "상세페이지에 노출되는 수련 유형이예요.",
+                options = CLASS_TYPE_OPTIONS,
+                selected = selectedClassTypes,
+                onSelectedChange = { selectedClassTypes = it },
+            )
+            MultiSelectChipsSection(
+                title = "수련 카테고리",
+                subTitle = "수련 카테고리에 목록별로 노출돼요!",
+                options = CLASS_CATEGORY_OPTIONS,
+                selected = selectedClassCategories,
+                onSelectedChange = { selectedClassCategories = it },
+            )
+            MultiSelectChipsSection(
+                title = "이용 대상",
+                subTitle = "참여 가능한 대상과 운영 조건을 선택해주세요.",
+                options = CLASS_USER_OPTIONS,
+                selected = selectedClassUsers,
+                onSelectedChange = { selectedClassUsers = it },
+            )
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -223,6 +292,16 @@ private fun Step1ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step1Content(onBack = {})
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step2Content")
+@Composable
+private fun Step2ContentPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step2Content(onBack = {})
         }
     }
 }

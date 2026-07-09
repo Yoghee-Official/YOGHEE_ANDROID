@@ -40,17 +40,18 @@ fun MultiSelectChipsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 10.dp),
+            .padding(top = 12.dp),
     ) {
         RegisterSectionTitle(
             title = title,
             subTitle = subTitle,
-            modifier = Modifier.padding(bottom = 12.dp),
+            modifier = Modifier.padding(bottom = 12.dp, start = 8.dp),
         )
         FlowRow(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+
         ) {
             options.forEach { option ->
                 val isSelected = option in selected

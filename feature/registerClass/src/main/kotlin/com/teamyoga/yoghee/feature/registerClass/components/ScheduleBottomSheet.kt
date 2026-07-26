@@ -73,13 +73,14 @@ fun ScheduleBottomSheet(
     onDismiss: () -> Unit,
     onApply: (ClassSchedule) -> Unit,
     modifier: Modifier = Modifier,
+    initial: ClassSchedule? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    var startTime by remember { mutableStateOf(DEFAULT_TIME) }
-    var endTime by remember { mutableStateOf(DEFAULT_TIME) }
-    var className by remember { mutableStateOf("") }
-    var minCount by remember { mutableIntStateOf(MIN_COUNT) }
-    var maxCount by remember { mutableIntStateOf(MIN_COUNT) }
+    var startTime by remember { mutableStateOf(initial?.startTime ?: DEFAULT_TIME) }
+    var endTime by remember { mutableStateOf(initial?.endTime ?: DEFAULT_TIME) }
+    var className by remember { mutableStateOf(initial?.className ?: "") }
+    var minCount by remember { mutableIntStateOf(initial?.minCount ?: MIN_COUNT) }
+    var maxCount by remember { mutableIntStateOf(initial?.maxCount ?: MIN_COUNT) }
     var pickerTarget by remember { mutableStateOf<TimePickerTarget?>(null) }
 
     ModalBottomSheet(

@@ -52,6 +52,28 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onScheduleEdit(index: Int, input: ClassSchedule) {
+        val current = _uiState.value
+        if (index !in current.schedules.indices) return
+        val updated = input.copy(dates = current.dates)
+        _uiState.update {
+            it.copy(
+                schedules = it.schedules.toMutableList().apply { this[index] = updated },
+                dates = emptySet(),
+            )
+        }
+    }
+
+    fun onScheduleDelete(index: Int) {
+        val current = _uiState.value
+        if (index !in current.schedules.indices) return
+        _uiState.update {
+            it.copy(
+                schedules = it.schedules.toMutableList().apply { removeAt(index) },
+            )
+        }
+    }
+
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
         _uiState.update { it.copy(submitState = SubmitState.Loading) }

@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
@@ -32,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -59,6 +58,7 @@ data class ScheduleInput(
     val endTime: String,
     val className: String,
     val minCount: Int,
+    val maxCount: Int
 )
 
 private const val MIN_COUNT = 0
@@ -79,6 +79,7 @@ fun ScheduleBottomSheet(
     var endTime by remember { mutableStateOf(DEFAULT_TIME) }
     var className by remember { mutableStateOf("") }
     var minCount by remember { mutableIntStateOf(MIN_COUNT) }
+    var maxCount by remember { mutableIntStateOf(MIN_COUNT) }
     var pickerTarget by remember { mutableStateOf<TimePickerTarget?>(null) }
 
     ModalBottomSheet(
@@ -90,12 +91,12 @@ fun ScheduleBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 32.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 TimeBox(
                     label = "시작시간",
@@ -115,17 +116,25 @@ fun ScheduleBottomSheet(
                 value = className,
                 onValueChange = { className = it },
             )
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY)
             CounterRow(
                 label = "최소 수련 가능인원",
                 count = minCount,
                 onDecrement = { if (minCount > MIN_COUNT) minCount-- },
                 onIncrement = { if (minCount < MAX_COUNT) minCount++ },
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            CounterRow(
+                label = "최대 수련 가능 인원",
+                count = maxCount,
+                onDecrement = { if (maxCount > MIN_COUNT) maxCount-- },
+                onIncrement = { if (maxCount < MAX_COUNT) maxCount++ },
+            )
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(bottom = 8.dp))
+
             ApplyButton(
                 modifier = Modifier.align(Alignment.End),
                 onClick = {
-                    onApply(ScheduleInput(startTime, endTime, className, minCount))
+                    onApply(ScheduleInput(startTime, endTime, className, minCount, maxCount))
                     onDismiss()
                 },
             )
@@ -158,8 +167,8 @@ private fun TimeBox(
             .fillMaxWidth()
             .height(49.dp)
             .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, GRAY, RoundedCornerShape(8.dp))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .border(1.dp, LIGHT_GRAY, RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.Center,
     ) {
         YogheeText(
@@ -169,15 +178,14 @@ private fun TimeBox(
                     append(" * (24시간 기준)")
                 }
             },
-            color = GRAY,
+            color = BLACK,
             fontSize = 10.sp,
-            fontWeight = FontWeight.Medium,
         )
         YogheeText(
             text = time,
             color = BLACK,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier
                 .padding(top = 4.dp)
                 .noRippleClickable(onClick),
@@ -192,26 +200,34 @@ private fun LabeledTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(49.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .border(1.dp, LIGHT_GRAY, RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
         YogheeText(
-            text = label,
-            color = GRAY,
+            text = buildAnnotatedString {
+                append(label)
+                withStyle(SpanStyle(color = MIND_ORANGE)) {
+                    append(" *")
+                }
+            },
+            color = BLACK,
             fontSize = 10.sp,
-            fontWeight = FontWeight.Medium,
         )
-        TextField(
+        BasicTextField(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             textStyle = androidx.compose.ui.text.TextStyle(
                 color = BLACK,
-                fontSize = 14.sp,
-            ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
             ),
         )
     }
@@ -226,7 +242,7 @@ private fun CounterRow(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(top = 16.dp),
+        modifier = modifier.fillMaxWidth().padding(top = 4.dp, start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         YogheeText(

@@ -52,12 +52,13 @@ import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 
-data class ScheduleInput(
+data class ClassSchedule(
     val startTime: String,
     val endTime: String,
     val className: String,
     val minCount: Int,
-    val maxCount: Int
+    val maxCount: Int,
+    val dates: Set<CalendarDate> = emptySet(),
 )
 
 private const val MIN_COUNT = 0
@@ -70,7 +71,7 @@ private enum class TimePickerTarget { START, END }
 @Composable
 fun ScheduleBottomSheet(
     onDismiss: () -> Unit,
-    onApply: (ScheduleInput) -> Unit,
+    onApply: (ClassSchedule) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -133,7 +134,7 @@ fun ScheduleBottomSheet(
             ApplyButton(
                 modifier = Modifier.align(Alignment.End),
                 onClick = {
-                    onApply(ScheduleInput(startTime, endTime, className, minCount, maxCount))
+                    onApply(ClassSchedule(startTime, endTime, className, minCount, maxCount))
                     onDismiss()
                 },
             )

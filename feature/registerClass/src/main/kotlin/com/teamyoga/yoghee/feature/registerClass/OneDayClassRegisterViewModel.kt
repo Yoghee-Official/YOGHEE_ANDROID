@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,17 @@ class OneDayClassRegisterViewModel @Inject constructor(
     fun onClassUsersChange(value: Set<String>) = _uiState.update { it.copy(classUsers = value) }
 
     fun onDatesChange(value: Set<CalendarDate>) = _uiState.update { it.copy(dates = value) }
+
+    fun onScheduleApplied(input: ClassSchedule) {
+        val current = _uiState.value
+        val newSchedule = input.copy(dates = current.dates)
+        _uiState.update {
+            it.copy(
+                schedules = it.schedules + newSchedule,
+                dates = emptySet(),
+            )
+        }
+    }
 
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
@@ -89,6 +101,8 @@ data class OneDayClassRegisterUiState(
     val classUsers: Set<String> = emptySet(),
     // TODO: Step 3 ScheduleBottomSheet 완성 시 API 전송으로 이관
     val dates: Set<CalendarDate> = emptySet(),
+    // Step 3에서 추가된 수련 일정 목록
+    val schedules: List<ClassSchedule> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
 )
 

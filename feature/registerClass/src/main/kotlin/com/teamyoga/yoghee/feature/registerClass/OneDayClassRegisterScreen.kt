@@ -45,7 +45,6 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
-import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import com.teamyoga.yoghee.feature.registerClass.components.AddScheduleButton
@@ -56,6 +55,8 @@ import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalen
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
+import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
 
 private const val TOTAL_STEPS = 7
 
@@ -100,6 +101,7 @@ fun OneDayClassRegisterScreen(
         onClassCategoriesChange = viewModel::onClassCategoriesChange,
         onClassUsersChange = viewModel::onClassUsersChange,
         onDatesChange = viewModel::onDatesChange,
+        onScheduleApplied = viewModel::onScheduleApplied,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -116,6 +118,7 @@ private fun OneDayClassRegisterContent(
     onClassCategoriesChange: (Set<String>) -> Unit,
     onClassUsersChange: (Set<String>) -> Unit,
     onDatesChange: (Set<CalendarDate>) -> Unit,
+    onScheduleApplied: (ClassSchedule) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -170,7 +173,9 @@ private fun OneDayClassRegisterContent(
                     )
                     3 -> Step3Content(
                         dates = state.dates,
+                        schedules = state.schedules,
                         onDatesChange = onDatesChange,
+                        onScheduleApplied = onScheduleApplied,
                         onBack = goPrevious,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
@@ -279,7 +284,9 @@ private fun Step2Content(
 @Composable
 private fun Step3Content(
     dates: Set<CalendarDate>,
+    schedules: List<ClassSchedule>,
     onDatesChange: (Set<CalendarDate>) -> Unit,
+    onScheduleApplied: (ClassSchedule) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -309,15 +316,19 @@ private fun Step3Content(
             )
             AddScheduleButton(
                 onClick = { showScheduleSheet = true },
+                enabled = dates.isNotEmpty(),
                 modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp),
             )
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(200.dp)
-                    .background(WHITE),
-            )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                schedules.forEach { schedule ->
+                    ScheduleItemCard(schedule = schedule)
+                }
+            }
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -325,7 +336,9 @@ private fun Step3Content(
     if (showScheduleSheet) {
         ScheduleBottomSheet(
             onDismiss = { showScheduleSheet = false },
-            onApply = { /* 추후 개발 */ },
+            onApply = { input ->
+                onScheduleApplied(input)
+            },
         )
     }
 }
@@ -456,6 +469,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onClassCategoriesChange = {},
             onClassUsersChange = {},
             onDatesChange = {},
+            onScheduleApplied = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -503,7 +517,9 @@ private fun Step3ContentPreview() {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step3Content(
                 dates = emptySet(),
+                schedules = emptyList(),
                 onDatesChange = {},
+                onScheduleApplied = {},
                 onBack = {},
             )
         }

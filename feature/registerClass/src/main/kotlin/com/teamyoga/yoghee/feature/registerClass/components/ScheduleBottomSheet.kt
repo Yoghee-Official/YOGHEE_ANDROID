@@ -19,9 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -44,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.core.ui.component.WheelPicker
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
@@ -317,7 +316,6 @@ private fun ApplyButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialog(
     initialTime: String,
@@ -327,11 +325,12 @@ private fun TimePickerDialog(
     val parts = initialTime.split(":")
     val initialHour = parts.getOrNull(0)?.toIntOrNull() ?: 0
     val initialMinute = parts.getOrNull(1)?.toIntOrNull() ?: 0
-    val state = rememberTimePickerState(
-        initialHour = initialHour,
-        initialMinute = initialMinute,
-        is24Hour = true,
-    )
+
+    var selectedHour by remember { mutableIntStateOf(initialHour) }
+    var selectedMinute by remember { mutableIntStateOf(initialMinute) }
+
+    val hours = remember { (0..23).toList() }
+    val minutes = remember { (0..59).toList() }
 
     Dialog(onDismissRequest = onDismiss) {
         Column(
@@ -340,7 +339,37 @@ private fun TimePickerDialog(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TimePicker(state = state)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                WheelPicker(
+                    items = hours,
+                    initialIndex = initialHour,
+                    onSelectedIndexChange = { selectedHour = hours[it] },
+                    modifier = Modifier.width(72.dp),
+                    itemContent = { item, isSelected ->
+                        WheelTimeText(text = "%02d".format(item), isSelected = isSelected)
+                    },
+                )
+                YogheeText(
+                    text = ":",
+                    color = BLACK,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                )
+                WheelPicker(
+                    items = minutes,
+                    initialIndex = initialMinute,
+                    onSelectedIndexChange = { selectedMinute = minutes[it] },
+                    modifier = Modifier.width(72.dp),
+                    itemContent = { item, isSelected ->
+                        WheelTimeText(text = "%02d".format(item), isSelected = isSelected)
+                    },
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -350,12 +379,22 @@ private fun TimePickerDialog(
                 TextButton(onClick = onDismiss) {
                     YogheeText(text = "취소", color = GRAY, fontSize = 14.sp)
                 }
-                TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
+                TextButton(onClick = { onConfirm(selectedHour, selectedMinute) }) {
                     YogheeText(text = "확인", color = BLACK, fontSize = 14.sp)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun WheelTimeText(text: String, isSelected: Boolean) {
+    YogheeText(
+        text = text,
+        color = if (isSelected) BLACK else GRAY,
+        fontSize = if (isSelected) 20.sp else 16.sp,
+        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

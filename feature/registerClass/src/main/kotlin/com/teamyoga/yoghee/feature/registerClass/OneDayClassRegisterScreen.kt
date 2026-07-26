@@ -322,7 +322,7 @@ private fun Step3Content(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
                 schedules.forEach { schedule ->

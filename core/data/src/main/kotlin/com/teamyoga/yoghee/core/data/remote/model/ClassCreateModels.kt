@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CreateClassRequest(
-    val classId: String,
     val type: String,
     val name: String,
     val description: String,

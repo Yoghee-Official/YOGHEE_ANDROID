@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 private const val ONE_DAY_CLASS_TYPE = "O"
@@ -21,9 +20,6 @@ private const val ONE_DAY_CLASS_TYPE = "O"
 class OneDayClassRegisterViewModel @Inject constructor(
     private val classRepository: ClassRepository,
 ) : ViewModel() {
-
-    // todo:: 확인 및 수정 필요
-    private val classId: String = "class-" + UUID.randomUUID().toString().take(8)
 
     private val _uiState = MutableStateFlow(OneDayClassRegisterUiState())
     val uiState: StateFlow<OneDayClassRegisterUiState> = _uiState.asStateFlow()
@@ -83,7 +79,6 @@ class OneDayClassRegisterViewModel @Inject constructor(
             runCatching {
                 classRepository.createOneDayClass(
                     CreateOneDayClassParams(
-                        classId = classId,
                         type = ONE_DAY_CLASS_TYPE,
                         name = state.name,
                         description = state.description,

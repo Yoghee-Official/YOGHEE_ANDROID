@@ -12,7 +12,6 @@ class ClassRepositoryImpl @Inject constructor(
 
     override suspend fun createOneDayClass(params: CreateOneDayClassParams): String {
         val request = CreateClassRequest(
-            classId = params.classId,
             type = params.type,
             name = params.name,
             description = params.description,

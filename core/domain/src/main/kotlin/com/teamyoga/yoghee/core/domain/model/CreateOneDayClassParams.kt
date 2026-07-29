@@ -6,7 +6,6 @@ package com.teamyoga.yoghee.core.domain.model
  * 추후 UI 완성 시 이곳에 추가한다.
  */
 data class CreateOneDayClassParams(
-    val classId: String,
     val type: String,
     val name: String,
     val description: String,

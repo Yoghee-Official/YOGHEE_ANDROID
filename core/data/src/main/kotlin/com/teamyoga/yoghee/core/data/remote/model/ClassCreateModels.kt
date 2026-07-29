@@ -20,7 +20,6 @@ data class CreateClassRequest(
 
 @Serializable
 data class CreateScheduleDto(
-    val scheduleId: String,
     val dates: List<String> = emptyList(),
     val dayOfWeek: Int = 0,
     val startTime: String = "",

@@ -2,6 +2,7 @@ package com.teamyoga.yoghee.feature.registerClass
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
@@ -86,6 +87,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         centerId = "",
                         featureCodes = state.classTypes.toList(),
                         categoryCodes = state.classCategories.toList(),
+                        schedules = state.schedules.map { it.toParam() },
                     )
                 )
             }.onSuccess {
@@ -107,6 +109,17 @@ class OneDayClassRegisterViewModel @Inject constructor(
             _uiState.update { it.copy(submitState = SubmitState.Idle) }
         }
     }
+
+    private fun ClassSchedule.toParam(): ClassScheduleParam = ClassScheduleParam(
+        name = className,
+        dates = dates
+            .sortedWith(compareBy({ it.year }, { it.month }, { it.day }))
+            .map { "%04d-%02d-%02d".format(it.year, it.month, it.day) },
+        startTime = startTime,
+        endTime = endTime,
+        minCapacity = minCount,
+        maxCapacity = maxCount,
+    )
 }
 
 data class OneDayClassRegisterUiState(
@@ -116,9 +129,7 @@ data class OneDayClassRegisterUiState(
     val classCategories: Set<String> = emptySet(),
     // 이용 대상: UI 상태로만 유지하고 API 전송에서는 제외
     val classUsers: Set<String> = emptySet(),
-    // TODO: Step 3 ScheduleBottomSheet 완성 시 API 전송으로 이관
     val dates: Set<CalendarDate> = emptySet(),
-    // Step 3에서 추가된 수련 일정 목록
     val schedules: List<ClassSchedule> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
 )

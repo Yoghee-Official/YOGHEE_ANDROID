@@ -2,6 +2,7 @@ package com.teamyoga.yoghee.feature.registerClass
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
@@ -99,6 +100,25 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun loadCenters() {
+        _uiState.update { it.copy(centersState = CentersState.Loading) }
+        viewModelScope.launch {
+            runCatching { classRepository.getCenters() }
+                .onSuccess { centers ->
+                    _uiState.update { it.copy(centersState = CentersState.Success(centers)) }
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            centersState = CentersState.Error(
+                                throwable.message ?: "요가원 목록을 불러오지 못했습니다."
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
     private fun ClassSchedule.toParam(): ClassScheduleParam = ClassScheduleParam(
         name = className,
         dates = dates
@@ -119,6 +139,7 @@ data class OneDayClassRegisterUiState(
     val categoryCodes: Set<String> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
+    val centersState: CentersState = CentersState.Idle,
 )
 
 sealed interface SubmitState {
@@ -126,4 +147,11 @@ sealed interface SubmitState {
     data object Loading : SubmitState
     data object Success : SubmitState
     data class Error(val message: String) : SubmitState
+}
+
+sealed interface CentersState {
+    data object Idle : CentersState
+    data object Loading : CentersState
+    data class Success(val centers: List<Center>) : CentersState
+    data class Error(val message: String) : CentersState
 }

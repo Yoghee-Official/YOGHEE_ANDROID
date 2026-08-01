@@ -97,6 +97,7 @@ fun OneDayClassRegisterScreen(
         onBack = onBack,
         onNameChange = viewModel::onNameChange,
         onDescriptionChange = viewModel::onDescriptionChange,
+        onClassPurposesChange = viewModel::onClassPurposesChange,
         onClassTypesChange = viewModel::onClassTypesChange,
         onClassCategoriesChange = viewModel::onClassCategoriesChange,
         onClassUsersChange = viewModel::onClassUsersChange,
@@ -116,6 +117,7 @@ private fun OneDayClassRegisterContent(
     onBack: () -> Unit,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
+    onClassPurposesChange: (Set<String>) -> Unit,
     onClassTypesChange: (Set<String>) -> Unit,
     onClassCategoriesChange: (Set<String>) -> Unit,
     onClassUsersChange: (Set<String>) -> Unit,
@@ -162,8 +164,10 @@ private fun OneDayClassRegisterContent(
                     1 -> Step1Content(
                         name = state.name,
                         description = state.description,
+                        classPurposes = state.classPurposes,
                         onNameChange = onNameChange,
                         onDescriptionChange = onDescriptionChange,
+                        onClassPurposesChange = onClassPurposesChange,
                         onBack = goPrevious,
                     )
                     2 -> Step2Content(
@@ -208,8 +212,10 @@ private fun OneDayClassRegisterContent(
 private fun Step1Content(
     name: String,
     description: String,
+    classPurposes: Set<String>,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
+    onClassPurposesChange: (Set<String>) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -232,7 +238,10 @@ private fun Step1Content(
                 onTitleChange = onNameChange,
                 onContentChange = onDescriptionChange,
             )
-            ClassPurposeSection()
+            ClassPurposeSection(
+                selected = classPurposes,
+                onSelectedChange = onClassPurposesChange,
+            )
         }
     }
 }
@@ -500,6 +509,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onBack = {},
             onNameChange = {},
             onDescriptionChange = {},
+            onClassPurposesChange = {},
             onClassTypesChange = {},
             onClassCategoriesChange = {},
             onClassUsersChange = {},
@@ -521,8 +531,10 @@ private fun Step1ContentPreview() {
             Step1Content(
                 name = "",
                 description = "",
+                classPurposes = emptySet(),
                 onNameChange = {},
                 onDescriptionChange = {},
+                onClassPurposesChange = {},
                 onBack = {},
             )
         }

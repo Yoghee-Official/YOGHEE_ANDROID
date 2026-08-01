@@ -31,6 +31,9 @@ class OneDayClassRegisterViewModel @Inject constructor(
 
     fun onClassTypesChange(value: Set<String>) = _uiState.update { it.copy(classTypes = value) }
 
+    fun onClassPurposesChange(value: Set<String>) =
+        _uiState.update { it.copy(classPurposes = value) }
+
     fun onClassCategoriesChange(value: Set<String>) =
         _uiState.update { it.copy(classCategories = value) }
 
@@ -85,7 +88,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         description = state.description,
                         // TODO: 로그인한 강사 정보에서 centerId 채우기
                         centerId = "",
-                        featureCodes = state.classTypes.toList(),
+                        featureCodes = state.classPurposes.toList(),
                         categoryCodes = state.classCategories.toList(),
                         schedules = state.schedules.map { it.toParam() },
                     )
@@ -125,6 +128,9 @@ class OneDayClassRegisterViewModel @Inject constructor(
 data class OneDayClassRegisterUiState(
     val name: String = "",
     val description: String = "",
+    // 클래스 목적(featureCodes): API code 집합
+    val classPurposes: Set<String> = emptySet(),
+    // 전문 수련 유형: UI 상태로만 유지하고 API 전송에서는 제외
     val classTypes: Set<String> = emptySet(),
     val classCategories: Set<String> = emptySet(),
     // 이용 대상: UI 상태로만 유지하고 API 전송에서는 제외

@@ -60,21 +60,43 @@ import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
 
 private const val TOTAL_STEPS = 7
 
+// 전문 수련 유형: (파트너/임산부/펫/키즈 요가는 이용 대상으로 이동)
 private val CLASS_TYPE_OPTIONS = listOf(
-    "아쉬탕가", "아헹가", "하타", "빈야사", "인요가",
-    "테라피", "명상", "쉬바난다", "비프로스플로우",
-    "인사이드플로우", "플라잉요가", "소도구요가", "파트너요가",
-    "임산부 요가", "펫요가", "키즈요가", "기타",
+    "ashtanga" to "아쉬탕가",
+    "iyengar" to "아헹가",
+    "hatha" to "하타",
+    "vinyasa" to "빈야사",
+    "yin_yoga" to "인요가",
+    "therapy" to "테라피",
+    "meditation" to "명상",
+    "sivananda" to "쉬바난다",
+    "bepros_flow" to "비프로스플로우",
+    "inside_flow" to "인사이드플로우",
+    "flying_yoga" to "플라잉 요가",
+    "props_yoga" to "소도구 요가",
+    "others" to "기타",
 )
 
 private val CLASS_CATEGORY_OPTIONS = listOf(
-    "이색 요가", "전통 요가", "파워", "릴렉스", "플로우",
-    "야외", "실내", "숙련자", "초심자",
+    "unique_yoga" to "이색 요가",
+    "traditional_yoga" to "전통 요가",
+    "power" to "파워",
+    "relax" to "릴렉스",
+    "flow" to "플로우",
+    "outdoor" to "야외",
+    "indoor" to "실내",
+    "advanced" to "숙련자",
+    "beginner" to "초심자",
 )
 
 private val CLASS_USER_OPTIONS = listOf(
-    "파트너 요가", "임산부 요가", "키즈 요가", "여성 전용",
-    "남성 전용", "남녀공용", "펫요가",
+    "partner_yoga" to "파트너 요가",
+    "prenatal_yoga" to "임산부 요가",
+    "kids_yoga" to "키즈 요가",
+    "women_only" to "여성 전용",
+    "men_only" to "남성 전용",
+    "unisex" to "남녀 공용",
+    "pet_yoga" to "펫요가",
 )
 
 @Composable
@@ -98,9 +120,7 @@ fun OneDayClassRegisterScreen(
         onNameChange = viewModel::onNameChange,
         onDescriptionChange = viewModel::onDescriptionChange,
         onClassPurposesChange = viewModel::onClassPurposesChange,
-        onClassTypesChange = viewModel::onClassTypesChange,
-        onClassCategoriesChange = viewModel::onClassCategoriesChange,
-        onClassUsersChange = viewModel::onClassUsersChange,
+        onCategoryCodesChange = viewModel::onCategoryCodesChange,
         onDatesChange = viewModel::onDatesChange,
         onScheduleApplied = viewModel::onScheduleApplied,
         onScheduleEdit = viewModel::onScheduleEdit,
@@ -118,9 +138,7 @@ private fun OneDayClassRegisterContent(
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onClassPurposesChange: (Set<String>) -> Unit,
-    onClassTypesChange: (Set<String>) -> Unit,
-    onClassCategoriesChange: (Set<String>) -> Unit,
-    onClassUsersChange: (Set<String>) -> Unit,
+    onCategoryCodesChange: (Set<String>) -> Unit,
     onDatesChange: (Set<CalendarDate>) -> Unit,
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
@@ -171,12 +189,8 @@ private fun OneDayClassRegisterContent(
                         onBack = goPrevious,
                     )
                     2 -> Step2Content(
-                        classTypes = state.classTypes,
-                        classCategories = state.classCategories,
-                        classUsers = state.classUsers,
-                        onClassTypesChange = onClassTypesChange,
-                        onClassCategoriesChange = onClassCategoriesChange,
-                        onClassUsersChange = onClassUsersChange,
+                        categoryCodes = state.categoryCodes,
+                        onCategoryCodesChange = onCategoryCodesChange,
                         onBack = goPrevious,
                     )
                     3 -> Step3Content(
@@ -248,12 +262,8 @@ private fun Step1Content(
 
 @Composable
 private fun Step2Content(
-    classTypes: Set<String>,
-    classCategories: Set<String>,
-    classUsers: Set<String>,
-    onClassTypesChange: (Set<String>) -> Unit,
-    onClassCategoriesChange: (Set<String>) -> Unit,
-    onClassUsersChange: (Set<String>) -> Unit,
+    categoryCodes: Set<String>,
+    onCategoryCodesChange: (Set<String>) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -274,22 +284,22 @@ private fun Step2Content(
                 title = "전문 수련 유형",
                 subTitle = "상세페이지에 노출되는 수련 유형이예요.",
                 options = CLASS_TYPE_OPTIONS,
-                selected = classTypes,
-                onSelectedChange = onClassTypesChange,
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             MultiSelectChipsSection(
                 title = "수련 카테고리",
                 subTitle = "수련 카테고리에 목록별로 노출돼요!",
                 options = CLASS_CATEGORY_OPTIONS,
-                selected = classCategories,
-                onSelectedChange = onClassCategoriesChange,
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             MultiSelectChipsSection(
                 title = "이용 대상",
                 subTitle = "참여 가능한 대상과 운영 조건을 선택해주세요.",
                 options = CLASS_USER_OPTIONS,
-                selected = classUsers,
-                onSelectedChange = onClassUsersChange,
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -510,9 +520,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onNameChange = {},
             onDescriptionChange = {},
             onClassPurposesChange = {},
-            onClassTypesChange = {},
-            onClassCategoriesChange = {},
-            onClassUsersChange = {},
+            onCategoryCodesChange = {},
             onDatesChange = {},
             onScheduleApplied = {},
             onScheduleEdit = { _, _ -> },
@@ -547,12 +555,8 @@ private fun Step2ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step2Content(
-                classTypes = emptySet(),
-                classCategories = emptySet(),
-                classUsers = emptySet(),
-                onClassTypesChange = {},
-                onClassCategoriesChange = {},
-                onClassUsersChange = {},
+                categoryCodes = emptySet(),
+                onCategoryCodesChange = {},
                 onBack = {},
             )
         }

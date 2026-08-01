@@ -29,15 +29,11 @@ class OneDayClassRegisterViewModel @Inject constructor(
 
     fun onDescriptionChange(value: String) = _uiState.update { it.copy(description = value) }
 
-    fun onClassTypesChange(value: Set<String>) = _uiState.update { it.copy(classTypes = value) }
-
     fun onClassPurposesChange(value: Set<String>) =
         _uiState.update { it.copy(classPurposes = value) }
 
-    fun onClassCategoriesChange(value: Set<String>) =
-        _uiState.update { it.copy(classCategories = value) }
-
-    fun onClassUsersChange(value: Set<String>) = _uiState.update { it.copy(classUsers = value) }
+    fun onCategoryCodesChange(value: Set<String>) =
+        _uiState.update { it.copy(categoryCodes = value) }
 
     fun onDatesChange(value: Set<CalendarDate>) = _uiState.update { it.copy(dates = value) }
 
@@ -89,7 +85,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         // TODO: 로그인한 강사 정보에서 centerId 채우기
                         centerId = "",
                         featureCodes = state.classPurposes.toList(),
-                        categoryCodes = state.classCategories.toList(),
+                        categoryCodes = state.categoryCodes.toList(),
                         schedules = state.schedules.map { it.toParam() },
                     )
                 )
@@ -130,11 +126,7 @@ data class OneDayClassRegisterUiState(
     val description: String = "",
     // 클래스 목적(featureCodes): API code 집합
     val classPurposes: Set<String> = emptySet(),
-    // 전문 수련 유형: UI 상태로만 유지하고 API 전송에서는 제외
-    val classTypes: Set<String> = emptySet(),
-    val classCategories: Set<String> = emptySet(),
-    // 이용 대상: UI 상태로만 유지하고 API 전송에서는 제외
-    val classUsers: Set<String> = emptySet(),
+    val categoryCodes: Set<String> = emptySet(),
     val dates: Set<CalendarDate> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,

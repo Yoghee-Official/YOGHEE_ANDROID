@@ -47,6 +47,7 @@
     <string name="one_day_class_register_step1_title">수련 설명</string>
     <string name="one_day_class_register_step2_title">수련 유형 선택</string>
     <string name="one_day_class_register_step3_title">수련 정보</string>
+    <string name="one_day_class_register_step4_title">수련 장소 등록</string>
     <string name="previous_page">이전 페이지</string>
     <string name="continue_page">계속</string>
 </resources>

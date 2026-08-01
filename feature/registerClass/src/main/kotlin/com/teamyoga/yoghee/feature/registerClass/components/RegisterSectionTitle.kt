@@ -17,8 +17,8 @@ import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 @Composable
 fun RegisterSectionTitle(
     title: String,
-    subTitle: String,
     modifier: Modifier = Modifier,
+    subTitle: String? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         YogheeText(
@@ -28,13 +28,15 @@ fun RegisterSectionTitle(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 8.dp),
         )
-        YogheeText(
-            text = subTitle,
-            color = GRAY,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 4.dp, start = 8.dp),
-        )
+        if (subTitle != null) {
+            YogheeText(
+                text = subTitle,
+                color = GRAY,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 4.dp, start = 8.dp),
+            )
+        }
     }
 }
 

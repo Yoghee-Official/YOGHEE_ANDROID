@@ -52,6 +52,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
+import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
@@ -197,6 +198,10 @@ private fun OneDayClassRegisterContent(
                         onScheduleEdit = onScheduleEdit,
                         onScheduleDelete = onScheduleDelete,
                         onBack = goPrevious,
+                    )
+                    4 -> Step4Content(
+                        onBack = goPrevious,
+                        onRegisterLocationClick = { /* TODO: 요가원 등록 화면 이동 */ },
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
                 }
@@ -396,6 +401,38 @@ private fun Step3Content(
 }
 
 @Composable
+private fun Step4Content(
+    onBack: () -> Unit,
+    onRegisterLocationClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step4_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            RegisterSectionTitle(
+                title = "장소 등록하기",
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            LocationRegisterButton(
+                onClick = onRegisterLocationClick,
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
 private fun StepPlaceholderContent(
     step: Int,
     onBack: () -> Unit,
@@ -571,6 +608,19 @@ private fun Step3ContentPreview() {
                 onScheduleEdit = { _, _ -> },
                 onScheduleDelete = {},
                 onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step4Content")
+@Composable
+private fun Step4ContentPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step4Content(
+                onBack = {},
+                onRegisterLocationClick = {},
             )
         }
     }

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
-import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,27 +34,18 @@ class OneDayClassRegisterViewModel @Inject constructor(
     fun onCategoryCodesChange(value: Set<String>) =
         _uiState.update { it.copy(categoryCodes = value) }
 
-    fun onDatesChange(value: Set<CalendarDate>) = _uiState.update { it.copy(dates = value) }
-
     fun onScheduleApplied(input: ClassSchedule) {
-        val current = _uiState.value
-        val newSchedule = input.copy(dates = current.dates)
         _uiState.update {
-            it.copy(
-                schedules = it.schedules + newSchedule,
-                dates = emptySet(),
-            )
+            it.copy(schedules = it.schedules + input)
         }
     }
 
     fun onScheduleEdit(index: Int, input: ClassSchedule) {
         val current = _uiState.value
         if (index !in current.schedules.indices) return
-        val updated = input.copy(dates = current.dates)
         _uiState.update {
             it.copy(
-                schedules = it.schedules.toMutableList().apply { this[index] = updated },
-                dates = emptySet(),
+                schedules = it.schedules.toMutableList().apply { this[index] = input },
             )
         }
     }
@@ -127,7 +117,6 @@ data class OneDayClassRegisterUiState(
     // 클래스 목적(featureCodes): API code 집합
     val classPurposes: Set<String> = emptySet(),
     val categoryCodes: Set<String> = emptySet(),
-    val dates: Set<CalendarDate> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
 )

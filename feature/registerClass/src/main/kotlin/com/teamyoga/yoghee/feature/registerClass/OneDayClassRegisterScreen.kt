@@ -121,7 +121,6 @@ fun OneDayClassRegisterScreen(
         onDescriptionChange = viewModel::onDescriptionChange,
         onClassPurposesChange = viewModel::onClassPurposesChange,
         onCategoryCodesChange = viewModel::onCategoryCodesChange,
-        onDatesChange = viewModel::onDatesChange,
         onScheduleApplied = viewModel::onScheduleApplied,
         onScheduleEdit = viewModel::onScheduleEdit,
         onScheduleDelete = viewModel::onScheduleDelete,
@@ -139,7 +138,6 @@ private fun OneDayClassRegisterContent(
     onDescriptionChange: (String) -> Unit,
     onClassPurposesChange: (Set<String>) -> Unit,
     onCategoryCodesChange: (Set<String>) -> Unit,
-    onDatesChange: (Set<CalendarDate>) -> Unit,
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
     onScheduleDelete: (Int) -> Unit,
@@ -194,9 +192,7 @@ private fun OneDayClassRegisterContent(
                         onBack = goPrevious,
                     )
                     3 -> Step3Content(
-                        dates = state.dates,
                         schedules = state.schedules,
-                        onDatesChange = onDatesChange,
                         onScheduleApplied = onScheduleApplied,
                         onScheduleEdit = onScheduleEdit,
                         onScheduleDelete = onScheduleDelete,
@@ -314,9 +310,7 @@ private sealed interface SheetMode {
 
 @Composable
 private fun Step3Content(
-    dates: Set<CalendarDate>,
     schedules: List<ClassSchedule>,
-    onDatesChange: (Set<CalendarDate>) -> Unit,
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
     onScheduleDelete: (Int) -> Unit,
@@ -324,6 +318,8 @@ private fun Step3Content(
     modifier: Modifier = Modifier,
 ) {
     var sheetMode by remember { mutableStateOf<SheetMode?>(null) }
+    // 캘린더에서 선택 중인 날짜: Apply 시점에 ClassSchedule에 병합되고 초기화됨
+    var selectedDates by remember { mutableStateOf<Set<CalendarDate>>(emptySet()) }
 
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
@@ -343,13 +339,13 @@ private fun Step3Content(
                 modifier = Modifier.padding(top = 20.dp, start = 24.dp),
             )
             DateMultiSelectCalendar(
-                selected = dates,
+                selected = selectedDates,
                 modifier = Modifier.padding(top = 16.dp),
-                onSelectedChange = onDatesChange,
+                onSelectedChange = { selectedDates = it },
             )
             AddScheduleButton(
                 onClick = { sheetMode = SheetMode.Add },
-                enabled = dates.isNotEmpty(),
+                enabled = selectedDates.isNotEmpty(),
                 modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp),
             )
             Column(
@@ -362,11 +358,11 @@ private fun Step3Content(
                     ScheduleItemCard(
                         schedule = schedule,
                         onEdit = {
-                            onDatesChange(schedule.dates)
+                            selectedDates = schedule.dates
                             sheetMode = SheetMode.Edit(index = index, schedule = schedule)
                         },
                         onCopy = {
-                            onDatesChange(schedule.dates)
+                            selectedDates = schedule.dates
                             sheetMode = SheetMode.Copy(schedule = schedule)
                         },
                         onDelete = { onScheduleDelete(index) },
@@ -387,10 +383,12 @@ private fun Step3Content(
             initial = initial,
             onDismiss = { sheetMode = null },
             onApply = { input ->
+                val complete = input.copy(dates = selectedDates)
                 when (mode) {
-                    is SheetMode.Edit -> onScheduleEdit(mode.index, input)
-                    SheetMode.Add, is SheetMode.Copy -> onScheduleApplied(input)
+                    is SheetMode.Edit -> onScheduleEdit(mode.index, complete)
+                    SheetMode.Add, is SheetMode.Copy -> onScheduleApplied(complete)
                 }
+                selectedDates = emptySet()
                 sheetMode = null
             },
         )
@@ -521,7 +519,6 @@ private fun OneDayClassRegisterScreenPreview() {
             onDescriptionChange = {},
             onClassPurposesChange = {},
             onCategoryCodesChange = {},
-            onDatesChange = {},
             onScheduleApplied = {},
             onScheduleEdit = { _, _ -> },
             onScheduleDelete = {},
@@ -569,9 +566,7 @@ private fun Step3ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step3Content(
-                dates = emptySet(),
                 schedules = emptyList(),
-                onDatesChange = {},
                 onScheduleApplied = {},
                 onScheduleEdit = { _, _ -> },
                 onScheduleDelete = {},

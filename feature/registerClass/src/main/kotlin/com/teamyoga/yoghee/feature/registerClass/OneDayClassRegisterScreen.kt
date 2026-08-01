@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -52,6 +53,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
+import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
 import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
@@ -125,6 +127,7 @@ fun OneDayClassRegisterScreen(
         onScheduleApplied = viewModel::onScheduleApplied,
         onScheduleEdit = viewModel::onScheduleEdit,
         onScheduleDelete = viewModel::onScheduleDelete,
+        onLoadCenters = viewModel::loadCenters,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -142,6 +145,7 @@ private fun OneDayClassRegisterContent(
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
     onScheduleDelete: (Int) -> Unit,
+    onLoadCenters: () -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -200,6 +204,8 @@ private fun OneDayClassRegisterContent(
                         onBack = goPrevious,
                     )
                     4 -> Step4Content(
+                        centersState = state.centersState,
+                        onLoadCenters = onLoadCenters,
                         onBack = goPrevious,
                         onRegisterLocationClick = { /* TODO: 요가원 등록 화면 이동 */ },
                     )
@@ -402,10 +408,14 @@ private fun Step3Content(
 
 @Composable
 private fun Step4Content(
+    centersState: CentersState,
+    onLoadCenters: () -> Unit,
     onBack: () -> Unit,
     onRegisterLocationClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    LaunchedEffect(Unit) { onLoadCenters() }
+
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
             title = stringResource(R.string.one_day_class_register_step4_title),
@@ -427,9 +437,60 @@ private fun Step4Content(
                 onClick = onRegisterLocationClick,
                 modifier = Modifier.padding(top = 16.dp),
             )
+            CentersSection(
+                centersState = centersState,
+                modifier = Modifier.padding(top = 33.dp),
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
+
+@Composable
+private fun CentersSection(
+    centersState: CentersState,
+    modifier: Modifier = Modifier,
+) {
+    when (centersState) {
+        CentersState.Idle -> Unit
+        CentersState.Loading -> {
+            Column(modifier = modifier.fillMaxWidth()) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = LAND_BROWN)
+                }
+            }
+        }
+        is CentersState.Success -> {
+            if (centersState.centers.isEmpty()) return
+            Column(
+                modifier = modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                centersState.centers.forEach { center ->
+                    LocationListItem(
+                        date = formatCreatedAt(center.createdAt),
+                        name = center.name,
+                        location = center.address,
+                    )
+                }
+            }
+        }
+        is CentersState.Error -> Unit
+    }
+}
+
+// ISO-8601(예: 2026-08-01T16:18:37.131Z) 앞부분에서 yyyy-MM-dd만 추출.
+// 파싱 실패 시 원본 반환.
+private fun formatCreatedAt(createdAt: String): String {
+    val datePart = createdAt.substringBefore('T', missingDelimiterValue = "")
+    return if (datePart.length == 10) datePart else createdAt
 }
 
 @Composable
@@ -559,6 +620,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleApplied = {},
             onScheduleEdit = { _, _ -> },
             onScheduleDelete = {},
+            onLoadCenters = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -619,6 +681,17 @@ private fun Step4ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step4Content(
+                centersState = CentersState.Success(
+                    centers = listOf(
+                        com.teamyoga.yoghee.core.domain.model.Center(
+                            centerId = "center-1234abcd",
+                            name = "정환요가원",
+                            address = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                            createdAt = "2026-08-01T16:18:37.131Z",
+                        ),
+                    ),
+                ),
+                onLoadCenters = {},
                 onBack = {},
                 onRegisterLocationClick = {},
             )

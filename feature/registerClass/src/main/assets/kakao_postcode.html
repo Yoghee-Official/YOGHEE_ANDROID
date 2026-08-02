@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kakao Postcode</title>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        html, body { margin: 0; padding: 0; }
+        #wrap { width: 100%; height: 100%; }
+    </style>
+</head>
+<body>
+<div id="wrap"></div>
+<script>
+    // useWideViewPort 환경에서 CSS 100vh가 body에 안 먹는 케이스 대응: JS로 명시 px 지정
+    function applySize() {
+        var h = window.innerHeight || document.documentElement.clientHeight;
+        var w = window.innerWidth || document.documentElement.clientWidth;
+        document.body.style.width = w + 'px';
+        document.body.style.height = h + 'px';
+        var wrap = document.getElementById('wrap');
+        wrap.style.width = w + 'px';
+        wrap.style.height = h + 'px';
+    }
+
+    function openPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                if (window.AndroidBridge && window.AndroidBridge.onAddressSelected) {
+                    window.AndroidBridge.onAddressSelected(JSON.stringify(data));
+                }
+            },
+            onclose: function (state) {
+                if (state === 'FORCE_CLOSE' || state === 'COMPLETE_CLOSE') {
+                    if (window.AndroidBridge && window.AndroidBridge.onClose) {
+                        window.AndroidBridge.onClose();
+                    }
+                }
+            },
+            width: '100%',
+            height: '100%'
+        }).embed(document.getElementById('wrap'));
+    }
+
+    window.addEventListener('load', function () {
+        applySize();
+        openPostcode();
+    });
+    window.addEventListener('resize', applySize);
+</script>
+</body>
+</html>

@@ -23,6 +23,7 @@ import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
 import com.teamyoga.yoghee.feature.registerClass.OneDayClassRegisterScreen
+import com.teamyoga.yoghee.feature.registerClass.RegisterCenterScreen
 import com.teamyoga.yoghee.feature.registerClass.SelectClassTypeScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
 import com.teamyoga.yoghee.splash.SplashScreen
@@ -104,6 +105,13 @@ private fun AppNavGraph(
             val typeIndex = backStackEntry.arguments?.getInt(AppRoute.OneDayClassRegister.ARG_TYPE_INDEX) ?: 0
             OneDayClassRegisterScreen(
                 typeIndex = typeIndex,
+                onBack = { navController.popBackStack() },
+                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.route) },
+            )
+        }
+
+        composable(AppRoute.RegisterCenter.route) {
+            RegisterCenterScreen(
                 onBack = { navController.popBackStack() },
             )
         }

@@ -106,6 +106,7 @@ private val CLASS_USER_OPTIONS = listOf(
 fun OneDayClassRegisterScreen(
     typeIndex: Int,
     onBack: () -> Unit,
+    onGoRegisterCenter: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OneDayClassRegisterViewModel = hiltViewModel(),
 ) {
@@ -128,6 +129,7 @@ fun OneDayClassRegisterScreen(
         onScheduleEdit = viewModel::onScheduleEdit,
         onScheduleDelete = viewModel::onScheduleDelete,
         onLoadCenters = viewModel::loadCenters,
+        onGoRegisterCenter = onGoRegisterCenter,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -146,6 +148,7 @@ private fun OneDayClassRegisterContent(
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
     onScheduleDelete: (Int) -> Unit,
     onLoadCenters: () -> Unit,
+    onGoRegisterCenter: () -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -207,7 +210,7 @@ private fun OneDayClassRegisterContent(
                         centersState = state.centersState,
                         onLoadCenters = onLoadCenters,
                         onBack = goPrevious,
-                        onRegisterLocationClick = { /* TODO: 요가원 등록 화면 이동 */ },
+                        onRegisterLocationClick = onGoRegisterCenter,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
                 }
@@ -621,6 +624,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleEdit = { _, _ -> },
             onScheduleDelete = {},
             onLoadCenters = {},
+            onGoRegisterCenter = {},
             onSubmit = {},
             onErrorConsumed = {},
         )

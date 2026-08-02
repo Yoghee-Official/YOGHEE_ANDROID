@@ -10,6 +10,7 @@ sealed class AppRoute(val route: String) {
     data object Profile : AppRoute("profile")
     data object ContentFeed : AppRoute("contentFeed")
     data object RegisterClass : AppRoute("registerClass")
+    data object RegisterCenter : AppRoute("registerCenter")
 
     data object OneDayClassRegister : AppRoute("oneDayClassRegister/{typeIndex}") {
         const val ARG_TYPE_INDEX = "typeIndex"

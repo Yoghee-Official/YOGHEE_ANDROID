@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,20 +30,20 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 private const val MAX_SELECTION_COUNT = 3
 
 private val PURPOSE_OPTIONS = listOf(
-    "기본 수련 경험이 있고 흐름 있는 동작",
-    "허리·골반 주변 이완 및 안정",
-    "요가 입문자, 기본 동작과 호흡 설명 중심",
-    "몸이 뻣뻣하거나 스트레칭 위주 수련",
-    "중심 잡기, 안정성, 자세 정렬에 집중하는 수련",
-    "호흡·이완 중심, 심리적 안정",
+    "flow" to "기본 수련 경험이 있고 흐름 있는 동작",
+    "relax" to "허리·골반 주변 이완 및 안정",
+    "beginner" to "요가 입문자, 기본 동작과 호흡 설명 중심",
+    "stretch" to "몸이 뻣뻣하거나 스트레칭 위주 수련",
+    "balance" to "중심 잡기, 안정성, 자세 정렬에 집중하는 수련",
+    "breath" to "호흡·이완 중심, 심리적 안정",
 )
 
 @Composable
 fun ClassPurposeSection(
+    selected: Set<String>,
+    onSelectedChange: (Set<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selected by remember { mutableStateOf<Set<String>>(emptySet()) }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -59,18 +55,19 @@ fun ClassPurposeSection(
             modifier = Modifier.padding(bottom = 2.dp)
         )
 
-        PURPOSE_OPTIONS.forEach { option ->
-            val isSelected = option in selected
+        PURPOSE_OPTIONS.forEach { (code, label) ->
+            val isSelected = code in selected
             PurposeCheckItem(
-                text = option,
+                text = label,
                 isSelected = isSelected,
                 onClick = {
-                    selected = when {
-                        isSelected -> selected - option
+                    val next = when {
+                        isSelected -> selected - code
                         // 최대 개수 도달 시 새 선택 무시
                         selected.size >= MAX_SELECTION_COUNT -> selected
-                        else -> selected + option
+                        else -> selected + code
                     }
+                    onSelectedChange(next)
                 },
             )
         }
@@ -114,6 +111,8 @@ private fun PurposeCheckItem(
 private fun ClassPurposeSectionPreview() {
     YogheeTheme {
         ClassPurposeSection(
+            selected = setOf("flow", "relax"),
+            onSelectedChange = {},
             modifier = Modifier.padding(24.dp),
         )
     }

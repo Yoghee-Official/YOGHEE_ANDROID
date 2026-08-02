@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,7 +31,7 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 fun MultiSelectChipsSection(
     title: String,
     subTitle: String,
-    options: List<String>,
+    options: List<Pair<String, String>>,
     selected: Set<String>,
     onSelectedChange: (Set<String>) -> Unit,
     modifier: Modifier = Modifier,
@@ -53,14 +52,14 @@ fun MultiSelectChipsSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
 
         ) {
-            options.forEach { option ->
-                val isSelected = option in selected
+            options.forEach { (code, label) ->
+                val isSelected = code in selected
                 SelectableChip(
-                    text = option,
+                    text = label,
                     isSelected = isSelected,
                     onClick = {
                         onSelectedChange(
-                            if (isSelected) selected - option else selected + option,
+                            if (isSelected) selected - code else selected + code,
                         )
                     },
                 )
@@ -95,12 +94,13 @@ private fun SelectableChip(
 @Composable
 private fun MultiSelectChipsSectionPreview() {
     val options = listOf(
-        "아쉬탕가", "아헹가", "하타", "빈야사", "인요가",
-        "테라피", "명상", "쉬바난다", "비프로스플로우",
-        "인사이드플로우", "플라잉요가", "소도구요가", "파트너요가",
-        "임산부 요가", "펫요가", "키즈요가", "기타",
+        "ashtanga" to "아쉬탕가",
+        "iyengar" to "아헹가",
+        "hatha" to "하타",
+        "vinyasa" to "빈야사",
+        "yin_yoga" to "인요가",
     )
-    var selected by remember { mutableStateOf(setOf("하타", "빈야사")) }
+    var selected by remember { mutableStateOf(setOf("hatha", "vinyasa")) }
     YogheeTheme {
         MultiSelectChipsSection(
             title = "전문 수련 유형",

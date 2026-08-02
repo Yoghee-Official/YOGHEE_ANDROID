@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,6 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -41,27 +47,56 @@ import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+import com.teamyoga.yoghee.feature.registerClass.components.AddScheduleButton
+import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
+import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
+import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
+import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
+import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
 
 private const val TOTAL_STEPS = 7
 
+// 전문 수련 유형: (파트너/임산부/펫/키즈 요가는 이용 대상으로 이동)
 private val CLASS_TYPE_OPTIONS = listOf(
-    "아쉬탕가", "아헹가", "하타", "빈야사", "인요가",
-    "테라피", "명상", "쉬바난다", "비프로스플로우",
-    "인사이드플로우", "플라잉요가", "소도구요가", "파트너요가",
-    "임산부 요가", "펫요가", "키즈요가", "기타",
+    "ashtanga" to "아쉬탕가",
+    "iyengar" to "아헹가",
+    "hatha" to "하타",
+    "vinyasa" to "빈야사",
+    "yin_yoga" to "인요가",
+    "therapy" to "테라피",
+    "meditation" to "명상",
+    "sivananda" to "쉬바난다",
+    "bepros_flow" to "비프로스플로우",
+    "inside_flow" to "인사이드플로우",
+    "flying_yoga" to "플라잉 요가",
+    "props_yoga" to "소도구 요가",
+    "others" to "기타",
 )
 
 private val CLASS_CATEGORY_OPTIONS = listOf(
-    "이색 요가", "전통 요가", "파워", "릴렉스", "플로우",
-    "야외", "실내", "숙련자", "초심자",
+    "unique_yoga" to "이색 요가",
+    "traditional_yoga" to "전통 요가",
+    "power" to "파워",
+    "relax" to "릴렉스",
+    "flow" to "플로우",
+    "outdoor" to "야외",
+    "indoor" to "실내",
+    "advanced" to "숙련자",
+    "beginner" to "초심자",
 )
 
 private val CLASS_USER_OPTIONS = listOf(
-    "파트너 요가", "임산부 요가", "키즈 요가", "여성 전용",
-    "남성 전용", "남녀공용", "펫요가",
+    "partner_yoga" to "파트너 요가",
+    "prenatal_yoga" to "임산부 요가",
+    "kids_yoga" to "키즈 요가",
+    "women_only" to "여성 전용",
+    "men_only" to "남성 전용",
+    "unisex" to "남녀 공용",
+    "pet_yoga" to "펫요가",
 )
 
 @Composable
@@ -69,42 +104,128 @@ fun OneDayClassRegisterScreen(
     typeIndex: Int,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: OneDayClassRegisterViewModel = hiltViewModel(),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.submitState) {
+        if (state.submitState is SubmitState.Success) {
+            onBack()
+        }
+    }
+
+    OneDayClassRegisterContent(
+        state = state,
+        onBack = onBack,
+        onNameChange = viewModel::onNameChange,
+        onDescriptionChange = viewModel::onDescriptionChange,
+        onClassPurposesChange = viewModel::onClassPurposesChange,
+        onCategoryCodesChange = viewModel::onCategoryCodesChange,
+        onScheduleApplied = viewModel::onScheduleApplied,
+        onScheduleEdit = viewModel::onScheduleEdit,
+        onScheduleDelete = viewModel::onScheduleDelete,
+        onSubmit = viewModel::submit,
+        onErrorConsumed = viewModel::onErrorConsumed,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun OneDayClassRegisterContent(
+    state: OneDayClassRegisterUiState,
+    onBack: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onClassPurposesChange: (Set<String>) -> Unit,
+    onCategoryCodesChange: (Set<String>) -> Unit,
+    onScheduleApplied: (ClassSchedule) -> Unit,
+    onScheduleEdit: (Int, ClassSchedule) -> Unit,
+    onScheduleDelete: (Int) -> Unit,
+    onSubmit: () -> Unit,
+    onErrorConsumed: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var currentStep by remember { mutableIntStateOf(1) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val isLoading = state.submitState is SubmitState.Loading
+
+    LaunchedEffect(state.submitState) {
+        val current = state.submitState
+        if (current is SubmitState.Error) {
+            snackbarHostState.showSnackbar(current.message)
+            onErrorConsumed()
+        }
+    }
 
     val goPrevious: () -> Unit = {
         if (currentStep == 1) onBack() else currentStep--
     }
     val goNext: () -> Unit = {
-        if (currentStep < TOTAL_STEPS) currentStep++
+        if (!isLoading) {
+            if (currentStep < TOTAL_STEPS) currentStep++ else onSubmit()
+        }
     }
 
-    BackHandler(onBack = goPrevious)    // back key 버튼 이벤트를 가로채는 API
+    BackHandler(onBack = goPrevious)
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .background(SAND_BEIGE),
-    ) {
-        Box(modifier = Modifier.weight(1f)) {
-            when (currentStep) {
-                1 -> Step1Content(onBack = goPrevious)
-                2 -> Step2Content(onBack = goPrevious)
-                else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .background(SAND_BEIGE),
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                when (currentStep) {
+                    1 -> Step1Content(
+                        name = state.name,
+                        description = state.description,
+                        classPurposes = state.classPurposes,
+                        onNameChange = onNameChange,
+                        onDescriptionChange = onDescriptionChange,
+                        onClassPurposesChange = onClassPurposesChange,
+                        onBack = goPrevious,
+                    )
+                    2 -> Step2Content(
+                        categoryCodes = state.categoryCodes,
+                        onCategoryCodesChange = onCategoryCodesChange,
+                        onBack = goPrevious,
+                    )
+                    3 -> Step3Content(
+                        schedules = state.schedules,
+                        onScheduleApplied = onScheduleApplied,
+                        onScheduleEdit = onScheduleEdit,
+                        onScheduleDelete = onScheduleDelete,
+                        onBack = goPrevious,
+                    )
+                    else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
+                }
             }
+            RegisterBottomBar(
+                currentStep = currentStep,
+                totalSteps = TOTAL_STEPS,
+                isLoading = isLoading,
+                onPrevious = goPrevious,
+                onNext = goNext,
+            )
         }
-        RegisterBottomBar(
-            currentStep = currentStep,
-            totalSteps = TOTAL_STEPS,
-            onPrevious = goPrevious,
-            onNext = goNext,
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding(),
         )
     }
 }
 
 @Composable
 private fun Step1Content(
+    name: String,
+    description: String,
+    classPurposes: Set<String>,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onClassPurposesChange: (Set<String>) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -121,21 +242,27 @@ private fun Step1Content(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            ClassIntroductionSection()
-            ClassPurposeSection()
+            ClassIntroductionSection(
+                title = name,
+                content = description,
+                onTitleChange = onNameChange,
+                onContentChange = onDescriptionChange,
+            )
+            ClassPurposeSection(
+                selected = classPurposes,
+                onSelectedChange = onClassPurposesChange,
+            )
         }
     }
 }
 
 @Composable
 private fun Step2Content(
+    categoryCodes: Set<String>,
+    onCategoryCodesChange: (Set<String>) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedClassTypes by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var selectedClassCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var selectedClassUsers by remember { mutableStateOf<Set<String>>(emptySet()) }
-
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
             title = stringResource(R.string.one_day_class_register_step2_title),
@@ -153,25 +280,118 @@ private fun Step2Content(
                 title = "전문 수련 유형",
                 subTitle = "상세페이지에 노출되는 수련 유형이예요.",
                 options = CLASS_TYPE_OPTIONS,
-                selected = selectedClassTypes,
-                onSelectedChange = { selectedClassTypes = it },
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             MultiSelectChipsSection(
                 title = "수련 카테고리",
                 subTitle = "수련 카테고리에 목록별로 노출돼요!",
                 options = CLASS_CATEGORY_OPTIONS,
-                selected = selectedClassCategories,
-                onSelectedChange = { selectedClassCategories = it },
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             MultiSelectChipsSection(
                 title = "이용 대상",
                 subTitle = "참여 가능한 대상과 운영 조건을 선택해주세요.",
                 options = CLASS_USER_OPTIONS,
-                selected = selectedClassUsers,
-                onSelectedChange = { selectedClassUsers = it },
+                selected = categoryCodes,
+                onSelectedChange = onCategoryCodesChange,
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+private sealed interface SheetMode {
+    data object Add : SheetMode
+    data class Edit(val index: Int, val schedule: ClassSchedule) : SheetMode
+    data class Copy(val schedule: ClassSchedule) : SheetMode
+}
+
+@Composable
+private fun Step3Content(
+    schedules: List<ClassSchedule>,
+    onScheduleApplied: (ClassSchedule) -> Unit,
+    onScheduleEdit: (Int, ClassSchedule) -> Unit,
+    onScheduleDelete: (Int) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var sheetMode by remember { mutableStateOf<SheetMode?>(null) }
+    // 캘린더에서 선택 중인 날짜: Apply 시점에 ClassSchedule에 병합되고 초기화됨
+    var selectedDates by remember { mutableStateOf<Set<CalendarDate>>(emptySet()) }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step3_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+        ) {
+            RegisterSectionTitle(
+                title = "추가하고 싶은 날짜를 선택해주세요.",
+                subTitle = "수련 오픈하는 날짜만 선택 해주세요. 요기는 휴강을 설정하지 않아도 괜찮아요.",
+                modifier = Modifier.padding(top = 20.dp, start = 24.dp),
+            )
+            DateMultiSelectCalendar(
+                selected = selectedDates,
+                modifier = Modifier.padding(top = 16.dp),
+                onSelectedChange = { selectedDates = it },
+            )
+            AddScheduleButton(
+                onClick = { sheetMode = SheetMode.Add },
+                enabled = selectedDates.isNotEmpty(),
+                modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 20.dp),
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                schedules.forEachIndexed { index, schedule ->
+                    ScheduleItemCard(
+                        schedule = schedule,
+                        onEdit = {
+                            selectedDates = schedule.dates
+                            sheetMode = SheetMode.Edit(index = index, schedule = schedule)
+                        },
+                        onCopy = {
+                            selectedDates = schedule.dates
+                            sheetMode = SheetMode.Copy(schedule = schedule)
+                        },
+                        onDelete = { onScheduleDelete(index) },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+
+    sheetMode?.let { mode ->
+        val initial = when (mode) {
+            SheetMode.Add -> null
+            is SheetMode.Edit -> mode.schedule
+            is SheetMode.Copy -> mode.schedule
+        }
+        ScheduleBottomSheet(
+            initial = initial,
+            onDismiss = { sheetMode = null },
+            onApply = { input ->
+                val complete = input.copy(dates = selectedDates)
+                when (mode) {
+                    is SheetMode.Edit -> onScheduleEdit(mode.index, complete)
+                    SheetMode.Add, is SheetMode.Copy -> onScheduleApplied(complete)
+                }
+                selectedDates = emptySet()
+                sheetMode = null
+            },
+        )
     }
 }
 
@@ -206,10 +426,17 @@ private fun StepPlaceholderContent(
 private fun RegisterBottomBar(
     currentStep: Int,
     totalSteps: Int,
+    isLoading: Boolean,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isLastStep = currentStep == totalSteps
+    val nextButtonLabel = if (isLastStep) {
+        "완료"
+    } else {
+        stringResource(R.string.continue_page)
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -236,15 +463,18 @@ private fun RegisterBottomBar(
                 modifier = Modifier
                     .height(48.dp)
                     .weight(1f)
+                    .alpha(if (isLoading) 0.5f else 1f)
                     .paint(
                         painter = painterResource(R.drawable.btn_continue_class_register),
                         contentScale = ContentScale.FillBounds,
                     )
-                    .noRippleClickable(onNext),
+                    .noRippleClickable {
+                        if (!isLoading) onNext()
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 YogheeText(
-                    text = stringResource(R.string.continue_page),
+                    text = nextButtonLabel,
                     color = BLACK,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
@@ -282,7 +512,19 @@ private fun ProgressBar(
 @Composable
 private fun OneDayClassRegisterScreenPreview() {
     YogheeTheme {
-        OneDayClassRegisterScreen(typeIndex = 0, onBack = {})
+        OneDayClassRegisterContent(
+            state = OneDayClassRegisterUiState(),
+            onBack = {},
+            onNameChange = {},
+            onDescriptionChange = {},
+            onClassPurposesChange = {},
+            onCategoryCodesChange = {},
+            onScheduleApplied = {},
+            onScheduleEdit = { _, _ -> },
+            onScheduleDelete = {},
+            onSubmit = {},
+            onErrorConsumed = {},
+        )
     }
 }
 
@@ -291,7 +533,15 @@ private fun OneDayClassRegisterScreenPreview() {
 private fun Step1ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            Step1Content(onBack = {})
+            Step1Content(
+                name = "",
+                description = "",
+                classPurposes = emptySet(),
+                onNameChange = {},
+                onDescriptionChange = {},
+                onClassPurposesChange = {},
+                onBack = {},
+            )
         }
     }
 }
@@ -301,17 +551,27 @@ private fun Step1ContentPreview() {
 private fun Step2ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            Step2Content(onBack = {})
+            Step2Content(
+                categoryCodes = emptySet(),
+                onCategoryCodesChange = {},
+                onBack = {},
+            )
         }
     }
 }
 
-@Preview(showBackground = true, name = "StepPlaceholderContent")
+@Preview(showBackground = true, name = "Step3Content")
 @Composable
-private fun StepPlaceholderContentPreview() {
+private fun Step3ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            StepPlaceholderContent(step = 3, onBack = {})
+            Step3Content(
+                schedules = emptyList(),
+                onScheduleApplied = {},
+                onScheduleEdit = { _, _ -> },
+                onScheduleDelete = {},
+                onBack = {},
+            )
         }
     }
 }

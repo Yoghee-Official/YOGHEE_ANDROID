@@ -37,6 +37,8 @@ import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldButton
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldEditable
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldReadOnly
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldStatic
+import com.teamyoga.yoghee.feature.registerClass.components.CONTENT_MAX_LENGTH
+import com.teamyoga.yoghee.feature.registerClass.components.HintTextField
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressResult
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
@@ -46,7 +48,7 @@ fun RegisterCenterScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var address by remember { mutableStateOf(CenterAddressForm()) }
+    var address by remember { mutableStateOf(CenterForm()) }
     var showAddressSheet by remember { mutableStateOf(false) }
 
     RegisterCenterContent(
@@ -70,8 +72,8 @@ fun RegisterCenterScreen(
 
 @Composable
 private fun RegisterCenterContent(
-    address: CenterAddressForm,
-    onAddressChange: (CenterAddressForm) -> Unit,
+    address: CenterForm,
+    onAddressChange: (CenterForm) -> Unit,
     onSearchAddressClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onBack: () -> Unit,
@@ -123,6 +125,28 @@ private fun RegisterCenterContent(
                 label = "우편번호",
                 value = address.zonecode
             )
+            RegisterSectionTitle(
+                title = "수련 장소명",
+                subTitle = "요기 지도에 주소록을 저장할 수 있어요! 다음 검색부터 수련 장소명만 입력해보세요.",
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            AddressFieldEditable(
+                label = "수련 장소명",
+                value = address.name,
+                onValueChange = { onAddressChange(address.copy(name = it)) },
+            )
+            RegisterSectionTitle(
+                title = "수련원 상세 위치 설명",
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            HintTextField(
+                value = address.description,
+                onValueChange = { onAddressChange(address.copy(description = it)) },
+                hint1 = "내용",
+                hint2 = "상세 위치를 작성해주세요.",
+                maxLength = CONTENT_MAX_LENGTH,
+                modifier = Modifier.padding(top = 20.dp)
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
         RegisterCenterBottomBar(onRegisterClick = onRegisterClick)
@@ -161,7 +185,9 @@ private fun RegisterCenterBottomBar(
     }
 }
 
-data class CenterAddressForm(
+data class CenterForm(
+    val name: String = "",
+    val description: String = "",
     val depth1: String = "",
     val depth2: String = "",
     val depth3: String = "",
@@ -171,7 +197,7 @@ data class CenterAddressForm(
     val addressDetail: String = "",
 )
 
-private fun CenterAddressForm.applyKakaoResult(result: KakaoAddressResult): CenterAddressForm =
+private fun CenterForm.applyKakaoResult(result: KakaoAddressResult): CenterForm =
     copy(
         depth1 = result.depth1,
         depth2 = result.depth2,
@@ -186,7 +212,9 @@ private fun CenterAddressForm.applyKakaoResult(result: KakaoAddressResult): Cent
 private fun RegisterCenterScreenFilledPreview() {
     YogheeTheme {
         RegisterCenterContent(
-            address = CenterAddressForm(
+            address = CenterForm(
+                name = "힐링 요가 센터",
+                description = "도심 속에서 마음과 몸의 힐링을 찾는 요가 센터입니다.",
                 depth1 = "서울",
                 depth2 = "강남구",
                 depth3 = "역삼동",

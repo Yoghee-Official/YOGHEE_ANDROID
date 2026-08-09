@@ -53,7 +53,8 @@ class ClassRepositoryImpl @Inject constructor(
 
     override suspend fun updateCenter(centerId: String, params: CreateCenterParams): String {
         val request = params.toRequest()
-        return classService.updateCenter(centerId, request).data?.centerId.orEmpty()
+        classService.updateCenter(centerId, request)
+        return centerId
     }
 
     private fun CreateCenterParams.toRequest(): CreateCenterRequest {

@@ -47,6 +47,14 @@ data class CreateCenterData(
     val centerId: String,
 )
 
+// PUT /api/center/{centerId} 응답. data 필드가 문자열 메시지로 옴.
+@Serializable
+data class UpdateCenterResponse(
+    val code: Int,
+    val status: String,
+    val data: String? = null,
+)
+
 // 요가원 상세 조회 응답. depth1/2/3 등 모든 폼 필드를 서버가 내려준다고 가정.
 @Serializable
 data class CenterDetailDto(

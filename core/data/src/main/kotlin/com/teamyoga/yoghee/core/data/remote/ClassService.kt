@@ -6,6 +6,7 @@ import com.teamyoga.yoghee.core.data.remote.model.CreateCenterResponse
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassResponse
 import com.teamyoga.yoghee.core.data.remote.model.GetCentersResponse
+import com.teamyoga.yoghee.core.data.remote.model.UpdateCenterResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -35,5 +36,5 @@ interface ClassService {
     suspend fun updateCenter(
         @Path("centerId") centerId: String,
         @Body request: CreateCenterRequest,
-    ): CreateCenterResponse
+    ): UpdateCenterResponse
 }

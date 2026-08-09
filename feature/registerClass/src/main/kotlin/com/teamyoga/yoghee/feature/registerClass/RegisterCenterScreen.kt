@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -82,8 +83,8 @@ private fun RegisterCenterContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-            .background(SAND_BEIGE),
+            .background(SAND_BEIGE)
+            .imePadding(),
     ) {
         YogheeHeader(
             title = "신규 장소 등록",
@@ -143,7 +144,7 @@ private fun RegisterCenterContent(
                 value = address.description,
                 onValueChange = { onAddressChange(address.copy(description = it)) },
                 hint1 = "내용",
-                hint2 = "상세 위치를 작성해주세요.",
+                hint2 = "",
                 maxLength = CONTENT_MAX_LENGTH,
                 modifier = Modifier.padding(top = 20.dp)
             )
@@ -162,6 +163,7 @@ private fun RegisterCenterBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .background(SAND_BEIGE)
+            .navigationBarsPadding()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
     ) {
         Box(

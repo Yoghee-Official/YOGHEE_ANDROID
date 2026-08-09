@@ -72,12 +72,12 @@ fun AddressFieldEditable(
     onValueChange: (String) -> Unit,
     required: Boolean = false,
 ) {
-    FieldBox(label = label, required = required) {
+    FieldBox(label = label, required = required, modifier = Modifier.height(51.dp)) {
         Box(modifier = Modifier.fillMaxWidth()) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth().height(51.dp),
+                modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(
                     color = BLACK,
                     fontSize = 14.sp,
@@ -91,11 +91,12 @@ fun AddressFieldEditable(
 @Composable
 private fun FieldBox(
     label: String,
+    modifier: Modifier = Modifier,
     required: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val baseModifier = Modifier
+    val baseModifier = modifier
         .fillMaxWidth()
         .clip(RoundedCornerShape(8.dp))
         .background(WHITE)

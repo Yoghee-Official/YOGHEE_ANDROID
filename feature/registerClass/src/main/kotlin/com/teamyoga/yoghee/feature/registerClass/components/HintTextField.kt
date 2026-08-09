@@ -58,13 +58,15 @@ fun HintTextField(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
-                    YogheeText(
-                        text = hint2,
-                        color = GRAY,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(top = 12.dp)
-                    )
+                    if (hint2.isNotEmpty()) {
+                        YogheeText(
+                            text = hint2,
+                            color = GRAY,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
+                    }
                 }
             }
             BasicTextField(

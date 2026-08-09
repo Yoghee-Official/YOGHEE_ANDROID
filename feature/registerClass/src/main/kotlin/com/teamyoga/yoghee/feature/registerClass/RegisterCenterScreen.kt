@@ -103,49 +103,54 @@ private fun RegisterCenterContent(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             RegisterSectionTitle(
                 title = "수련 위치",
                 subTitle = "요기니들이 찾아올 수 있도록 수련 위치를 등록 해주세요.",
                 modifier = Modifier.padding(top = 20.dp),
             )
-            AddressFieldStatic(label = "국가/지역", value = "대한민국")
+            AddressFieldStatic(label = "국가/지역", value = "대한민국", modifier = Modifier.padding(top = 12.dp))
             AddressFieldButton(
                 label = "광역시/도",
                 value = address.depth1,
                 onClick = onSearchAddressClick,
+                modifier = Modifier.padding(top = 12.dp)
             )
             AddressFieldReadOnly(
                 label = "시/구",
-                value = address.depth2
+                value = address.depth2,
+                modifier = Modifier.padding(top = 12.dp)
             )
             AddressFieldReadOnly(
                 label = "도로명 주소",
-                value = address.roadAddress
+                value = address.roadAddress,
+                modifier = Modifier.padding(top = 12.dp)
             )
             AddressFieldEditable(
                 label = "상세 주소",
                 value = address.addressDetail,
-                onValueChange = { onAddressChange(address.copy(addressDetail = it)) }
+                onValueChange = { onAddressChange(address.copy(addressDetail = it)) },
+                modifier = Modifier.padding(top = 12.dp)
             )
             AddressFieldReadOnly(
                 label = "우편번호",
-                value = address.zonecode
+                value = address.zonecode,
+                modifier = Modifier.padding(top = 12.dp)
             )
             RegisterSectionTitle(
                 title = "수련 장소명",
                 subTitle = "요기 지도에 주소록을 저장할 수 있어요! 다음 검색부터 수련 장소명만 입력해보세요.",
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 28.dp),
             )
             AddressFieldEditable(
                 label = "수련 장소명",
                 value = address.name,
-                onValueChange = { onAddressChange(address.copy(name = it)) },
+                onValueChange = { onAddressChange(address.copy(name = it))},
+                modifier = Modifier.padding(top = 12.dp)
             )
             RegisterSectionTitle(
                 title = "수련원 상세 위치 설명",
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 28.dp),
             )
             HintTextField(
                 value = address.description,
@@ -153,7 +158,7 @@ private fun RegisterCenterContent(
                 hint1 = "내용",
                 hint2 = "",
                 maxLength = CONTENT_MAX_LENGTH,
-                modifier = Modifier.padding(top = 20.dp)
+                modifier = Modifier.padding(top = 8.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
         }

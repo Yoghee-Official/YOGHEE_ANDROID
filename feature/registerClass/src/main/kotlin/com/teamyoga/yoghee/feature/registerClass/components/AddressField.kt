@@ -31,9 +31,10 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 @Composable
 fun AddressFieldStatic(
     label: String,
-    value: String
+    value: String,
+    modifier: Modifier = Modifier
 ) {
-    FieldBox(label = label, required = true) {
+    FieldBox(label = label, required = true, modifier = modifier) {
         ValueText(
             text = value
         )
@@ -44,9 +45,10 @@ fun AddressFieldStatic(
 fun AddressFieldButton(
     label: String,
     value: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    FieldBox(label = label, required = true, onClick = onClick) {
+    FieldBox(label = label, required = true, onClick = onClick, modifier = modifier) {
         ValueText(
             text = value
         )
@@ -56,9 +58,10 @@ fun AddressFieldButton(
 @Composable
 fun AddressFieldReadOnly(
     label: String,
-    value: String
+    value: String,
+    modifier: Modifier = Modifier
 ) {
-    FieldBox(label = label, required = true) {
+    FieldBox(label = label, required = true, modifier = modifier) {
         ValueText(
             text = value,
         )
@@ -70,9 +73,10 @@ fun AddressFieldEditable(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     required: Boolean = false,
 ) {
-    FieldBox(label = label, required = required, modifier = Modifier.height(51.dp)) {
+    FieldBox(label = label, required = required, modifier = modifier.height(51.dp)) {
         Box(modifier = Modifier.fillMaxWidth()) {
             BasicTextField(
                 value = value,

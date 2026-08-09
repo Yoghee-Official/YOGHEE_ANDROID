@@ -14,14 +14,20 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -30,10 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
@@ -54,24 +63,57 @@ import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 fun RegisterCenterScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: RegisterCenterViewModel = hiltViewModel(),
 ) {
-    var address by remember { mutableStateOf(CenterForm()) }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddressSheet by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val isLoading = state.submitState is SubmitState.Loading
 
-    RegisterCenterContent(
-        address = address,
-        onAddressChange = { address = it },
-        onSearchAddressClick = { showAddressSheet = true },
-        onRegisterClick = { /* TODO: 등록 API 연동 */ onBack() },
-        onBack = onBack,
-        modifier = modifier,
-    )
+    LaunchedEffect(state.submitState) {
+        when (val submit = state.submitState) {
+            SubmitState.Success -> onBack()
+            is SubmitState.Error -> {
+                snackbarHostState.showSnackbar(submit.message)
+                viewModel.onErrorConsumed()
+            }
+            else -> Unit
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        RegisterCenterContent(
+            address = state.form,
+            onAddressChange = viewModel::onFormChange,
+            onSearchAddressClick = { showAddressSheet = true },
+            onRegisterClick = viewModel::submit,
+            onBack = onBack,
+            isLoading = isLoading,
+        )
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding(),
+        )
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .pointerInput(Unit) { detectTapGestures { } },
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = LAND_BROWN)
+            }
+        }
+    }
 
     if (showAddressSheet) {
         KakaoAddressBottomSheet(
             onDismiss = { showAddressSheet = false },
             onAddressSelected = { result ->
-                address = address.applyKakaoResult(result)
+                viewModel.onFormChange(state.form.applyKakaoResult(result))
             },
         )
     }
@@ -84,6 +126,7 @@ private fun RegisterCenterContent(
     onSearchAddressClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onBack: () -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -183,13 +226,17 @@ private fun RegisterCenterContent(
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
-        RegisterCenterBottomBar(onRegisterClick = onRegisterClick)
+        RegisterCenterBottomBar(
+            onRegisterClick = onRegisterClick,
+            isLoading = isLoading,
+        )
     }
 }
 
 @Composable
 private fun RegisterCenterBottomBar(
     onRegisterClick: () -> Unit,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -203,11 +250,12 @@ private fun RegisterCenterBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
+                .alpha(if (isLoading) 0.5f else 1f)
                 .paint(
                     painter = painterResource(R.drawable.btn_continue_class_register),
                     contentScale = ContentScale.FillBounds,
                 )
-                .noRippleClickable(onRegisterClick),
+                .noRippleClickable { if (!isLoading) onRegisterClick() },
             contentAlignment = Alignment.Center,
         ) {
             YogheeText(
@@ -263,6 +311,7 @@ private fun RegisterCenterScreenFilledPreview() {
             onSearchAddressClick = {},
             onRegisterClick = {},
             onBack = {},
+            isLoading = false,
         )
     }
 }

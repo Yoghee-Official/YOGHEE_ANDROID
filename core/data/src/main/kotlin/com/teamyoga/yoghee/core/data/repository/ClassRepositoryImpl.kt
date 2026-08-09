@@ -1,11 +1,13 @@
 package com.teamyoga.yoghee.core.data.repository
 
 import com.teamyoga.yoghee.core.data.remote.ClassService
+import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
 import com.teamyoga.yoghee.core.data.remote.model.MyCenterDto
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
+import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import javax.inject.Inject
@@ -35,6 +37,31 @@ class ClassRepositoryImpl @Inject constructor(
 
     override suspend fun getCenters(): List<Center> =
         classService.getCenters().data.map { it.toDomain() }
+
+    override suspend fun createCenter(params: CreateCenterParams): String {
+        val fullAddress = buildString {
+            append(params.roadAddress)
+            if (params.addressDetail.isNotBlank()) {
+                if (isNotEmpty()) append(' ')
+                append(params.addressDetail)
+            }
+        }
+        val request = CreateCenterRequest(
+            name = params.name,
+            description = params.description,
+            depth1 = params.depth1,
+            depth2 = params.depth2,
+            depth3 = params.depth3,
+            roadAddress = params.roadAddress,
+            jibunAddress = params.jibunAddress,
+            zonecode = params.zonecode,
+            addressDetail = params.addressDetail,
+            fullAddress = fullAddress,
+            amenityCodes = params.amenityCodes,
+            categoryCodes = params.categoryCodes,
+        )
+        return classService.createCenter(request).data?.centerId.orEmpty()
+    }
 
     private fun ClassScheduleParam.toDto(): CreateScheduleDto = CreateScheduleDto(
         dates = dates,

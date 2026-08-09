@@ -17,3 +17,32 @@ data class GetCentersResponse(
     val status: String,
     val data: List<MyCenterDto> = emptyList(),
 )
+
+// 요가원 등록 요청. centerId / thumbnail / masterId는 서버에서 처리하므로 미포함.
+@Serializable
+data class CreateCenterRequest(
+    val name: String,
+    val description: String,
+    val depth1: String,
+    val depth2: String,
+    val depth3: String,
+    val roadAddress: String,
+    val jibunAddress: String,
+    val zonecode: String,
+    val addressDetail: String,
+    val fullAddress: String,
+    val amenityCodes: List<String>,
+    val categoryCodes: List<String>,
+)
+
+@Serializable
+data class CreateCenterResponse(
+    val code: Int,
+    val status: String,
+    val data: CreateCenterData? = null,
+)
+
+@Serializable
+data class CreateCenterData(
+    val centerId: String,
+)

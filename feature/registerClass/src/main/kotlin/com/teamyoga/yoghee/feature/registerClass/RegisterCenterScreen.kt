@@ -37,6 +37,8 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+import com.teamyoga.yoghee.feature.registerClass.components.AMENITY_FACILITY_OPTIONS
+import com.teamyoga.yoghee.feature.registerClass.components.AMENITY_ITEM_OPTIONS
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldButton
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldEditable
 import com.teamyoga.yoghee.feature.registerClass.components.AddressFieldReadOnly
@@ -45,6 +47,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.CONTENT_MAX_LENGTH
 import com.teamyoga.yoghee.feature.registerClass.components.HintTextField
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressResult
+import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 
 @Composable
@@ -160,6 +163,24 @@ private fun RegisterCenterContent(
                 maxLength = CONTENT_MAX_LENGTH,
                 modifier = Modifier.padding(top = 8.dp)
             )
+            MultiSelectChipsSection(
+                title = "수련원에서 제공하는 물품",
+                subTitle = "복수 선택 가능",
+                options = AMENITY_ITEM_OPTIONS,
+                selected = address.amenityCodes,
+                onSelectedChange = { onAddressChange(address.copy(amenityCodes = it)) },
+                modifier = Modifier.padding(top = 14.dp),
+                titleModifier = Modifier.padding(bottom = 12.dp),
+            )
+            MultiSelectChipsSection(
+                title = "수련원 편의시설",
+                subTitle = "복수 선택 가능",
+                options = AMENITY_FACILITY_OPTIONS,
+                selected = address.amenityCodes,
+                onSelectedChange = { onAddressChange(address.copy(amenityCodes = it)) },
+                modifier = Modifier.padding(top = 14.dp),
+                titleModifier = Modifier.padding(bottom = 12.dp),
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
         RegisterCenterBottomBar(onRegisterClick = onRegisterClick)
@@ -209,6 +230,7 @@ data class CenterForm(
     val jibunAddress: String = "",
     val zonecode: String = "",
     val addressDetail: String = "",
+    val amenityCodes: Set<String> = emptySet(),
 )
 
 private fun CenterForm.applyKakaoResult(result: KakaoAddressResult): CenterForm =
@@ -235,6 +257,7 @@ private fun RegisterCenterScreenFilledPreview() {
                 roadAddress = "서울 강남구 테헤란로 212",
                 zonecode = "06220",
                 addressDetail = "멀티캠퍼스 3층",
+                amenityCodes = setOf("mat", "wifi", "shower_room"),
             ),
             onAddressChange = {},
             onSearchAddressClick = {},

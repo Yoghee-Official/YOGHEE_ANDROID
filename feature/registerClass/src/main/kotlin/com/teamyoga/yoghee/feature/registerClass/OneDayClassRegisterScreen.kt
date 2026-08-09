@@ -296,6 +296,7 @@ private fun Step2Content(
                 options = CLASS_TYPE_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             MultiSelectChipsSection(
                 title = "수련 카테고리",
@@ -303,6 +304,7 @@ private fun Step2Content(
                 options = CLASS_CATEGORY_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             MultiSelectChipsSection(
                 title = "이용 대상",
@@ -310,6 +312,7 @@ private fun Step2Content(
                 options = CLASS_USER_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
         }

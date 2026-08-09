@@ -24,10 +24,16 @@ class RegisterCenterViewModel @Inject constructor(
 
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
-        _uiState.update { it.copy(submitState = SubmitState.Loading) }
+        val form = _uiState.value.form
+        if (!form.isValid()) {
+            _uiState.update { it.copy(showRequiredErrors = true) }
+            return
+        }
+        _uiState.update {
+            it.copy(showRequiredErrors = false, submitState = SubmitState.Loading)
+        }
 
         viewModelScope.launch {
-            val form = _uiState.value.form
             runCatching {
                 classRepository.createCenter(
                     CreateCenterParams(
@@ -68,4 +74,12 @@ class RegisterCenterViewModel @Inject constructor(
 data class RegisterCenterUiState(
     val form: CenterForm = CenterForm(),
     val submitState: SubmitState = SubmitState.Idle,
+    val showRequiredErrors: Boolean = false,
 )
+
+private fun CenterForm.isValid(): Boolean =
+    depth1.isNotBlank() &&
+        depth2.isNotBlank() &&
+        roadAddress.isNotBlank() &&
+        zonecode.isNotBlank() &&
+        name.isNotBlank()

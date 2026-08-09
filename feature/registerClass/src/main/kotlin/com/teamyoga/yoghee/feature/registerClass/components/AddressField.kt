@@ -45,10 +45,18 @@ fun AddressFieldStatic(
 fun AddressFieldButton(
     label: String,
     value: String,
+    required: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
 ) {
-    FieldBox(label = label, required = true, onClick = onClick, modifier = modifier) {
+    FieldBox(
+        label = label,
+        required = required,
+        onClick = onClick,
+        modifier = modifier,
+        isError = isError,
+    ) {
         ValueText(
             text = value
         )
@@ -59,9 +67,11 @@ fun AddressFieldButton(
 fun AddressFieldReadOnly(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    required: Boolean,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
 ) {
-    FieldBox(label = label, required = true, modifier = modifier) {
+    FieldBox(label = label, required = required, modifier = modifier, isError = isError) {
         ValueText(
             text = value,
         )
@@ -74,9 +84,15 @@ fun AddressFieldEditable(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    required: Boolean = false,
+    required: Boolean,
+    isError: Boolean = false,
 ) {
-    FieldBox(label = label, required = required, modifier = modifier.height(51.dp)) {
+    FieldBox(
+        label = label,
+        required = required,
+        modifier = modifier.height(51.dp),
+        isError = isError,
+    ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             BasicTextField(
                 value = value,
@@ -96,15 +112,17 @@ fun AddressFieldEditable(
 private fun FieldBox(
     label: String,
     modifier: Modifier = Modifier,
-    required: Boolean = false,
+    required: Boolean,
     onClick: (() -> Unit)? = null,
+    isError: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val borderColor = if (isError) MIND_ORANGE else LIGHT_GRAY
     val baseModifier = modifier
         .fillMaxWidth()
         .clip(RoundedCornerShape(8.dp))
         .background(WHITE)
-        .border(width = 1.dp, color = LIGHT_GRAY, shape = RoundedCornerShape(8.dp))
+        .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
     val clickableModifier = if (onClick != null) baseModifier.noRippleClickable(onClick) else baseModifier
     Column(
         modifier = clickableModifier.padding(horizontal = 16.dp, vertical = 8.dp),

@@ -43,6 +43,7 @@ import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
+import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
@@ -89,6 +90,7 @@ fun RegisterCenterScreen(
             onRegisterClick = viewModel::submit,
             onBack = onBack,
             isLoading = isLoading,
+            showRequiredErrors = state.showRequiredErrors,
         )
         SnackbarHost(
             hostState = snackbarHostState,
@@ -127,6 +129,7 @@ private fun RegisterCenterContent(
     onRegisterClick: () -> Unit,
     onBack: () -> Unit,
     isLoading: Boolean,
+    showRequiredErrors: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -160,28 +163,37 @@ private fun RegisterCenterContent(
                 label = "광역시/도",
                 value = address.depth1,
                 onClick = onSearchAddressClick,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = true,
+                isError = showRequiredErrors && address.depth1.isBlank(),
             )
             AddressFieldReadOnly(
                 label = "시/구",
                 value = address.depth2,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = true,
+                isError = showRequiredErrors && address.depth2.isBlank(),
             )
             AddressFieldReadOnly(
                 label = "도로명 주소",
                 value = address.roadAddress,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = true,
+                isError = showRequiredErrors && address.roadAddress.isBlank(),
             )
             AddressFieldEditable(
                 label = "상세 주소",
                 value = address.addressDetail,
                 onValueChange = { onAddressChange(address.copy(addressDetail = it)) },
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = false
             )
             AddressFieldReadOnly(
                 label = "우편번호",
                 value = address.zonecode,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = true,
+                isError = showRequiredErrors && address.zonecode.isBlank(),
             )
             RegisterSectionTitle(
                 title = "수련 장소명",
@@ -192,8 +204,17 @@ private fun RegisterCenterContent(
                 label = "수련 장소명",
                 value = address.name,
                 onValueChange = { onAddressChange(address.copy(name = it))},
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 12.dp),
+                required = true
             )
+            if (showRequiredErrors && address.name.isBlank()) {
+                YogheeText(
+                    text = "* 필수 입력란을 채워주세요.",
+                    color = MIND_ORANGE,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(top = 8.dp, start = 16.dp),
+                )
+            }
             RegisterSectionTitle(
                 title = "수련원 상세 위치 설명",
                 modifier = Modifier.padding(top = 28.dp),
@@ -312,6 +333,7 @@ private fun RegisterCenterScreenFilledPreview() {
             onRegisterClick = {},
             onBack = {},
             isLoading = false,
+            showRequiredErrors = false,
         )
     }
 }

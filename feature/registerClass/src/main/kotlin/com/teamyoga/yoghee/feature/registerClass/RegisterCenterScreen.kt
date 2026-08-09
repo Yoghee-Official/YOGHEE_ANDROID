@@ -2,7 +2,6 @@ package com.teamyoga.yoghee.feature.registerClass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -266,10 +266,11 @@ private fun RegisterCenterBottomBar(
             .background(SAND_BEIGE)
             .navigationBarsPadding()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
+        contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(208.dp)
                 .height(48.dp)
                 .alpha(if (isLoading) 0.5f else 1f)
                 .paint(

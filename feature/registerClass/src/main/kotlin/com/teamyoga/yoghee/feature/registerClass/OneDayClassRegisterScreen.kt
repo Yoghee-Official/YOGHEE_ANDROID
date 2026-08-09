@@ -108,6 +108,7 @@ fun OneDayClassRegisterScreen(
     typeIndex: Int,
     onBack: () -> Unit,
     onGoRegisterCenter: () -> Unit,
+    onGoEditCenter: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OneDayClassRegisterViewModel = hiltViewModel(),
 ) {
@@ -131,6 +132,7 @@ fun OneDayClassRegisterScreen(
         onScheduleDelete = viewModel::onScheduleDelete,
         onLoadCenters = viewModel::loadCenters,
         onGoRegisterCenter = onGoRegisterCenter,
+        onGoEditCenter = onGoEditCenter,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -150,6 +152,7 @@ private fun OneDayClassRegisterContent(
     onScheduleDelete: (Int) -> Unit,
     onLoadCenters: () -> Unit,
     onGoRegisterCenter: () -> Unit,
+    onGoEditCenter: (String) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -212,6 +215,7 @@ private fun OneDayClassRegisterContent(
                         onLoadCenters = onLoadCenters,
                         onBack = goPrevious,
                         onRegisterLocationClick = onGoRegisterCenter,
+                        onEditCenterClick = onGoEditCenter,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
                 }
@@ -419,6 +423,7 @@ private fun Step4Content(
     onLoadCenters: () -> Unit,
     onBack: () -> Unit,
     onRegisterLocationClick: () -> Unit,
+    onEditCenterClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(Unit) { onLoadCenters() }
@@ -446,6 +451,8 @@ private fun Step4Content(
             )
             CentersSection(
                 centersState = centersState,
+                onAddClass = onRegisterLocationClick,
+                onEditAddress = onEditCenterClick,
                 modifier = Modifier.padding(top = 33.dp),
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -456,6 +463,8 @@ private fun Step4Content(
 @Composable
 private fun CentersSection(
     centersState: CentersState,
+    onAddClass: () -> Unit,
+    onEditAddress: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (centersState) {
@@ -485,6 +494,8 @@ private fun CentersSection(
                         date = formatCreatedAt(center.createdAt),
                         name = center.name,
                         location = center.address,
+                        onAddClass = onAddClass,
+                        onEditAddress = { onEditAddress(center.centerId) },
                     )
                 }
             }
@@ -629,6 +640,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleDelete = {},
             onLoadCenters = {},
             onGoRegisterCenter = {},
+            onGoEditCenter = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -702,6 +714,7 @@ private fun Step4ContentPreview() {
                 onLoadCenters = {},
                 onBack = {},
                 onRegisterLocationClick = {},
+                onEditCenterClick = {},
             )
         }
     }

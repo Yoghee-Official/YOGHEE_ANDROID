@@ -1,11 +1,13 @@
 package com.teamyoga.yoghee.core.data.repository
 
 import com.teamyoga.yoghee.core.data.remote.ClassService
+import com.teamyoga.yoghee.core.data.remote.model.CenterDetailDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
 import com.teamyoga.yoghee.core.data.remote.model.MyCenterDto
 import com.teamyoga.yoghee.core.domain.model.Center
+import com.teamyoga.yoghee.core.domain.model.CenterDetail
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
@@ -39,28 +41,43 @@ class ClassRepositoryImpl @Inject constructor(
         classService.getCenters().data.map { it.toDomain() }
 
     override suspend fun createCenter(params: CreateCenterParams): String {
+        val request = params.toRequest()
+        return classService.createCenter(request).data?.centerId.orEmpty()
+    }
+
+    override suspend fun getCenterDetail(centerId: String): CenterDetail {
+        val dto = classService.getCenterDetail(centerId).data
+            ?: error("요가원 상세 정보를 불러오지 못했습니다.")
+        return dto.toDomain()
+    }
+
+    override suspend fun updateCenter(centerId: String, params: CreateCenterParams): String {
+        val request = params.toRequest()
+        return classService.updateCenter(centerId, request).data?.centerId.orEmpty()
+    }
+
+    private fun CreateCenterParams.toRequest(): CreateCenterRequest {
         val fullAddress = buildString {
-            append(params.roadAddress)
-            if (params.addressDetail.isNotBlank()) {
+            append(roadAddress)
+            if (addressDetail.isNotBlank()) {
                 if (isNotEmpty()) append(' ')
-                append(params.addressDetail)
+                append(addressDetail)
             }
         }
-        val request = CreateCenterRequest(
-            name = params.name,
-            description = params.description,
-            depth1 = params.depth1,
-            depth2 = params.depth2,
-            depth3 = params.depth3,
-            roadAddress = params.roadAddress,
-            jibunAddress = params.jibunAddress,
-            zonecode = params.zonecode,
-            addressDetail = params.addressDetail,
+        return CreateCenterRequest(
+            name = name,
+            description = description,
+            depth1 = depth1,
+            depth2 = depth2,
+            depth3 = depth3,
+            roadAddress = roadAddress,
+            jibunAddress = jibunAddress,
+            zonecode = zonecode,
+            addressDetail = addressDetail,
             fullAddress = fullAddress,
-            amenityCodes = params.amenityCodes,
-            categoryCodes = params.categoryCodes,
+            amenityCodes = amenityCodes,
+            categoryCodes = categoryCodes,
         )
-        return classService.createCenter(request).data?.centerId.orEmpty()
     }
 
     private fun ClassScheduleParam.toDto(): CreateScheduleDto = CreateScheduleDto(
@@ -77,5 +94,20 @@ class ClassRepositoryImpl @Inject constructor(
         name = name,
         address = address,
         createdAt = createdAt,
+    )
+
+    private fun CenterDetailDto.toDomain(): CenterDetail = CenterDetail(
+        centerId = centerId,
+        name = name,
+        description = description,
+        depth1 = depth1,
+        depth2 = depth2,
+        depth3 = depth3,
+        roadAddress = roadAddress,
+        jibunAddress = jibunAddress,
+        zonecode = zonecode,
+        addressDetail = addressDetail,
+        amenityCodes = amenityCodes,
+        categoryCodes = categoryCodes,
     )
 }

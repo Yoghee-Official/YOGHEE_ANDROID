@@ -69,7 +69,9 @@ fun RegisterCenterScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showAddressSheet by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val isLoading = state.submitState is SubmitState.Loading
+    val isSubmitting = state.submitState is SubmitState.Loading
+    val isDetailLoading = state.loadState is LoadState.Loading
+    val showOverlay = isSubmitting || isDetailLoading
 
     LaunchedEffect(state.submitState) {
         when (val submit = state.submitState) {
@@ -82,6 +84,13 @@ fun RegisterCenterScreen(
         }
     }
 
+    LaunchedEffect(state.loadState) {
+        val load = state.loadState
+        if (load is LoadState.Error) {
+            snackbarHostState.showSnackbar(load.message)
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         RegisterCenterContent(
             address = state.form,
@@ -89,8 +98,9 @@ fun RegisterCenterScreen(
             onSearchAddressClick = { showAddressSheet = true },
             onRegisterClick = viewModel::submit,
             onBack = onBack,
-            isLoading = isLoading,
+            isLoading = isSubmitting,
             showRequiredErrors = state.showRequiredErrors,
+            isEditMode = state.isEditMode,
         )
         SnackbarHost(
             hostState = snackbarHostState,
@@ -98,7 +108,7 @@ fun RegisterCenterScreen(
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding(),
         )
-        if (isLoading) {
+        if (showOverlay) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -130,6 +140,7 @@ private fun RegisterCenterContent(
     onBack: () -> Unit,
     isLoading: Boolean,
     showRequiredErrors: Boolean,
+    isEditMode: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
@@ -143,7 +154,7 @@ private fun RegisterCenterContent(
             .imePadding(),
     ) {
         YogheeHeader(
-            title = "신규 장소 등록",
+            title = if (isEditMode) "장소 수정" else "신규 장소 등록",
             onBack = onBack,
         )
         Column(
@@ -250,6 +261,7 @@ private fun RegisterCenterContent(
         RegisterCenterBottomBar(
             onRegisterClick = onRegisterClick,
             isLoading = isLoading,
+            buttonLabel = if (isEditMode) "수정 완료" else "등록",
         )
     }
 }
@@ -258,6 +270,7 @@ private fun RegisterCenterContent(
 private fun RegisterCenterBottomBar(
     onRegisterClick: () -> Unit,
     isLoading: Boolean,
+    buttonLabel: String,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -281,7 +294,7 @@ private fun RegisterCenterBottomBar(
             contentAlignment = Alignment.Center,
         ) {
             YogheeText(
-                text = "등록",
+                text = buttonLabel,
                 color = BLACK,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -335,6 +348,33 @@ private fun RegisterCenterScreenFilledPreview() {
             onBack = {},
             isLoading = false,
             showRequiredErrors = false,
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true, name = "RegisterCenterScreen Edit")
+@Composable
+private fun RegisterCenterScreenEditPreview() {
+    YogheeTheme {
+        RegisterCenterContent(
+            address = CenterForm(
+                name = "힐링 요가 센터",
+                description = "도심 속에서 마음과 몸의 힐링을 찾는 요가 센터입니다.",
+                depth1 = "서울",
+                depth2 = "강남구",
+                depth3 = "역삼동",
+                roadAddress = "서울 강남구 테헤란로 212",
+                zonecode = "06220",
+                addressDetail = "멀티캠퍼스 3층",
+                amenityCodes = setOf("mat", "wifi", "shower_room"),
+            ),
+            onAddressChange = {},
+            onSearchAddressClick = {},
+            onRegisterClick = {},
+            onBack = {},
+            isLoading = false,
+            showRequiredErrors = false,
+            isEditMode = true,
         )
     }
 }

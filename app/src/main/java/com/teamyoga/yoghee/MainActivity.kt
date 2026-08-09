@@ -106,11 +106,23 @@ private fun AppNavGraph(
             OneDayClassRegisterScreen(
                 typeIndex = typeIndex,
                 onBack = { navController.popBackStack() },
-                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.route) },
+                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) },
+                onGoEditCenter = { centerId ->
+                    navController.navigate(AppRoute.RegisterCenter.createRoute(centerId = centerId))
+                },
             )
         }
 
-        composable(AppRoute.RegisterCenter.route) {
+        composable(
+            route = AppRoute.RegisterCenter.route,
+            arguments = listOf(
+                navArgument(AppRoute.RegisterCenter.ARG_CENTER_ID) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) {
             RegisterCenterScreen(
                 onBack = { navController.popBackStack() },
             )

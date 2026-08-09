@@ -10,7 +10,14 @@ sealed class AppRoute(val route: String) {
     data object Profile : AppRoute("profile")
     data object ContentFeed : AppRoute("contentFeed")
     data object RegisterClass : AppRoute("registerClass")
-    data object RegisterCenter : AppRoute("registerCenter")
+
+    // centerId가 있으면 편집 모드, 없으면 신규 등록.
+    data object RegisterCenter : AppRoute("registerCenter?centerId={centerId}") {
+        const val ARG_CENTER_ID = "centerId"
+
+        fun createRoute(centerId: String? = null): String =
+            if (centerId.isNullOrBlank()) "registerCenter" else "registerCenter?centerId=$centerId"
+    }
 
     data object OneDayClassRegister : AppRoute("oneDayClassRegister/{typeIndex}") {
         const val ARG_TYPE_INDEX = "typeIndex"

@@ -1,5 +1,6 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.model.Center
@@ -138,6 +139,7 @@ data class OneDayClassRegisterUiState(
     val classPurposes: Set<String> = emptySet(),
     val categoryCodes: Set<String> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
+    val images: List<Uri> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

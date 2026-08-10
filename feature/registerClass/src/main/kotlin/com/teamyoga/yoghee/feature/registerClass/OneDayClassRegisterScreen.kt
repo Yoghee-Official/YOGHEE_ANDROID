@@ -1,5 +1,6 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
@@ -54,6 +55,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
+import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
 import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
 import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
@@ -216,6 +218,11 @@ private fun OneDayClassRegisterContent(
                         onBack = goPrevious,
                         onRegisterLocationClick = onGoRegisterCenter,
                         onEditCenterClick = onGoEditCenter,
+                    )
+                    5 -> Step5Content(
+                        images = state.images,
+                        onAddImageClick = { /* Phase 2: 카메라/갤러리 시트 오픈 */ },
+                        onBack = goPrevious,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
                 }
@@ -512,6 +519,37 @@ private fun formatCreatedAt(createdAt: String): String {
 }
 
 @Composable
+private fun Step5Content(
+    images: List<Uri>,
+    onAddImageClick: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step5_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        ImagePickerGrid(
+            images = images,
+            onAddClick = onAddImageClick,
+            header = {
+                RegisterSectionTitle(
+                    title = "수련원 이미지 등록",
+                    subTitle = "드래그로 이미지 순서를 변경할 수 있어요.",
+                    modifier = Modifier.padding(
+                        bottom = 7.dp
+                    ),
+                    startPadding = 0.dp
+                )
+            },
+        )
+    }
+}
+
+@Composable
 private fun StepPlaceholderContent(
     step: Int,
     onBack: () -> Unit,
@@ -689,6 +727,34 @@ private fun Step3ContentPreview() {
                 onScheduleApplied = {},
                 onScheduleEdit = { _, _ -> },
                 onScheduleDelete = {},
+                onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step5Content Empty")
+@Composable
+private fun Step5ContentEmptyPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step5Content(
+                images = emptyList(),
+                onAddImageClick = {},
+                onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step5Content With Images")
+@Composable
+private fun Step5ContentWithImagesPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step5Content(
+                images = List(5) { Uri.parse("preview://image/$it") },
+                onAddImageClick = {},
                 onBack = {},
             )
         }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -19,6 +20,7 @@ fun RegisterSectionTitle(
     title: String,
     modifier: Modifier = Modifier,
     subTitle: String? = null,
+    startPadding: Dp = 8.dp
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         YogheeText(
@@ -26,7 +28,7 @@ fun RegisterSectionTitle(
             color = BLACK,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = startPadding),
         )
         if (subTitle != null) {
             YogheeText(
@@ -34,7 +36,7 @@ fun RegisterSectionTitle(
                 color = GRAY,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp, start = 8.dp),
+                modifier = Modifier.padding(top = 4.dp, start = startPadding),
             )
         }
     }

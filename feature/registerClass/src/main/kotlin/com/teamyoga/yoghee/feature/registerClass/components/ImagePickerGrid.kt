@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,23 +22,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
-import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
-import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 @Composable
 fun ImagePickerGrid(
     images: List<Uri>,
     onAddClick: () -> Unit,
+    onDelete: (Int) -> Unit,
+    onReorder: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
     header: (@Composable () -> Unit)? = null,
 ) {
+    val lazyGridState = rememberLazyGridState()
+    // 드래그 재정렬: from/to는 이미지 셀 key(URI 문자열)를 통해 원본 인덱스로 변환
+    val reorderableState = rememberReorderableLazyGridState(lazyGridState) { from, to ->
+        val fromKey = from.key as? String ?: return@rememberReorderableLazyGridState
+        val toKey = to.key as? String ?: return@rememberReorderableLazyGridState
+        val fromIndex = images.indexOfFirst { it.toString() == fromKey }
+        val toIndex = images.indexOfFirst { it.toString() == toKey }
+        if (fromIndex >= 0 && toIndex >= 0) onReorder(fromIndex, toIndex)
+    }
+
     LazyVerticalGrid(
+        state = lazyGridState,
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp),
@@ -48,11 +62,17 @@ fun ImagePickerGrid(
                 header()
             }
         }
-        item {
+        item(key = "add_cell") {
             AddImageCell(onClick = onAddClick)
         }
-        items(items = images, key = { it.toString() }) { uri ->
-            ImageCell(uri = uri)
+        itemsIndexed(items = images, key = { _, uri -> uri.toString() }) { index, uri ->
+            ReorderableItem(reorderableState, key = uri.toString()) { _ ->
+                ImageCell(
+                    uri = uri,
+                    onDelete = { onDelete(index) },
+                    modifier = Modifier.longPressDraggableHandle(),
+                )
+            }
         }
     }
 }
@@ -64,7 +84,7 @@ private fun AddImageCell(
 ) {
     Box(
         modifier = modifier
-            .aspectRatio(148/124f)
+            .aspectRatio(148 / 124f)
             .clip(RoundedCornerShape(8.dp))
             .background(LIGHT_GRAY)
             .noRippleClickable(onClick),
@@ -73,7 +93,7 @@ private fun AddImageCell(
         Image(
             painter = painterResource(R.drawable.ic_plus),
             contentDescription = "이미지 추가",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
     }
 }
@@ -81,39 +101,27 @@ private fun AddImageCell(
 @Composable
 private fun ImageCell(
     uri: Uri,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    YogheeImage(
-        model = uri,
-        contentScale = ContentScale.Crop,
+    Box(
         modifier = modifier
-            .aspectRatio(148/124f)
+            .aspectRatio(148 / 124f)
             .clip(RoundedCornerShape(8.dp)),
-    )
-}
-
-@Preview(showBackground = true, name = "ImagePickerGrid Empty")
-@Composable
-private fun ImagePickerGridEmptyPreview() {
-    YogheeTheme {
-        Box(modifier = Modifier.background(SAND_BEIGE)) {
-            ImagePickerGrid(
-                images = emptyList(),
-                onAddClick = {},
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "ImagePickerGrid With Images")
-@Composable
-private fun ImagePickerGridWithImagesPreview() {
-    YogheeTheme {
-        Box(modifier = Modifier.background(SAND_BEIGE)) {
-            ImagePickerGrid(
-                images = List(5) { Uri.parse("preview://image/$it") },
-                onAddClick = {},
-            )
-        }
+    ) {
+        YogheeImage(
+            model = uri,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Image(
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = "이미지 삭제",
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 8.dp, top = 8.dp)
+                .size(12.dp)
+                .noRippleClickable(onDelete),
+        )
     }
 }

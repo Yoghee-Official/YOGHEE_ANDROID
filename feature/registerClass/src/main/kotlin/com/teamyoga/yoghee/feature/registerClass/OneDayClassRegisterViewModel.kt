@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val ONE_DAY_CLASS_TYPE = "O"
+internal const val MAX_IMAGE_COUNT = 20
 
 @HiltViewModel
 class OneDayClassRegisterViewModel @Inject constructor(
@@ -58,6 +59,32 @@ class OneDayClassRegisterViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 schedules = it.schedules.toMutableList().apply { removeAt(index) },
+            )
+        }
+    }
+
+    fun onImageAdded(uri: Uri) {
+        _uiState.update {
+            if (it.images.size >= MAX_IMAGE_COUNT) it
+            else it.copy(images = it.images + uri)
+        }
+    }
+
+    fun onImageRemoved(index: Int) {
+        val current = _uiState.value
+        if (index !in current.images.indices) return
+        _uiState.update {
+            it.copy(images = it.images.toMutableList().apply { removeAt(index) })
+        }
+    }
+
+    fun onImagesReordered(from: Int, to: Int) {
+        val current = _uiState.value
+        if (from == to) return
+        if (from !in current.images.indices || to !in current.images.indices) return
+        _uiState.update {
+            it.copy(
+                images = it.images.toMutableList().apply { add(to, removeAt(from)) },
             )
         }
     }

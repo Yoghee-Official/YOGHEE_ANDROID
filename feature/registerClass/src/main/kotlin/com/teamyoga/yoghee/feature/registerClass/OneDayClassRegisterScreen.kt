@@ -157,6 +157,7 @@ fun OneDayClassRegisterScreen(
         onGoRegisterCenter = onGoRegisterCenter,
         onGoEditCenter = onGoEditCenter,
         onImageAdded = viewModel::onImageAdded,
+        onImagesAdded = viewModel::onImagesAdded,
         onImageRemoved = viewModel::onImageRemoved,
         onImagesReordered = viewModel::onImagesReordered,
         onSubmit = viewModel::submit,
@@ -180,6 +181,7 @@ private fun OneDayClassRegisterContent(
     onGoRegisterCenter: () -> Unit,
     onGoEditCenter: (String) -> Unit,
     onImageAdded: (Uri) -> Unit,
+    onImagesAdded: (List<Uri>) -> Unit,
     onImageRemoved: (Int) -> Unit,
     onImagesReordered: (Int, Int) -> Unit,
     onSubmit: () -> Unit,
@@ -253,6 +255,7 @@ private fun OneDayClassRegisterContent(
                     5 -> Step5Content(
                         images = state.images,
                         onImageAdded = onImageAdded,
+                        onImagesAdded = onImagesAdded,
                         onImageRemoved = onImageRemoved,
                         onImagesReordered = onImagesReordered,
                         onShowMessage = onShowMessage,
@@ -556,6 +559,7 @@ private fun formatCreatedAt(createdAt: String): String {
 private fun Step5Content(
     images: List<ImageItem>,
     onImageAdded: (Uri) -> Unit,
+    onImagesAdded: (List<Uri>) -> Unit,
     onImageRemoved: (Int) -> Unit,
     onImagesReordered: (Int, Int) -> Unit,
     onShowMessage: (String) -> Unit,
@@ -576,9 +580,15 @@ private fun Step5Content(
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri != null) onImageAdded(uri)
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = MAX_IMAGE_COUNT),
+    ) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        val remaining = MAX_IMAGE_COUNT - images.size
+        val accepted = uris.take(remaining)
+        if (accepted.isNotEmpty()) onImagesAdded(accepted)
+        if (uris.size > accepted.size) {
+            onShowMessage("이미지는 최대 ${MAX_IMAGE_COUNT}장까지 등록할 수 있어요.")
+        }
     }
 
     val launchCamera: () -> Unit = {
@@ -649,15 +659,10 @@ private fun Step5Content(
 
         ImagePickerGrid(
             images = images,
-            onAddClick = {
-                if (images.size >= MAX_IMAGE_COUNT) {
-                    onShowMessage("이미지는 최대 ${MAX_IMAGE_COUNT}장까지 등록할 수 있어요.")
-                } else {
-                    sheetVisible = true
-                }
-            },
+            onAddClick = { sheetVisible = true },
             onDelete = onImageRemoved,
-            onReorder = onImagesReordered
+            onReorder = onImagesReordered,
+            canAddMore = images.size < MAX_IMAGE_COUNT,
         )
     }
 
@@ -838,6 +843,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onGoRegisterCenter = {},
             onGoEditCenter = {},
             onImageAdded = {},
+            onImagesAdded = {},
             onImageRemoved = {},
             onImagesReordered = { _, _ -> },
             onSubmit = {},
@@ -902,6 +908,7 @@ private fun Step5ContentEmptyPreview() {
             Step5Content(
                 images = emptyList(),
                 onImageAdded = {},
+                onImagesAdded = {},
                 onImageRemoved = {},
                 onImagesReordered = { _, _ -> },
                 onShowMessage = {},
@@ -921,6 +928,7 @@ private fun Step5ContentWithImagesPreview() {
                     ImageItem(id = "preview-$index", uri = Uri.parse("preview://image/$index"))
                 },
                 onImageAdded = {},
+                onImagesAdded = {},
                 onImageRemoved = {},
                 onImagesReordered = { _, _ -> },
                 onShowMessage = {},

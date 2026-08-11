@@ -44,7 +44,7 @@ fun ImagePickerGrid(
     onDelete: (Int) -> Unit,
     onReorder: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
-    header: (@Composable () -> Unit)? = null,
+    canAddMore: Boolean = true,
 ) {
     val lazyGridState = rememberLazyGridState()
     // 드래그 재정렬: from/to key(ImageItem.id)를 통해 원본 인덱스로 변환
@@ -64,8 +64,10 @@ fun ImagePickerGrid(
         horizontalArrangement = Arrangement.spacedBy(11.dp),
         verticalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        item(key = "add_cell") {
-            AddImageCell(onClick = onAddClick)
+        if (canAddMore) {
+            item(key = "add_cell") {
+                AddImageCell(onClick = onAddClick)
+            }
         }
         itemsIndexed(items = images, key = { _, item -> item.id }) { index, item ->
             ReorderableItem(reorderableState, key = item.id) { _ ->

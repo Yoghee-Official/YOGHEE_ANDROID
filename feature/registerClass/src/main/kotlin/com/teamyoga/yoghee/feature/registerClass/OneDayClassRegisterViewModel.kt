@@ -77,6 +77,18 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onImagesAdded(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        _uiState.update {
+            val remaining = MAX_IMAGE_COUNT - it.images.size
+            if (remaining <= 0) return@update it
+            val toAdd = uris.take(remaining).map { uri ->
+                ImageItem(id = UUID.randomUUID().toString(), uri = uri)
+            }
+            it.copy(images = it.images + toAdd)
+        }
+    }
+
     fun onImageRemoved(index: Int) {
         val current = _uiState.value
         if (index !in current.images.indices) return

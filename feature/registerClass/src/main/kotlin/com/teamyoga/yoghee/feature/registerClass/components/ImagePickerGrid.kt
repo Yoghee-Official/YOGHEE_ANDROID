@@ -60,15 +60,10 @@ fun ImagePickerGrid(
         state = lazyGridState,
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(11.dp),
         verticalArrangement = Arrangement.spacedBy(11.dp),
     ) {
-        if (header != null) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                header()
-            }
-        }
         item(key = "add_cell") {
             AddImageCell(onClick = onAddClick)
         }

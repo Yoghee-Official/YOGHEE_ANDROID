@@ -609,6 +609,18 @@ private fun Step5Content(
             subTitle = stringResource(R.string.inquire),
             onSubTitleClick = {},
         )
+
+        RegisterSectionTitle(
+            title = "수련원 이미지 등록",
+            subTitle = "드래그로 이미지 순서를 변경할 수 있어요.",
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 24.dp,
+                top = 20.dp,
+                bottom = 7.dp
+            )
+        )
+
         ImagePickerGrid(
             images = images,
             onAddClick = {
@@ -619,17 +631,7 @@ private fun Step5Content(
                 }
             },
             onDelete = onImageRemoved,
-            onReorder = onImagesReordered,
-            header = {
-                RegisterSectionTitle(
-                    title = "수련원 이미지 등록",
-                    subTitle = "드래그로 이미지 순서를 변경할 수 있어요.",
-                    modifier = Modifier.padding(
-                        bottom = 7.dp
-                    ),
-                    startPadding = 0.dp
-                )
-            },
+            onReorder = onImagesReordered
         )
     }
 

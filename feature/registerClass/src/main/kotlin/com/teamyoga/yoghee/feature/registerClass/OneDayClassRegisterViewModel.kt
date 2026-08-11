@@ -8,12 +8,14 @@ import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
+import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 private const val ONE_DAY_CLASS_TYPE = "O"
@@ -66,7 +68,12 @@ class OneDayClassRegisterViewModel @Inject constructor(
     fun onImageAdded(uri: Uri) {
         _uiState.update {
             if (it.images.size >= MAX_IMAGE_COUNT) it
-            else it.copy(images = it.images + uri)
+            else it.copy(
+                images = it.images + ImageItem(
+                    id = UUID.randomUUID().toString(),
+                    uri = uri,
+                ),
+            )
         }
     }
 
@@ -166,7 +173,7 @@ data class OneDayClassRegisterUiState(
     val classPurposes: Set<String> = emptySet(),
     val categoryCodes: Set<String> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
-    val images: List<Uri> = emptyList(),
+    val images: List<ImageItem> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

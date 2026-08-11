@@ -63,6 +63,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
+import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
 import com.teamyoga.yoghee.feature.registerClass.components.ImageSource
 import com.teamyoga.yoghee.feature.registerClass.components.ImageSourcePickerBottomSheet
@@ -544,7 +545,7 @@ private fun formatCreatedAt(createdAt: String): String {
 
 @Composable
 private fun Step5Content(
-    images: List<Uri>,
+    images: List<ImageItem>,
     onImageAdded: (Uri) -> Unit,
     onImageRemoved: (Int) -> Unit,
     onImagesReordered: (Int, Int) -> Unit,
@@ -855,7 +856,9 @@ private fun Step5ContentWithImagesPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step5Content(
-                images = List(5) { Uri.parse("preview://image/$it") },
+                images = List(5) { index ->
+                    ImageItem(id = "preview-$index", uri = Uri.parse("preview://image/$index"))
+                },
                 onImageAdded = {},
                 onImageRemoved = {},
                 onImagesReordered = { _, _ -> },

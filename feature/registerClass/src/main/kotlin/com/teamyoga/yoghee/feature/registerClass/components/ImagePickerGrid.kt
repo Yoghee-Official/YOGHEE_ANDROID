@@ -30,9 +30,16 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 
+// 같은 URI가 여러 번 추가되어도 LazyLayout의 key 충돌이 나지 않도록
+// URI를 고유 id로 래핑한다.
+data class ImageItem(
+    val id: String,
+    val uri: Uri,
+)
+
 @Composable
 fun ImagePickerGrid(
-    images: List<Uri>,
+    images: List<ImageItem>,
     onAddClick: () -> Unit,
     onDelete: (Int) -> Unit,
     onReorder: (from: Int, to: Int) -> Unit,
@@ -40,12 +47,12 @@ fun ImagePickerGrid(
     header: (@Composable () -> Unit)? = null,
 ) {
     val lazyGridState = rememberLazyGridState()
-    // 드래그 재정렬: from/to는 이미지 셀 key(URI 문자열)를 통해 원본 인덱스로 변환
+    // 드래그 재정렬: from/to key(ImageItem.id)를 통해 원본 인덱스로 변환
     val reorderableState = rememberReorderableLazyGridState(lazyGridState) { from, to ->
         val fromKey = from.key as? String ?: return@rememberReorderableLazyGridState
         val toKey = to.key as? String ?: return@rememberReorderableLazyGridState
-        val fromIndex = images.indexOfFirst { it.toString() == fromKey }
-        val toIndex = images.indexOfFirst { it.toString() == toKey }
+        val fromIndex = images.indexOfFirst { it.id == fromKey }
+        val toIndex = images.indexOfFirst { it.id == toKey }
         if (fromIndex >= 0 && toIndex >= 0) onReorder(fromIndex, toIndex)
     }
 
@@ -65,10 +72,10 @@ fun ImagePickerGrid(
         item(key = "add_cell") {
             AddImageCell(onClick = onAddClick)
         }
-        itemsIndexed(items = images, key = { _, uri -> uri.toString() }) { index, uri ->
-            ReorderableItem(reorderableState, key = uri.toString()) { _ ->
+        itemsIndexed(items = images, key = { _, item -> item.id }) { index, item ->
+            ReorderableItem(reorderableState, key = item.id) { _ ->
                 ImageCell(
-                    uri = uri,
+                    uri = item.uri,
                     onDelete = { onDelete(index) },
                     modifier = Modifier.longPressDraggableHandle(),
                 )

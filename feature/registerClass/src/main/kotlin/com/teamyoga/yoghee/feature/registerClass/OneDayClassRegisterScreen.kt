@@ -1,12 +1,18 @@
 package com.teamyoga.yoghee.feature.registerClass
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,9 +27,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -578,11 +587,28 @@ private fun Step5Content(
         cameraLauncher.launch(uri)
     }
 
+    // 카메라 권한 영구 거부(다시 묻지 않기) 시 설정 이동 유도 다이얼로그 노출
+    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
+
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
-        if (granted) launchCamera()
-        else onShowMessage("카메라 권한이 필요합니다.")
+        if (granted) {
+            launchCamera()
+        } else {
+            val activity = context.findActivity()
+            val canShowRationale = activity != null &&
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    Manifest.permission.CAMERA,
+                )
+            if (!canShowRationale) {
+                // 최초 요청 후 "다시 묻지 않기" 선택했거나 정책상 요청 불가 → 설정 이동 유도
+                showPermissionSettingsDialog = true
+            } else {
+                onShowMessage("카메라 권한이 필요합니다.")
+            }
+        }
     }
 
     val onCameraSelected: () -> Unit = {
@@ -646,6 +672,39 @@ private fun Step5Content(
             },
         )
     }
+
+    if (showPermissionSettingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionSettingsDialog = false },
+            title = { Text("카메라 권한이 필요해요") },
+            text = { Text("사진 촬영을 위해 앱 설정에서 카메라 권한을 허용해주세요.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionSettingsDialog = false
+                    context.openAppSettings()
+                }) { Text("설정 열기") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionSettingsDialog = false }) {
+                    Text("취소")
+                }
+            },
+        )
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+private fun Context.openAppSettings() {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", packageName, null)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    startActivity(intent)
 }
 
 @Composable

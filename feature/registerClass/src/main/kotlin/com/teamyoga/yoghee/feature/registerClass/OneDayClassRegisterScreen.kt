@@ -27,12 +27,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -597,9 +594,6 @@ private fun Step5Content(
         cameraLauncher.launch(uri)
     }
 
-    // 카메라 권한 영구 거부(다시 묻지 않기) 시 설정 이동 유도 다이얼로그 노출
-    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
-
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { granted ->
@@ -613,8 +607,9 @@ private fun Step5Content(
                     Manifest.permission.CAMERA,
                 )
             if (!canShowRationale) {
-                // 최초 요청 후 "다시 묻지 않기" 선택했거나 정책상 요청 불가 → 설정 이동 유도
-                showPermissionSettingsDialog = true
+                // "다시 묻지 않기" 선택 등으로 재요청 불가 → 앱 설정 화면으로 바로 이동
+                onShowMessage("설정에서 카메라 권한을 허용해주세요.")
+                context.openAppSettings()
             } else {
                 onShowMessage("카메라 권한이 필요합니다.")
             }
@@ -678,24 +673,6 @@ private fun Step5Content(
         )
     }
 
-    if (showPermissionSettingsDialog) {
-        AlertDialog(
-            onDismissRequest = { showPermissionSettingsDialog = false },
-            title = { Text("카메라 권한이 필요해요") },
-            text = { Text("사진 촬영을 위해 앱 설정에서 카메라 권한을 허용해주세요.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    showPermissionSettingsDialog = false
-                    context.openAppSettings()
-                }) { Text("설정 열기") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPermissionSettingsDialog = false }) {
-                    Text("취소")
-                }
-            },
-        )
-    }
 }
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {

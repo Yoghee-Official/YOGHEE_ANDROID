@@ -1,0 +1,168 @@
+package com.teamyoga.yoghee.feature.registerClass.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.teamyoga.yoghee.core.ui.component.YogheeText
+import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
+import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
+import com.teamyoga.yoghee.core.ui.theme.WHITE
+import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
+import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+
+@Composable
+fun AddressFieldStatic(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    FieldBox(label = label, required = true, modifier = modifier) {
+        ValueText(
+            text = value
+        )
+    }
+}
+
+@Composable
+fun AddressFieldButton(
+    label: String,
+    value: String,
+    required: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+) {
+    FieldBox(
+        label = label,
+        required = required,
+        onClick = onClick,
+        modifier = modifier,
+        isError = isError,
+    ) {
+        ValueText(
+            text = value
+        )
+    }
+}
+
+@Composable
+fun AddressFieldReadOnly(
+    label: String,
+    value: String,
+    required: Boolean,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+) {
+    FieldBox(label = label, required = required, modifier = modifier, isError = isError) {
+        ValueText(
+            text = value,
+        )
+    }
+}
+
+@Composable
+fun AddressFieldEditable(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    required: Boolean,
+    isError: Boolean = false,
+) {
+    FieldBox(
+        label = label,
+        required = required,
+        modifier = modifier.height(51.dp),
+        isError = isError,
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(
+                    color = BLACK,
+                    fontSize = 14.sp,
+                ),
+                singleLine = true,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FieldBox(
+    label: String,
+    modifier: Modifier = Modifier,
+    required: Boolean,
+    onClick: (() -> Unit)? = null,
+    isError: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    val borderColor = if (isError) MIND_ORANGE else LIGHT_GRAY
+    val baseModifier = modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(8.dp))
+        .background(WHITE)
+        .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
+    val clickableModifier = if (onClick != null) baseModifier.noRippleClickable(onClick) else baseModifier
+    Column(
+        modifier = clickableModifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        YogheeText(
+            text = buildAnnotatedString {
+                append(label)
+                if (required) {
+                    withStyle(style = SpanStyle(color = MIND_ORANGE)) {
+                        append(" *")
+                    }
+                }
+            },
+            fontSize = 10.sp,
+        )
+        content()
+    }
+}
+
+@Composable
+private fun ValueText(
+    text: String
+) {
+    YogheeText(
+        text = text,
+        color = BLACK,
+        fontSize = 14.sp
+    )
+}
+
+@Preview(showBackground = true, name = "AddressField Variants")
+@Composable
+private fun AddressFieldPreview() {
+    YogheeTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            AddressFieldStatic(label = "국가/지역", value = "대한민국")
+        }
+    }
+}

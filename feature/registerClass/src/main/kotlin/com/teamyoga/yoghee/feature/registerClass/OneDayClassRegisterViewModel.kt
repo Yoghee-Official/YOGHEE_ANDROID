@@ -1,20 +1,25 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
+import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 private const val ONE_DAY_CLASS_TYPE = "O"
+internal const val MAX_IMAGE_COUNT = 20
 
 @HiltViewModel
 class OneDayClassRegisterViewModel @Inject constructor(
@@ -60,6 +65,49 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onImageAdded(uri: Uri) {
+        _uiState.update {
+            if (it.images.size >= MAX_IMAGE_COUNT) it
+            else it.copy(
+                images = it.images + ImageItem(
+                    id = UUID.randomUUID().toString(),
+                    uri = uri,
+                ),
+            )
+        }
+    }
+
+    fun onImagesAdded(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        _uiState.update {
+            val remaining = MAX_IMAGE_COUNT - it.images.size
+            if (remaining <= 0) return@update it
+            val toAdd = uris.take(remaining).map { uri ->
+                ImageItem(id = UUID.randomUUID().toString(), uri = uri)
+            }
+            it.copy(images = it.images + toAdd)
+        }
+    }
+
+    fun onImageRemoved(index: Int) {
+        val current = _uiState.value
+        if (index !in current.images.indices) return
+        _uiState.update {
+            it.copy(images = it.images.toMutableList().apply { removeAt(index) })
+        }
+    }
+
+    fun onImagesReordered(from: Int, to: Int) {
+        val current = _uiState.value
+        if (from == to) return
+        if (from !in current.images.indices || to !in current.images.indices) return
+        _uiState.update {
+            it.copy(
+                images = it.images.toMutableList().apply { add(to, removeAt(from)) },
+            )
+        }
+    }
+
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
         _uiState.update { it.copy(submitState = SubmitState.Loading) }
@@ -99,6 +147,25 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun loadCenters() {
+        _uiState.update { it.copy(centersState = CentersState.Loading) }
+        viewModelScope.launch {
+            runCatching { classRepository.getCenters() }
+                .onSuccess { centers ->
+                    _uiState.update { it.copy(centersState = CentersState.Success(centers)) }
+                }
+                .onFailure { throwable ->
+                    _uiState.update {
+                        it.copy(
+                            centersState = CentersState.Error(
+                                throwable.message ?: "요가원 목록을 불러오지 못했습니다."
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
     private fun ClassSchedule.toParam(): ClassScheduleParam = ClassScheduleParam(
         name = className,
         dates = dates
@@ -118,7 +185,9 @@ data class OneDayClassRegisterUiState(
     val classPurposes: Set<String> = emptySet(),
     val categoryCodes: Set<String> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
+    val images: List<ImageItem> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
+    val centersState: CentersState = CentersState.Idle,
 )
 
 sealed interface SubmitState {
@@ -126,4 +195,11 @@ sealed interface SubmitState {
     data object Loading : SubmitState
     data object Success : SubmitState
     data class Error(val message: String) : SubmitState
+}
+
+sealed interface CentersState {
+    data object Idle : CentersState
+    data object Loading : CentersState
+    data class Success(val centers: List<Center>) : CentersState
+    data class Error(val message: String) : CentersState
 }

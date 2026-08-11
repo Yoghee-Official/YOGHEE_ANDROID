@@ -1,6 +1,18 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -23,12 +36,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.ui.R
@@ -52,11 +69,18 @@ import com.teamyoga.yoghee.feature.registerClass.components.CalendarDate
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
+import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
+import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
+import com.teamyoga.yoghee.feature.registerClass.components.ImageSource
+import com.teamyoga.yoghee.feature.registerClass.components.ImageSourcePickerBottomSheet
+import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
+import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
+import kotlinx.coroutines.launch
 
 private const val TOTAL_STEPS = 7
 
@@ -103,6 +127,8 @@ private val CLASS_USER_OPTIONS = listOf(
 fun OneDayClassRegisterScreen(
     typeIndex: Int,
     onBack: () -> Unit,
+    onGoRegisterCenter: () -> Unit,
+    onGoEditCenter: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OneDayClassRegisterViewModel = hiltViewModel(),
 ) {
@@ -124,6 +150,13 @@ fun OneDayClassRegisterScreen(
         onScheduleApplied = viewModel::onScheduleApplied,
         onScheduleEdit = viewModel::onScheduleEdit,
         onScheduleDelete = viewModel::onScheduleDelete,
+        onLoadCenters = viewModel::loadCenters,
+        onGoRegisterCenter = onGoRegisterCenter,
+        onGoEditCenter = onGoEditCenter,
+        onImageAdded = viewModel::onImageAdded,
+        onImagesAdded = viewModel::onImagesAdded,
+        onImageRemoved = viewModel::onImageRemoved,
+        onImagesReordered = viewModel::onImagesReordered,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -141,12 +174,23 @@ private fun OneDayClassRegisterContent(
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
     onScheduleDelete: (Int) -> Unit,
+    onLoadCenters: () -> Unit,
+    onGoRegisterCenter: () -> Unit,
+    onGoEditCenter: (String) -> Unit,
+    onImageAdded: (Uri) -> Unit,
+    onImagesAdded: (List<Uri>) -> Unit,
+    onImageRemoved: (Int) -> Unit,
+    onImagesReordered: (Int, Int) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var currentStep by remember { mutableIntStateOf(1) }
+    var currentStep by rememberSaveable { mutableIntStateOf(1) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+    val onShowMessage: (String) -> Unit = { message ->
+        snackbarScope.launch { snackbarHostState.showSnackbar(message) }
+    }
     val isLoading = state.submitState is SubmitState.Loading
 
     LaunchedEffect(state.submitState) {
@@ -196,6 +240,22 @@ private fun OneDayClassRegisterContent(
                         onScheduleApplied = onScheduleApplied,
                         onScheduleEdit = onScheduleEdit,
                         onScheduleDelete = onScheduleDelete,
+                        onBack = goPrevious,
+                    )
+                    4 -> Step4Content(
+                        centersState = state.centersState,
+                        onLoadCenters = onLoadCenters,
+                        onBack = goPrevious,
+                        onRegisterLocationClick = onGoRegisterCenter,
+                        onEditCenterClick = onGoEditCenter,
+                    )
+                    5 -> Step5Content(
+                        images = state.images,
+                        onImageAdded = onImageAdded,
+                        onImagesAdded = onImagesAdded,
+                        onImageRemoved = onImageRemoved,
+                        onImagesReordered = onImagesReordered,
+                        onShowMessage = onShowMessage,
                         onBack = goPrevious,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
@@ -282,6 +342,7 @@ private fun Step2Content(
                 options = CLASS_TYPE_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             MultiSelectChipsSection(
                 title = "수련 카테고리",
@@ -289,6 +350,7 @@ private fun Step2Content(
                 options = CLASS_CATEGORY_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             MultiSelectChipsSection(
                 title = "이용 대상",
@@ -296,6 +358,7 @@ private fun Step2Content(
                 options = CLASS_USER_OPTIONS,
                 selected = categoryCodes,
                 onSelectedChange = onCategoryCodesChange,
+                itemModifier = Modifier.padding(start = 16.dp, end = 16.dp)
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -393,6 +456,237 @@ private fun Step3Content(
             },
         )
     }
+}
+
+@Composable
+private fun Step4Content(
+    centersState: CentersState,
+    onLoadCenters: () -> Unit,
+    onBack: () -> Unit,
+    onRegisterLocationClick: () -> Unit,
+    onEditCenterClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(Unit) { onLoadCenters() }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step4_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            RegisterSectionTitle(
+                title = "장소 등록하기",
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            LocationRegisterButton(
+                onClick = onRegisterLocationClick,
+                modifier = Modifier.padding(top = 16.dp),
+            )
+            CentersSection(
+                centersState = centersState,
+                onAddClass = onRegisterLocationClick,
+                onEditAddress = onEditCenterClick,
+                modifier = Modifier.padding(top = 33.dp),
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun CentersSection(
+    centersState: CentersState,
+    onAddClass: () -> Unit,
+    onEditAddress: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (centersState) {
+        CentersState.Idle -> Unit
+        CentersState.Loading -> {
+            Column(modifier = modifier.fillMaxWidth()) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = LAND_BROWN)
+                }
+            }
+        }
+        is CentersState.Success -> {
+            if (centersState.centers.isEmpty()) return
+            Column(
+                modifier = modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                centersState.centers.forEach { center ->
+                    LocationListItem(
+                        date = formatCreatedAt(center.createdAt),
+                        name = center.name,
+                        location = center.address,
+                        onAddClass = onAddClass,
+                        onEditAddress = { onEditAddress(center.centerId) },
+                    )
+                }
+            }
+        }
+        is CentersState.Error -> Unit
+    }
+}
+
+// ISO-8601(예: 2026-08-01T16:18:37.131Z) 앞부분에서 yyyy-MM-dd만 추출.
+// 파싱 실패 시 원본 반환.
+private fun formatCreatedAt(createdAt: String): String {
+    val datePart = createdAt.substringBefore('T', missingDelimiterValue = "")
+    return if (datePart.length == 10) datePart else createdAt
+}
+
+@Composable
+private fun Step5Content(
+    images: List<ImageItem>,
+    onImageAdded: (Uri) -> Unit,
+    onImagesAdded: (List<Uri>) -> Unit,
+    onImageRemoved: (Int) -> Unit,
+    onImagesReordered: (Int, Int) -> Unit,
+    onShowMessage: (String) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    var sheetVisible by rememberSaveable { mutableStateOf(false) }
+    // 카메라 촬영 결과 콜백이 URI를 돌려주지 않으므로 요청 시점의 URI를 임시 보관
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { success ->
+        val uri = pendingCameraUri
+        pendingCameraUri = null
+        if (success && uri != null) onImageAdded(uri)
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = MAX_IMAGE_COUNT),
+    ) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        val remaining = MAX_IMAGE_COUNT - images.size
+        val accepted = uris.take(remaining)
+        if (accepted.isNotEmpty()) onImagesAdded(accepted)
+        if (uris.size > accepted.size) {
+            onShowMessage("이미지는 최대 ${MAX_IMAGE_COUNT}장까지 등록할 수 있어요.")
+        }
+    }
+
+    val launchCamera: () -> Unit = {
+        val uri = createImageCaptureUri(context)
+        pendingCameraUri = uri
+        cameraLauncher.launch(uri)
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            val activity = context.findActivity()
+            val canShowRationale = activity != null &&
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    Manifest.permission.CAMERA,
+                )
+            if (!canShowRationale) {
+                // "다시 묻지 않기" 선택 등으로 재요청 불가 → 앱 설정 화면으로 바로 이동
+                onShowMessage("설정에서 카메라 권한을 허용해주세요.")
+                context.openAppSettings()
+            } else {
+                onShowMessage("카메라 권한이 필요합니다.")
+            }
+        }
+    }
+
+    val onCameraSelected: () -> Unit = {
+        sheetVisible = false
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) launchCamera()
+        else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    val onGallerySelected: () -> Unit = {
+        sheetVisible = false
+        galleryLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        )
+    }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step5_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+
+        RegisterSectionTitle(
+            title = "수련원 이미지 등록",
+            subTitle = "드래그로 이미지 순서를 변경할 수 있어요.",
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 24.dp,
+                top = 20.dp,
+                bottom = 7.dp
+            )
+        )
+
+        ImagePickerGrid(
+            images = images,
+            onAddClick = { sheetVisible = true },
+            onDelete = onImageRemoved,
+            onReorder = onImagesReordered,
+            canAddMore = images.size < MAX_IMAGE_COUNT,
+        )
+    }
+
+    if (sheetVisible) {
+        ImageSourcePickerBottomSheet(
+            onDismiss = { sheetVisible = false },
+            onSelect = { source ->
+                when (source) {
+                    ImageSource.CAMERA -> onCameraSelected()
+                    ImageSource.GALLERY -> onGallerySelected()
+                }
+            },
+        )
+    }
+
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+private fun Context.openAppSettings() {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", packageName, null)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    startActivity(intent)
 }
 
 @Composable
@@ -522,6 +816,13 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleApplied = {},
             onScheduleEdit = { _, _ -> },
             onScheduleDelete = {},
+            onLoadCenters = {},
+            onGoRegisterCenter = {},
+            onGoEditCenter = {},
+            onImageAdded = {},
+            onImagesAdded = {},
+            onImageRemoved = {},
+            onImagesReordered = { _, _ -> },
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -571,6 +872,69 @@ private fun Step3ContentPreview() {
                 onScheduleEdit = { _, _ -> },
                 onScheduleDelete = {},
                 onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step5Content Empty")
+@Composable
+private fun Step5ContentEmptyPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step5Content(
+                images = emptyList(),
+                onImageAdded = {},
+                onImagesAdded = {},
+                onImageRemoved = {},
+                onImagesReordered = { _, _ -> },
+                onShowMessage = {},
+                onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step5Content With Images")
+@Composable
+private fun Step5ContentWithImagesPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step5Content(
+                images = List(5) { index ->
+                    ImageItem(id = "preview-$index", uri = Uri.parse("preview://image/$index"))
+                },
+                onImageAdded = {},
+                onImagesAdded = {},
+                onImageRemoved = {},
+                onImagesReordered = { _, _ -> },
+                onShowMessage = {},
+                onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Step4Content")
+@Composable
+private fun Step4ContentPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            Step4Content(
+                centersState = CentersState.Success(
+                    centers = listOf(
+                        com.teamyoga.yoghee.core.domain.model.Center(
+                            centerId = "center-1234abcd",
+                            name = "정환요가원",
+                            address = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                            createdAt = "2026-08-01T16:18:37.131Z",
+                        ),
+                    ),
+                ),
+                onLoadCenters = {},
+                onBack = {},
+                onRegisterLocationClick = {},
+                onEditCenterClick = {},
             )
         }
     }

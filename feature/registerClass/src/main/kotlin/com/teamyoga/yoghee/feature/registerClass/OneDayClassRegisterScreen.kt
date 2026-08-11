@@ -1,7 +1,12 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.ui.R
@@ -56,6 +64,8 @@ import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSec
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
 import com.teamyoga.yoghee.feature.registerClass.components.DateMultiSelectCalendar
 import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
+import com.teamyoga.yoghee.feature.registerClass.components.ImageSource
+import com.teamyoga.yoghee.feature.registerClass.components.ImageSourcePickerBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
 import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
@@ -63,6 +73,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
+import kotlinx.coroutines.launch
 
 private const val TOTAL_STEPS = 7
 
@@ -135,6 +146,9 @@ fun OneDayClassRegisterScreen(
         onLoadCenters = viewModel::loadCenters,
         onGoRegisterCenter = onGoRegisterCenter,
         onGoEditCenter = onGoEditCenter,
+        onImageAdded = viewModel::onImageAdded,
+        onImageRemoved = viewModel::onImageRemoved,
+        onImagesReordered = viewModel::onImagesReordered,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -155,12 +169,19 @@ private fun OneDayClassRegisterContent(
     onLoadCenters: () -> Unit,
     onGoRegisterCenter: () -> Unit,
     onGoEditCenter: (String) -> Unit,
+    onImageAdded: (Uri) -> Unit,
+    onImageRemoved: (Int) -> Unit,
+    onImagesReordered: (Int, Int) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var currentStep by rememberSaveable { mutableIntStateOf(1) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+    val onShowMessage: (String) -> Unit = { message ->
+        snackbarScope.launch { snackbarHostState.showSnackbar(message) }
+    }
     val isLoading = state.submitState is SubmitState.Loading
 
     LaunchedEffect(state.submitState) {
@@ -221,7 +242,10 @@ private fun OneDayClassRegisterContent(
                     )
                     5 -> Step5Content(
                         images = state.images,
-                        onAddImageClick = { /* Phase 2: 카메라/갤러리 시트 오픈 */ },
+                        onImageAdded = onImageAdded,
+                        onImageRemoved = onImageRemoved,
+                        onImagesReordered = onImagesReordered,
+                        onShowMessage = onShowMessage,
                         onBack = goPrevious,
                     )
                     else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
@@ -521,10 +545,62 @@ private fun formatCreatedAt(createdAt: String): String {
 @Composable
 private fun Step5Content(
     images: List<Uri>,
-    onAddImageClick: () -> Unit,
+    onImageAdded: (Uri) -> Unit,
+    onImageRemoved: (Int) -> Unit,
+    onImagesReordered: (Int, Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    var sheetVisible by rememberSaveable { mutableStateOf(false) }
+    // 카메라 촬영 결과 콜백이 URI를 돌려주지 않으므로 요청 시점의 URI를 임시 보관
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { success ->
+        val uri = pendingCameraUri
+        pendingCameraUri = null
+        if (success && uri != null) onImageAdded(uri)
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null) onImageAdded(uri)
+    }
+
+    val launchCamera: () -> Unit = {
+        val uri = createImageCaptureUri(context)
+        pendingCameraUri = uri
+        cameraLauncher.launch(uri)
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) launchCamera()
+        else onShowMessage("카메라 권한이 필요합니다.")
+    }
+
+    val onCameraSelected: () -> Unit = {
+        sheetVisible = false
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
+        if (granted) launchCamera()
+        else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    val onGallerySelected: () -> Unit = {
+        sheetVisible = false
+        galleryLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        )
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
             title = stringResource(R.string.one_day_class_register_step5_title),
@@ -534,7 +610,15 @@ private fun Step5Content(
         )
         ImagePickerGrid(
             images = images,
-            onAddClick = onAddImageClick,
+            onAddClick = {
+                if (images.size >= MAX_IMAGE_COUNT) {
+                    onShowMessage("이미지는 최대 ${MAX_IMAGE_COUNT}장까지 등록할 수 있어요.")
+                } else {
+                    sheetVisible = true
+                }
+            },
+            onDelete = onImageRemoved,
+            onReorder = onImagesReordered,
             header = {
                 RegisterSectionTitle(
                     title = "수련원 이미지 등록",
@@ -544,6 +628,18 @@ private fun Step5Content(
                     ),
                     startPadding = 0.dp
                 )
+            },
+        )
+    }
+
+    if (sheetVisible) {
+        ImageSourcePickerBottomSheet(
+            onDismiss = { sheetVisible = false },
+            onSelect = { source ->
+                when (source) {
+                    ImageSource.CAMERA -> onCameraSelected()
+                    ImageSource.GALLERY -> onGallerySelected()
+                }
             },
         )
     }
@@ -679,6 +775,9 @@ private fun OneDayClassRegisterScreenPreview() {
             onLoadCenters = {},
             onGoRegisterCenter = {},
             onGoEditCenter = {},
+            onImageAdded = {},
+            onImageRemoved = {},
+            onImagesReordered = { _, _ -> },
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -740,7 +839,10 @@ private fun Step5ContentEmptyPreview() {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step5Content(
                 images = emptyList(),
-                onAddImageClick = {},
+                onImageAdded = {},
+                onImageRemoved = {},
+                onImagesReordered = { _, _ -> },
+                onShowMessage = {},
                 onBack = {},
             )
         }
@@ -754,7 +856,10 @@ private fun Step5ContentWithImagesPreview() {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             Step5Content(
                 images = List(5) { Uri.parse("preview://image/$it") },
-                onAddImageClick = {},
+                onImageAdded = {},
+                onImageRemoved = {},
+                onImagesReordered = { _, _ -> },
+                onShowMessage = {},
                 onBack = {},
             )
         }

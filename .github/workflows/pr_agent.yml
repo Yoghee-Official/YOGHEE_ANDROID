@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: PR Agent action step
         id: pragent
-        uses: qodo-ai/pr-agent@743f52d80f3513193dfc7626f778c73478df6d0a # v0.41.1
+        uses: qodo-ai/pr-agent@f6af7d77554ff8d26adffded077e6461329e92fa # v0.42.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIG__MODEL: "gemini/gemini-2.5-flash"

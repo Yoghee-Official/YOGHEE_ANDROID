@@ -40,7 +40,7 @@ annotation class AppHttp
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://www.yoghee.xyz/"
+    private const val BASE_URL = "https://www.dopidopi.xyz/"
 
     @Provides
     @Singleton

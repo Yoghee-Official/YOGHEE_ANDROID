@@ -106,10 +106,7 @@ private fun AppNavGraph(
             OneDayClassRegisterScreen(
                 typeIndex = typeIndex,
                 onBack = { navController.popBackStack() },
-                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) },
-                onGoEditCenter = { centerId ->
-                    navController.navigate(AppRoute.RegisterCenter.createRoute(centerId = centerId))
-                },
+                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) }
             )
         }
 

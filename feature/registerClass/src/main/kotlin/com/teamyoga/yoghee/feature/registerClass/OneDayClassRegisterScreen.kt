@@ -66,6 +66,7 @@ import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
+import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
@@ -78,12 +79,12 @@ import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
 import com.teamyoga.yoghee.feature.registerClass.components.ImageSource
 import com.teamyoga.yoghee.feature.registerClass.components.ImageSourcePickerBottomSheet
-import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
-import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
+import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
+import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
 import kotlinx.coroutines.launch
 
@@ -133,7 +134,6 @@ fun OneDayClassRegisterScreen(
     typeIndex: Int,
     onBack: () -> Unit,
     onGoRegisterCenter: () -> Unit,
-    onGoEditCenter: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OneDayClassRegisterViewModel = hiltViewModel(),
 ) {
@@ -157,7 +157,6 @@ fun OneDayClassRegisterScreen(
         onScheduleDelete = viewModel::onScheduleDelete,
         onLoadCenters = viewModel::loadCenters,
         onGoRegisterCenter = onGoRegisterCenter,
-        onGoEditCenter = onGoEditCenter,
         onImageAdded = viewModel::onImageAdded,
         onImagesAdded = viewModel::onImagesAdded,
         onImageRemoved = viewModel::onImageRemoved,
@@ -181,7 +180,6 @@ private fun OneDayClassRegisterContent(
     onScheduleDelete: (Int) -> Unit,
     onLoadCenters: () -> Unit,
     onGoRegisterCenter: () -> Unit,
-    onGoEditCenter: (String) -> Unit,
     onImageAdded: (Uri) -> Unit,
     onImagesAdded: (List<Uri>) -> Unit,
     onImageRemoved: (Int) -> Unit,
@@ -254,7 +252,6 @@ private fun OneDayClassRegisterContent(
                         onLoadCenters = onLoadCenters,
                         onBack = goPrevious,
                         onRegisterLocationClick = onGoRegisterCenter,
-                        onEditCenterClick = onGoEditCenter,
                     )
                     5 -> Step5Content(
                         images = state.images,
@@ -471,7 +468,6 @@ private fun Step4Content(
     onLoadCenters: () -> Unit,
     onBack: () -> Unit,
     onRegisterLocationClick: () -> Unit,
-    onEditCenterClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(Unit) { onLoadCenters() }
@@ -496,11 +492,12 @@ private fun Step4Content(
             LocationRegisterButton(
                 onClick = onRegisterLocationClick,
                 modifier = Modifier.padding(top = 16.dp),
+                borderColor = LIGHT_GRAY,
+                titleColor = BLACK,
+                subTitleColor = LIGHT_GRAY
             )
             CentersSection(
                 centersState = centersState,
-                onAddClass = onRegisterLocationClick,
-                onEditAddress = onEditCenterClick,
                 modifier = Modifier.padding(top = 33.dp),
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -511,8 +508,6 @@ private fun Step4Content(
 @Composable
 private fun CentersSection(
     centersState: CentersState,
-    onAddClass: () -> Unit,
-    onEditAddress: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (centersState) {
@@ -534,16 +529,14 @@ private fun CentersSection(
             if (centersState.centers.isEmpty()) return
             Column(
                 modifier = modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 RegisterSectionTitle(title = "요가원 불러오기")
                 centersState.centers.forEach { center ->
                     LocationListItem(
                         date = formatCreatedAt(center.createdAt),
                         name = center.name,
-                        location = center.address,
-                        onAddClass = onAddClass,
-                        onEditAddress = { onEditAddress(center.centerId) },
+                        location = center.address
                     )
                 }
             }
@@ -825,7 +818,6 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleDelete = {},
             onLoadCenters = {},
             onGoRegisterCenter = {},
-            onGoEditCenter = {},
             onImageAdded = {},
             onImagesAdded = {},
             onImageRemoved = {},
@@ -922,27 +914,3 @@ private fun Step5ContentWithImagesPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step4Content")
-@Composable
-private fun Step4ContentPreview() {
-    YogheeTheme {
-        Box(modifier = Modifier.background(SAND_BEIGE)) {
-            Step4Content(
-                centersState = CentersState.Success(
-                    centers = listOf(
-                        com.teamyoga.yoghee.core.domain.model.Center(
-                            centerId = "center-1234abcd",
-                            name = "정환요가원",
-                            address = "경기 남양주시 다산중앙로123번길 22-26 899호",
-                            createdAt = "2026-08-01T16:18:37.131Z",
-                        ),
-                    ),
-                ),
-                onLoadCenters = {},
-                onBack = {},
-                onRegisterLocationClick = {},
-                onEditCenterClick = {},
-            )
-        }
-    }
-}

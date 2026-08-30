@@ -65,11 +65,24 @@ import java.util.TimeZone
 
 @Composable
 internal fun Step6Content(
+    price: String,
+    onPriceChange: (String) -> Unit,
+    discountEnabled: Boolean,
+    onDiscountEnabledChange: (Boolean) -> Unit,
+    discountRate: String,
+    onDiscountRateChange: (String) -> Unit,
+    discountStartMillis: Long?,
+    discountEndMillis: Long?,
+    onDiscountDateChange: (Long?, Long?) -> Unit,
+    refundRate24: String,
+    refundRate48: String,
+    refundRate72: String,
+    onRefundRateChange: (hoursBeforeClass: Int, value: String) -> Unit,
+    noticeText: String,
+    onNoticeChange: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var noticeText by rememberSaveable { mutableStateOf("") }
-
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
             title = stringResource(R.string.one_day_class_register_step6_title),
@@ -83,22 +96,48 @@ internal fun Step6Content(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
         ) {
-            EnterPrice()
+            EnterPrice(price = price, onPriceChange = onPriceChange)
             HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
-            DiscountArea()
+            DiscountArea(
+                enabled = discountEnabled,
+                onEnabledChange = onDiscountEnabledChange,
+                discountRate = discountRate,
+                onDiscountRateChange = onDiscountRateChange,
+                startMillis = discountStartMillis,
+                endMillis = discountEndMillis,
+                onDateChange = onDiscountDateChange,
+            )
             HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
 
             PriceTitleText(text = "환불기준")
             PriceTitleText(text = "예약 취소 안내 (환급금액)", modifier = Modifier.padding(top = 20.dp))
-            EnterPercentPrice("수련 시작", "환불", 24)
-            EnterPercentPrice("수련 시작", "환불", 48)
-            EnterPercentPrice("수련 시작", "환불", 72)
+            EnterPercentPrice(
+                title = "수련 시작",
+                label = "환불",
+                time = 24,
+                value = refundRate24,
+                onValueChange = { onRefundRateChange(24, it) },
+            )
+            EnterPercentPrice(
+                title = "수련 시작",
+                label = "환불",
+                time = 48,
+                value = refundRate48,
+                onValueChange = { onRefundRateChange(48, it) },
+            )
+            EnterPercentPrice(
+                title = "수련 시작",
+                label = "환불",
+                time = 72,
+                value = refundRate72,
+                onValueChange = { onRefundRateChange(72, it) },
+            )
             HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
 
             PriceTitleText(text = "예약 시 안내사항")
             HintTextField(
                 value = noticeText,
-                onValueChange = { noticeText = it },
+                onValueChange = onNoticeChange,
                 hint1 = "내용",
                 hint2 = "입금이나 환불과 관련하여, 추가로 안내할 사항을 입력하세요.",
                 maxLength = 3000,
@@ -126,8 +165,7 @@ internal fun Step6Content(
 }
 
 @Composable
-fun EnterPrice() {
-    var priceRaw by rememberSaveable { mutableStateOf("") }
+fun EnterPrice(price: String, onPriceChange: (String) -> Unit) {
     // 1회 수업 가격
     Row(
         modifier = Modifier
@@ -137,9 +175,9 @@ fun EnterPrice() {
     ) {
         PriceTitleText(text = "1회수업")
         BasicTextField(
-            value = priceRaw,
+            value = price,
             onValueChange = { input ->
-                priceRaw = input.filter { it.isDigit() }.trimStart('0')
+                onPriceChange(input.filter { it.isDigit() }.trimStart('0'))
             },
             modifier = Modifier.weight(1f),
             textStyle = TextStyle(
@@ -153,7 +191,7 @@ fun EnterPrice() {
             singleLine = true,
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterEnd) {
-                    if (priceRaw.isEmpty()) {
+                    if (price.isEmpty()) {
                         YogheeText(
                             text = "________",
                             color = BLACK,
@@ -171,9 +209,15 @@ fun EnterPrice() {
 }
 
 @Composable
-fun DiscountArea() {
-    var discountEnabled by rememberSaveable { mutableStateOf(false) }
-
+fun DiscountArea(
+    enabled: Boolean,
+    onEnabledChange: (Boolean) -> Unit,
+    discountRate: String,
+    onDiscountRateChange: (String) -> Unit,
+    startMillis: Long?,
+    endMillis: Long?,
+    onDateChange: (Long?, Long?) -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,13 +226,25 @@ fun DiscountArea() {
             PriceTitleText(text = "할인 적용")
             Spacer(modifier = Modifier.weight(1f))
             YogheeToggle(
-                checked = discountEnabled,
-                onCheckedChange = { discountEnabled = it },
+                checked = enabled,
+                onCheckedChange = onEnabledChange,
             )
         }
-        if (discountEnabled) {
-            EnterPercentPrice("할인률 기준", "할인", modifier = Modifier.padding(top = 24.dp))
-            EnterDiscountDate("할인 적용 기간", "까지")
+        if (enabled) {
+            EnterPercentPrice(
+                title = "할인률 기준",
+                label = "할인",
+                value = discountRate,
+                onValueChange = onDiscountRateChange,
+                modifier = Modifier.padding(top = 24.dp),
+            )
+            EnterDiscountDate(
+                title = "할인 적용 기간",
+                label = "까지",
+                startMillis = startMillis,
+                endMillis = endMillis,
+                onDateChange = onDateChange,
+            )
         }
     }
 }
@@ -197,11 +253,11 @@ fun DiscountArea() {
 fun EnterPercentPrice(
     title: String,
     label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
     time: Int? = null,
-    modifier: Modifier = Modifier.padding(top = 16.dp)
+    modifier: Modifier = Modifier.padding(top = 16.dp),
 ) {
-    var text by rememberSaveable { mutableStateOf("") }
-
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -219,9 +275,9 @@ fun EnterPercentPrice(
             PriceMediumText("시간 전")
         }
         BasicTextField(
-            value = text,
+            value = value,
             onValueChange = { input ->
-                text = input.filter { it.isDigit() }.trimStart('0')
+                onValueChange(input.filter { it.isDigit() }.trimStart('0'))
             },
             modifier = Modifier.weight(1f),
             textStyle = TextStyle(
@@ -245,15 +301,20 @@ fun EnterPercentPrice(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnterDiscountDate(title: String, label: String) {
-    var startMillis by rememberSaveable { mutableStateOf<Long?>(null) }
-    var endMillis by rememberSaveable { mutableStateOf<Long?>(null) }
+fun EnterDiscountDate(
+    title: String,
+    label: String,
+    startMillis: Long?,
+    endMillis: Long?,
+    onDateChange: (Long?, Long?) -> Unit,
+) {
+    // 다이얼로그 열림 여부는 순수 UI 상태라서 로컬에 보관.
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
     val displayText = when {
         startMillis == null -> "시작일 ~ 종료일"
-        endMillis == null -> "${formatDateMillis(startMillis!!)} ~ 종료일"
-        else -> "${formatDateMillis(startMillis!!)} ~ ${formatDateMillis(endMillis!!)}"
+        endMillis == null -> "${formatDateMillis(startMillis)} ~ 종료일"
+        else -> "${formatDateMillis(startMillis)} ~ ${formatDateMillis(endMillis)}"
     }
 
     Row(
@@ -287,8 +348,10 @@ fun EnterDiscountDate(title: String, label: String) {
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    startMillis = rangeState.selectedStartDateMillis
-                    endMillis = rangeState.selectedEndDateMillis
+                    onDateChange(
+                        rangeState.selectedStartDateMillis,
+                        rangeState.selectedEndDateMillis,
+                    )
                     showDatePicker = false
                 }) {
                     Text("확인", color = LAND_BROWN)
@@ -399,7 +462,24 @@ private object ThousandsSeparatorTransformation : VisualTransformation {
 private fun Step6ContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            Step6Content(onBack = {})
+            Step6Content(
+                price = "15000",
+                onPriceChange = {},
+                discountEnabled = true,
+                onDiscountEnabledChange = {},
+                discountRate = "10",
+                onDiscountRateChange = {},
+                discountStartMillis = null,
+                discountEndMillis = null,
+                onDiscountDateChange = { _, _ -> },
+                refundRate24 = "50",
+                refundRate48 = "80",
+                refundRate72 = "100",
+                onRefundRateChange = { _, _ -> },
+                noticeText = "환불은 수련 시작 24시간 전까지 가능합니다.",
+                onNoticeChange = {},
+                onBack = {},
+            )
         }
     }
 }

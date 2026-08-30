@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
+import com.teamyoga.yoghee.core.domain.model.CreateClassPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
+import com.teamyoga.yoghee.core.domain.model.CreateRefundPolicyParam
 import com.teamyoga.yoghee.core.domain.model.ImageUploadFile
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.core.domain.repository.ImageRepository
@@ -122,12 +124,46 @@ class OneDayClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onPriceChange(value: String) = _uiState.update { it.copy(price = value) }
+
+    fun onDiscountEnabledChange(value: Boolean) =
+        _uiState.update { it.copy(discountEnabled = value) }
+
+    fun onDiscountRateChange(value: String) =
+        _uiState.update { it.copy(discountRate = value) }
+
+    fun onDiscountDateChange(startMillis: Long?, endMillis: Long?) =
+        _uiState.update {
+            it.copy(discountStartMillis = startMillis, discountEndMillis = endMillis)
+        }
+
+    fun onRefundRateChange(hoursBeforeClass: Int, value: String) =
+        _uiState.update {
+            when (hoursBeforeClass) {
+                24 -> it.copy(refundRate24 = value)
+                48 -> it.copy(refundRate48 = value)
+                72 -> it.copy(refundRate72 = value)
+                else -> it
+            }
+        }
+
+    fun onNoticeChange(value: String) = _uiState.update { it.copy(noticeText = value) }
+
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
+
+        val state = _uiState.value
+        val price = state.price.toIntOrNull()
+        if (price == null || price <= 0) {
+            _uiState.update {
+                it.copy(submitState = SubmitState.Error("1회수업 가격을 입력해주세요."))
+            }
+            return
+        }
+
         _uiState.update { it.copy(submitState = SubmitState.Loading) }
 
         viewModelScope.launch {
-            val state = _uiState.value
             runCatching {
                 val imageUrls = uploadImagesIfAny(state.images)
                 classRepository.createOneDayClass(
@@ -140,6 +176,8 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         categoryCodes = state.categoryCodes.toList(),
                         schedules = state.schedules.map { it.toParam() },
                         images = imageUrls,
+                        price = price,
+                        policy = buildPolicy(state),
                     )
                 )
             }.onSuccess {
@@ -154,6 +192,33 @@ class OneDayClassRegisterViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    // 사용자가 아무 값도 입력하지 않았으면 policy 자체를 null로 전송한다.
+    private fun buildPolicy(state: OneDayClassRegisterUiState): CreateClassPolicyParam? {
+        val discountRate = if (state.discountEnabled) {
+            state.discountRate.toIntOrNull() ?: 0
+        } else {
+            0
+        }
+        val refundPolicies = listOf(
+            24 to state.refundRate24,
+            48 to state.refundRate48,
+            72 to state.refundRate72,
+        ).mapNotNull { (hours, raw) ->
+            raw.toIntOrNull()?.let { rate ->
+                CreateRefundPolicyParam(hoursBeforeClass = hours, refundRate = rate)
+            }
+        }
+        val note = state.noticeText
+        val noPolicyContent = discountRate == 0 && refundPolicies.isEmpty() && note.isBlank()
+        if (noPolicyContent) return null
+        return CreateClassPolicyParam(
+            discountPrice = 0,
+            discountRate = discountRate,
+            reservationNote = note,
+            refundPolicies = refundPolicies,
+        )
     }
 
     private suspend fun uploadImagesIfAny(images: List<ImageItem>): List<String> {
@@ -254,6 +319,17 @@ data class OneDayClassRegisterUiState(
     val schedules: List<ClassSchedule> = emptyList(),
     val images: List<ImageItem> = emptyList(),
     val selectedCenterId: String? = null,
+    // Step 6: 가격/할인/환불/안내사항
+    val price: String = "",
+    val discountEnabled: Boolean = false,
+    val discountRate: String = "",
+    // 할인 적용 기간은 아직 서버 스펙에 필드가 없어 클라이언트 상태로만 유지.
+    val discountStartMillis: Long? = null,
+    val discountEndMillis: Long? = null,
+    val refundRate24: String = "",
+    val refundRate48: String = "",
+    val refundRate72: String = "",
+    val noticeText: String = "",
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

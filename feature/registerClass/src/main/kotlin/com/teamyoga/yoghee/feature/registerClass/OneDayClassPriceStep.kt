@@ -151,6 +151,20 @@ fun EnterPrice() {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             visualTransformation = ThousandsSeparatorTransformation,
             singleLine = true,
+            decorationBox = { innerTextField ->
+                Box(contentAlignment = Alignment.CenterEnd) {
+                    if (priceRaw.isEmpty()) {
+                        YogheeText(
+                            text = "________",
+                            color = BLACK,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End,
+                        )
+                    }
+                    innerTextField()
+                }
+            },
         )
         PriceTitleText(text = "원")
     }
@@ -237,8 +251,8 @@ fun EnterDiscountDate(title: String, label: String) {
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
     val displayText = when {
-        startMillis == null -> "선택"
-        endMillis == null -> "${formatDateMillis(startMillis!!)} ~ 선택"
+        startMillis == null -> "시작일 ~ 종료일"
+        endMillis == null -> "${formatDateMillis(startMillis!!)} ~ 종료일"
         else -> "${formatDateMillis(startMillis!!)} ~ ${formatDateMillis(endMillis!!)}"
     }
 

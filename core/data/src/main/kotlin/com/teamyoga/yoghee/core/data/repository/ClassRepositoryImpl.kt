@@ -7,6 +7,7 @@ import com.teamyoga.yoghee.core.data.remote.model.CreateClassPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateRefundPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
+import com.teamyoga.yoghee.core.data.remote.model.CreateTicketDto
 import com.teamyoga.yoghee.core.data.remote.model.MyCenterDto
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.CenterDetail
@@ -17,6 +18,8 @@ import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.model.CreateRefundPolicyParam
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import javax.inject.Inject
+
+private const val ONE_DAY_TICKET_TYPE = "ONE_DAY"
 
 class ClassRepositoryImpl @Inject constructor(
     private val classService: ClassService,
@@ -34,9 +37,15 @@ class ClassRepositoryImpl @Inject constructor(
             images = params.images,
             price = params.price,
             policy = params.policy?.toDto(),
-            // TODO: 휴일/티켓 UI 미구현
+            // 하루수련은 항상 ONE_DAY 티켓 1장이며 가격은 class price와 동일.
+            tickets = listOf(
+                CreateTicketDto(
+                    ticketType = ONE_DAY_TICKET_TYPE,
+                    price = params.price,
+                )
+            ),
+            // TODO: 휴일 UI 미구현
             holidayPolicy = null,
-            tickets = emptyList(),
         )
         return classService.createClass(request).data.orEmpty()
     }

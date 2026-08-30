@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +28,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -44,7 +47,9 @@ import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.component.YogheeToggle
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.FLOW_BLUE
 import com.teamyoga.yoghee.core.ui.theme.GRAY
+import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
@@ -52,6 +57,7 @@ import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
+import com.teamyoga.yoghee.feature.registerClass.components.HintTextField
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,6 +68,7 @@ internal fun Step6Content(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var noticeText by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
@@ -74,11 +81,46 @@ internal fun Step6Content(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 24.dp),
         ) {
             EnterPrice()
-            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(horizontal = 8.dp, vertical = 20.dp))
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
             DiscountArea()
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
+
+            PriceTitleText(text = "환불기준")
+            PriceTitleText(text = "예약 취소 안내 (환급금액)", modifier = Modifier.padding(top = 20.dp))
+            EnterPercentPrice("수련 시작", "환불", 24)
+            EnterPercentPrice("수련 시작", "환불", 48)
+            EnterPercentPrice("수련 시작", "환불", 72)
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(vertical = 20.dp))
+
+            PriceTitleText(text = "예약 시 안내사항")
+            HintTextField(
+                value = noticeText,
+                onValueChange = { noticeText = it },
+                hint1 = "내용",
+                hint2 = "입금이나 환불과 관련하여, 추가로 안내할 사항을 입력하세요.",
+                maxLength = 3000,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+            YogheeText(
+                text = "미리보기",
+                color = BLACK,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(FLOW_BLUE, Green_D6F695),
+                        ),
+                    )
+                    .padding(vertical = 13.dp)
+            )
         }
     }
 }
@@ -90,7 +132,7 @@ fun EnterPrice() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 38.dp, start = 8.dp, end = 8.dp),
+            .padding(top = 38.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PriceTitleText(text = "1회수업")
@@ -117,12 +159,10 @@ fun EnterPrice() {
 @Composable
 fun DiscountArea() {
     var discountEnabled by rememberSaveable { mutableStateOf(false) }
-    var text by rememberSaveable { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PriceTitleText(text = "할인 적용")
@@ -133,44 +173,65 @@ fun DiscountArea() {
             )
         }
         if (discountEnabled) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                PriceMediumText(text = "할인률 기준")
-                BasicTextField(
-                    value = text,
-                    onValueChange = { input ->
-                        text = input.filter { it.isDigit() }.trimStart('0')
-                    },
-                    modifier = Modifier.weight(1f),
-                    textStyle = TextStyle(
-                        color = MIND_ORANGE,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.End,
-                    ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                )
-                YogheeText(
-                    text = "%",
-                    color = MIND_ORANGE,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                PriceMediumText(text = "할인", modifier = Modifier.padding(start = 20.dp))
-            }
-            EnterDiscount("할인 적용 기간", "까지")
+            EnterPercentPrice("할인률 기준", "할인", modifier = Modifier.padding(top = 24.dp))
+            EnterDiscountDate("할인 적용 기간", "까지")
         }
+    }
+}
+
+@Composable
+fun EnterPercentPrice(
+    title: String,
+    label: String,
+    time: Int? = null,
+    modifier: Modifier = Modifier.padding(top = 16.dp)
+) {
+    var text by rememberSaveable { mutableStateOf("") }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PriceMediumText(text = title)
+        if (time != null) {
+            YogheeText(
+                text = time.toString(),
+                color = MIND_ORANGE,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            PriceMediumText("시간 전")
+        }
+        BasicTextField(
+            value = text,
+            onValueChange = { input ->
+                text = input.filter { it.isDigit() }.trimStart('0')
+            },
+            modifier = Modifier.weight(1f),
+            textStyle = TextStyle(
+                color = MIND_ORANGE,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+        )
+        YogheeText(
+            text = "%",
+            color = MIND_ORANGE,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        PriceMediumText(text = label, modifier = Modifier.padding(start = 20.dp))
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnterDiscount(title: String, label: String) {
+fun EnterDiscountDate(title: String, label: String) {
     var startMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var endMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
@@ -267,12 +328,13 @@ private fun formatDateMillis(millis: Long): String {
 }
 
 @Composable
-fun PriceTitleText(text: String) {
+fun PriceTitleText(text: String, modifier: Modifier = Modifier) {
     YogheeText(
         text = text,
         color = BLACK,
         fontSize = 16.sp,
         fontWeight = FontWeight.Bold,
+        modifier = modifier
     )
 }
 

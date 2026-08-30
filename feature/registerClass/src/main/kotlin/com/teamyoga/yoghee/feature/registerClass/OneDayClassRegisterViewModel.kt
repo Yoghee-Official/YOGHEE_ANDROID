@@ -1,29 +1,40 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
+import com.teamyoga.yoghee.core.domain.model.ImageUploadFile
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
+import com.teamyoga.yoghee.core.domain.repository.ImageRepository
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 private const val ONE_DAY_CLASS_TYPE = "O"
+private const val IMAGE_UPLOAD_TYPE = "class"
 internal const val MAX_IMAGE_COUNT = 20
 
 @HiltViewModel
 class OneDayClassRegisterViewModel @Inject constructor(
     private val classRepository: ClassRepository,
+    private val imageRepository: ImageRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OneDayClassRegisterUiState())
@@ -118,6 +129,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             runCatching {
+                val imageUrls = uploadImagesIfAny(state.images)
                 classRepository.createOneDayClass(
                     CreateOneDayClassParams(
                         type = ONE_DAY_CLASS_TYPE,
@@ -127,6 +139,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         featureCodes = state.classPurposes.toList(),
                         categoryCodes = state.categoryCodes.toList(),
                         schedules = state.schedules.map { it.toParam() },
+                        images = imageUrls,
                     )
                 )
             }.onSuccess {
@@ -141,6 +154,14 @@ class OneDayClassRegisterViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun uploadImagesIfAny(images: List<ImageItem>): List<String> {
+        if (images.isEmpty()) return emptyList()
+        val files = withContext(Dispatchers.IO) {
+            images.map { it.uri.toUploadFile(context) }
+        }
+        return imageRepository.uploadImages(type = IMAGE_UPLOAD_TYPE, files = files)
     }
 
     fun onErrorConsumed() {
@@ -178,6 +199,50 @@ class OneDayClassRegisterViewModel @Inject constructor(
         minCapacity = minCount,
         maxCapacity = maxCount,
     )
+}
+
+private fun Uri.toUploadFile(context: Context): ImageUploadFile {
+    val resolver = context.contentResolver
+    val contentType = resolver.getType(this) ?: "image/jpeg"
+    val bytes = resolver.openInputStream(this)?.use { it.readBytes() }
+        ?: error("이미지를 읽을 수 없습니다: $this")
+    val (width, height) = decodeImageSize(bytes)
+    val fileName = queryDisplayName(context) ?: generateFileName(contentType)
+    return ImageUploadFile(
+        fileName = fileName,
+        contentType = contentType,
+        width = width,
+        height = height,
+        bytes = bytes,
+    )
+}
+
+private fun Uri.queryDisplayName(context: Context): String? {
+    val cursor = context.contentResolver.query(
+        this,
+        arrayOf(MediaStore.MediaColumns.DISPLAY_NAME),
+        null, null, null,
+    ) ?: return null
+    return cursor.use {
+        if (it.moveToFirst()) it.getString(0) else null
+    }
+}
+
+private fun generateFileName(contentType: String): String {
+    val extension = when {
+        contentType.contains("png") -> "png"
+        contentType.contains("gif") -> "gif"
+        contentType.contains("webp") -> "webp"
+        else -> "jpg"
+    }
+    return "${UUID.randomUUID()}.$extension"
+}
+
+// 헤더만 디코딩해서 이미지 크기 추출 (전체 비트맵 메모리 로드 X)
+private fun decodeImageSize(bytes: ByteArray): Pair<Int, Int> {
+    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+    return options.outWidth.coerceAtLeast(0) to options.outHeight.coerceAtLeast(0)
 }
 
 data class OneDayClassRegisterUiState(

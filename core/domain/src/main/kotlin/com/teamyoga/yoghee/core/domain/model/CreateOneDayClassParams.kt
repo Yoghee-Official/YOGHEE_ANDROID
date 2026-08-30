@@ -12,6 +12,8 @@ data class CreateOneDayClassParams(
     val featureCodes: List<String>,
     val categoryCodes: List<String>,
     val schedules: List<ClassScheduleParam>,
+    // 업로드가 끝난 imageUrl 목록. 첫 번째 항목이 썸네일.
+    val images: List<String> = emptyList(),
 )
 
 data class ClassScheduleParam(

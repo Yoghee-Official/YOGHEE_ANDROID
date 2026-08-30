@@ -4,11 +4,13 @@ import com.teamyoga.yoghee.core.data.repository.AuthRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.CategoryRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.ClassRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.FeedRepositoryImpl
+import com.teamyoga.yoghee.core.data.repository.ImageRepositoryImpl
 import com.teamyoga.yoghee.core.data.repository.MainRepositoryImpl
 import com.teamyoga.yoghee.core.domain.repository.AuthRepository
 import com.teamyoga.yoghee.core.domain.repository.CategoryRepository
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.core.domain.repository.FeedRepository
+import com.teamyoga.yoghee.core.domain.repository.ImageRepository
 import com.teamyoga.yoghee.core.domain.repository.MainRepository
 import dagger.Binds
 import dagger.Module
@@ -49,4 +51,10 @@ interface DataModule {
     fun bindClassRepository(
         classRepositoryImpl: ClassRepositoryImpl
     ): ClassRepository
+
+    @Binds
+    @Singleton
+    fun bindImageRepository(
+        imageRepositoryImpl: ImageRepositoryImpl
+    ): ImageRepository
 }

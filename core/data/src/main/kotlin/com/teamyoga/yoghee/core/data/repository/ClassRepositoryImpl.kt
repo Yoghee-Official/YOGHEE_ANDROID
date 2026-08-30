@@ -27,8 +27,8 @@ class ClassRepositoryImpl @Inject constructor(
             featureCodes = params.featureCodes,
             categoryCodes = params.categoryCodes,
             schedules = params.schedules.map { it.toDto() },
-            // TODO: Step 4~7 UI 완성 시 값 채우기
-            images = emptyList(),
+            images = params.images,
+            // TODO: Step 6 UI 완성 시 값 채우기
             price = 0,
             policy = null,
             holidayPolicy = null,

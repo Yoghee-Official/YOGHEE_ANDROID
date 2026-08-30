@@ -87,7 +87,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ScheduleItemCard
 import kotlinx.coroutines.launch
 
-private const val TOTAL_STEPS = 7
+private const val TOTAL_STEPS = 6
 
 // 전문 수련 유형: (파트너/임산부/펫/키즈 요가는 이용 대상으로 이동)
 private val CLASS_TYPE_OPTIONS = listOf(
@@ -266,7 +266,6 @@ private fun OneDayClassRegisterContent(
                         onBack = goPrevious,
                     )
                     6 -> Step6Content(onBack = goPrevious)
-                    else -> StepPlaceholderContent(step = currentStep, onBack = goPrevious)
                 }
             }
             RegisterBottomBar(

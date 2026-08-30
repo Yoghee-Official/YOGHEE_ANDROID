@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +35,9 @@ import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
+import com.teamyoga.yoghee.core.ui.component.YogheeToggle
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 
@@ -42,7 +46,6 @@ internal fun Step6Content(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var priceRaw by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
@@ -57,43 +60,74 @@ internal fun Step6Content(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
         ) {
-            // 1회 수업 가격
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 38.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                YogheeText(
-                    text = "1회수업",
-                    color = BLACK,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                BasicTextField(
-                    value = priceRaw,
-                    onValueChange = { input ->
-                        priceRaw = input.filter { it.isDigit() }.trimStart('0')
-                    },
-                    modifier = Modifier.weight(1f),
-                    textStyle = TextStyle(
-                        color = BLACK,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.End,
-                    ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    visualTransformation = ThousandsSeparatorTransformation,
-                    singleLine = true,
-                )
-                YogheeText(
-                    text = "원",
-                    color = BLACK,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+            EnterPrice()
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(horizontal = 8.dp, vertical = 20.dp))
+            DiscountArea()
         }
+    }
+}
+
+@Composable
+fun EnterPrice() {
+    var priceRaw by rememberSaveable { mutableStateOf("") }
+    // 1회 수업 가격
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 38.dp, start = 8.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        YogheeText(
+            text = "1회수업",
+            color = BLACK,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        BasicTextField(
+            value = priceRaw,
+            onValueChange = { input ->
+                priceRaw = input.filter { it.isDigit() }.trimStart('0')
+            },
+            modifier = Modifier.weight(1f),
+            textStyle = TextStyle(
+                color = BLACK,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            visualTransformation = ThousandsSeparatorTransformation,
+            singleLine = true,
+        )
+        YogheeText(
+            text = "원",
+            color = BLACK,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+fun DiscountArea() {
+    var discountEnabled by rememberSaveable { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        YogheeText(
+            text = "할인 적용",
+            color = BLACK,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        YogheeToggle(
+            checked = discountEnabled,
+            onCheckedChange = { discountEnabled = it },
+        )
     }
 }
 

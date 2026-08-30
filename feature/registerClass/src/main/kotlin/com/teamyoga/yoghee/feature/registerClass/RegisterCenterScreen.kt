@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.teamyoga.yoghee.core.common.formatCreatedAt
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -418,13 +419,6 @@ private fun CentersSection(
         }
         is CentersState.Error -> Unit
     }
-}
-
-// ISO-8601(예: 2026-08-01T16:18:37.131Z) 앞부분에서 yyyy-MM-dd만 추출.
-// 파싱 실패 시 원본 반환.
-private fun formatCreatedAt(createdAt: String): String {
-    val datePart = createdAt.substringBefore('T', missingDelimiterValue = "")
-    return if (datePart.length == 10) datePart else createdAt
 }
 
 @Preview(showBackground = true, name = "YogaPlaceRegisterScreen")

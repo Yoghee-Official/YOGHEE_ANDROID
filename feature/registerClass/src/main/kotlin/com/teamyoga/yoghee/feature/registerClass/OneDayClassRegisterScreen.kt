@@ -60,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.teamyoga.yoghee.core.common.formatCreatedAt
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -157,6 +158,7 @@ fun OneDayClassRegisterScreen(
         onScheduleDelete = viewModel::onScheduleDelete,
         onLoadCenters = viewModel::loadCenters,
         onGoRegisterCenter = onGoRegisterCenter,
+        onCenterSelected = viewModel::onCenterSelected,
         onImageAdded = viewModel::onImageAdded,
         onImagesAdded = viewModel::onImagesAdded,
         onImageRemoved = viewModel::onImageRemoved,
@@ -180,6 +182,7 @@ private fun OneDayClassRegisterContent(
     onScheduleDelete: (Int) -> Unit,
     onLoadCenters: () -> Unit,
     onGoRegisterCenter: () -> Unit,
+    onCenterSelected: (String) -> Unit,
     onImageAdded: (Uri) -> Unit,
     onImagesAdded: (List<Uri>) -> Unit,
     onImageRemoved: (Int) -> Unit,
@@ -249,6 +252,8 @@ private fun OneDayClassRegisterContent(
                     )
                     4 -> Step4Content(
                         centersState = state.centersState,
+                        selectedCenterId = state.selectedCenterId,
+                        onCenterSelected = onCenterSelected,
                         onLoadCenters = onLoadCenters,
                         onBack = goPrevious,
                         onRegisterLocationClick = onGoRegisterCenter,
@@ -465,6 +470,8 @@ private fun Step3Content(
 @Composable
 private fun Step4Content(
     centersState: CentersState,
+    selectedCenterId: String?,
+    onCenterSelected: (String) -> Unit,
     onLoadCenters: () -> Unit,
     onBack: () -> Unit,
     onRegisterLocationClick: () -> Unit,
@@ -498,6 +505,8 @@ private fun Step4Content(
             )
             CentersSection(
                 centersState = centersState,
+                selectedCenterId = selectedCenterId,
+                onCenterSelected = onCenterSelected,
                 modifier = Modifier.padding(top = 33.dp),
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -508,6 +517,8 @@ private fun Step4Content(
 @Composable
 private fun CentersSection(
     centersState: CentersState,
+    selectedCenterId: String?,
+    onCenterSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (centersState) {
@@ -536,20 +547,15 @@ private fun CentersSection(
                     LocationListItem(
                         date = formatCreatedAt(center.createdAt),
                         name = center.name,
-                        location = center.address
+                        location = center.address,
+                        selected = center.centerId == selectedCenterId,
+                        onClick = { onCenterSelected(center.centerId) },
                     )
                 }
             }
         }
         is CentersState.Error -> Unit
     }
-}
-
-// ISO-8601(예: 2026-08-01T16:18:37.131Z) 앞부분에서 yyyy-MM-dd만 추출.
-// 파싱 실패 시 원본 반환.
-private fun formatCreatedAt(createdAt: String): String {
-    val datePart = createdAt.substringBefore('T', missingDelimiterValue = "")
-    return if (datePart.length == 10) datePart else createdAt
 }
 
 @Composable
@@ -818,6 +824,7 @@ private fun OneDayClassRegisterScreenPreview() {
             onScheduleDelete = {},
             onLoadCenters = {},
             onGoRegisterCenter = {},
+            onCenterSelected = {},
             onImageAdded = {},
             onImagesAdded = {},
             onImageRemoved = {},

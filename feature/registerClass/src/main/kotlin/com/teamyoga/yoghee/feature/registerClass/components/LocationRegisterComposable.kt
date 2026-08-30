@@ -144,14 +144,19 @@ fun LocationListItem(
     date: String,
     name: String,
     location: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) {
+    val borderColor = if (selected) MIND_ORANGE else LIGHT_GRAY
+    val nameColor = if (selected) MIND_ORANGE else BLACK
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(WHITE)
-            .border(width = 1.dp, color = LIGHT_GRAY, shape = RoundedCornerShape(8.dp))
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
+            .then(if (onClick != null) Modifier.noRippleClickable(onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -164,7 +169,7 @@ fun LocationListItem(
         )
         YogheeText(
             text = name,
-            color = BLACK,
+            color = nameColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -224,5 +229,30 @@ private fun LocationListItemPreview() {
             location = "경기 남양주시 다산중앙로123번길 22-26 899호",
             modifier = Modifier.padding(16.dp),
         )
+    }
+}
+
+@Preview(showBackground = true, name = "LocationListItem Selectable")
+@Composable
+private fun LocationListItemSelectablePreview() {
+    YogheeTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LocationListItem(
+                date = "2026-08-01",
+                name = "정환요가원 (선택됨)",
+                location = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                selected = true,
+                onClick = {},
+            )
+            LocationListItem(
+                date = "2026-08-01",
+                name = "정환요가원 (미선택)",
+                location = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                selected = false,
+                onClick = {},
+            )
+        }
     }
 }

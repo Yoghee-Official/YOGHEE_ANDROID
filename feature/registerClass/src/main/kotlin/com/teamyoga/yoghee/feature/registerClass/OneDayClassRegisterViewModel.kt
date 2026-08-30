@@ -39,6 +39,9 @@ class OneDayClassRegisterViewModel @Inject constructor(
     fun onCategoryCodesChange(value: Set<String>) =
         _uiState.update { it.copy(categoryCodes = value) }
 
+    fun onCenterSelected(centerId: String) =
+        _uiState.update { it.copy(selectedCenterId = centerId) }
+
     fun onScheduleApplied(input: ClassSchedule) {
         _uiState.update {
             it.copy(schedules = it.schedules + input)
@@ -120,8 +123,7 @@ class OneDayClassRegisterViewModel @Inject constructor(
                         type = ONE_DAY_CLASS_TYPE,
                         name = state.name,
                         description = state.description,
-                        // TODO: 로그인한 강사 정보에서 centerId 채우기
-                        centerId = "",
+                        centerId = state.selectedCenterId.orEmpty(),
                         featureCodes = state.classPurposes.toList(),
                         categoryCodes = state.categoryCodes.toList(),
                         schedules = state.schedules.map { it.toParam() },
@@ -186,6 +188,7 @@ data class OneDayClassRegisterUiState(
     val categoryCodes: Set<String> = emptySet(),
     val schedules: List<ClassSchedule> = emptyList(),
     val images: List<ImageItem> = emptyList(),
+    val selectedCenterId: String? = null,
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

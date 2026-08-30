@@ -530,7 +530,7 @@ private fun Step4Content(
                 modifier = Modifier.padding(top = 16.dp),
                 borderColor = LIGHT_GRAY,
                 titleColor = BLACK,
-                subTitleColor = LIGHT_GRAY
+                subTitleColor = GRAY
             )
             CentersSection(
                 centersState = centersState,

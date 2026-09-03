@@ -68,6 +68,8 @@ fun RegularClassRegisterScreen(
         onImagesReordered = viewModel::onImagesReordered,
         onHasHolidayChange = viewModel::onHasHolidayChange,
         onHolidayDayOfWeekToggle = viewModel::onHolidayDayOfWeekToggle,
+        onHolidayToggle = viewModel::onHolidayToggle,
+        onAllHolidayToggle = viewModel::onAllHolidayToggle,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -91,6 +93,8 @@ private fun RegularClassRegisterContent(
     onImagesReordered: (Int, Int) -> Unit,
     onHasHolidayChange: (Boolean) -> Unit,
     onHolidayDayOfWeekToggle: (String) -> Unit,
+    onHolidayToggle: (Set<String>) -> Unit,
+    onAllHolidayToggle: () -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -172,8 +176,11 @@ private fun RegularClassRegisterContent(
                         title = stringResource(R.string.regular_class_register_step5_title),
                         hasHoliday = state.hasHoliday,
                         holidayDaysOfWeek = state.holidayDaysOfWeek,
+                        holidays = state.holidays,
                         onHasHolidayChange = onHasHolidayChange,
                         onHolidayDayOfWeekToggle = onHolidayDayOfWeekToggle,
+                        onHolidayToggle = onHolidayToggle,
+                        onAllHolidayToggle = onAllHolidayToggle,
                         onBack = goPrevious,
                     )
                     6 -> StepPlaceholderContent(step = 6, onBack = goPrevious)
@@ -216,6 +223,8 @@ private fun RegularClassRegisterScreenPreview() {
             onImagesReordered = { _, _ -> },
             onHasHolidayChange = {},
             onHolidayDayOfWeekToggle = {},
+            onHolidayToggle = {},
+            onAllHolidayToggle = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -231,8 +240,11 @@ private fun RegularClassRegisterHolidayStepPreview() {
                 title = "휴무 정보",
                 hasHoliday = true,
                 holidayDaysOfWeek = setOf("MON", "SUN"),
+                holidays = setOf("NEW_YEAR_DAY", "CHRISTMAS_DAY"),
                 onHasHolidayChange = {},
                 onHolidayDayOfWeekToggle = {},
+                onHolidayToggle = {},
+                onAllHolidayToggle = {},
                 onBack = {},
             )
         }

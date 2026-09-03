@@ -13,6 +13,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +23,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,6 +63,7 @@ import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
+import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
@@ -427,13 +431,39 @@ internal val HOLIDAY_DAY_OF_WEEK_OPTIONS = listOf(
     "SUN" to "일",
 )
 
+// 하나의 pill이 전송/토글해야 하는 공휴일 코드 묶음.
+// 예) "설날 연휴" pill을 누르면 SEOLLAL_PREV/DAY/NEXT 3개 코드가 함께 처리된다.
+internal data class HolidayOption(val codes: Set<String>, val label: String)
+
+internal val HOLIDAY_OPTIONS = listOf(
+    HolidayOption(setOf("NEW_YEAR_DAY"), "신정"),
+    HolidayOption(setOf("SEOLLAL_DAY"), "설날 당일"),
+    HolidayOption(setOf("SEOLLAL_PREV", "SEOLLAL_DAY", "SEOLLAL_NEXT"), "설날 연휴"),
+    HolidayOption(setOf("INDEPENDENCE_MOVEMENT_DAY"), "삼일절"),
+    HolidayOption(setOf("BUDDHA_BIRTHDAY"), "석가탄신일"),
+    HolidayOption(setOf("CHILDREN_DAY"), "어린이날"),
+    HolidayOption(setOf("MEMORIAL_DAY"), "현충일"),
+    HolidayOption(setOf("LIBERATION_DAY"), "광복절"),
+    HolidayOption(setOf("NATIONAL_FOUNDATION_DAY"), "개천절"),
+    HolidayOption(setOf("HANGEUL_DAY"), "한글날"),
+    HolidayOption(setOf("CHUSEOK_DAY"), "추석 당일"),
+    HolidayOption(setOf("CHUSEOK_PREV", "CHUSEOK_DAY", "CHUSEOK_NEXT"), "추석 연휴"),
+    HolidayOption(setOf("CHRISTMAS_DAY"), "크리스마스"),
+)
+
+internal val ALL_HOLIDAY_CODES: Set<String> =
+    HOLIDAY_OPTIONS.flatMap { it.codes }.toSet()
+
 @Composable
 internal fun ClassHolidayStepContent(
     title: String,
     hasHoliday: Boolean,
     holidayDaysOfWeek: Set<String>,
+    holidays: Set<String>,
     onHasHolidayChange: (Boolean) -> Unit,
     onHolidayDayOfWeekToggle: (String) -> Unit,
+    onHolidayToggle: (Set<String>) -> Unit,
+    onAllHolidayToggle: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -477,7 +507,7 @@ internal fun ClassHolidayStepContent(
                 HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(top = 24.dp))
                 RegisterSectionTitle(
                     title = "휴무요일 선택",
-                    modifier = Modifier.padding(top = 20.dp, start = 12.dp),
+                    modifier = Modifier.padding(top = 20.dp, start = 8.dp),
                 )
                 Row(
                     modifier = Modifier
@@ -494,6 +524,21 @@ internal fun ClassHolidayStepContent(
                         )
                     }
                 }
+                HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(top = 20.dp))
+                RegisterSectionTitle(
+                    title = "다음 공휴일 중 휴무일이 있나요?",
+                    modifier = Modifier.padding(top = 20.dp, start = 8.dp),
+                )
+                AllHolidayCheckboxRow(
+                    checked = holidays == ALL_HOLIDAY_CODES,
+                    onClick = onAllHolidayToggle,
+                    modifier = Modifier.padding(top = 16.dp, start = 8.dp),
+                )
+                HolidayOptionsGrid(
+                    selected = holidays,
+                    onToggle = onHolidayToggle,
+                    modifier = Modifier.padding(top = 20.dp, start = 8.dp),
+                )
             }
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -519,7 +564,98 @@ private fun HolidayChoiceButton(
             text = text,
             color = BLACK,
             fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@Composable
+private fun AllHolidayCheckboxRow(
+    checked: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.noRippleClickable(onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(WHITE)
+                .border(1.dp, LIGHT_GRAY, CircleShape)
+                .padding(5.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (checked) {
+                Image(
+                    painter = painterResource(R.drawable.ic_check),
+                    contentDescription = "선택됨",
+                )
+            }
+        }
+        YogheeText(
+            text = "전체 휴무",
+            color = BLACK,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@Composable
+private fun HolidayOptionsGrid(
+    selected: Set<String>,
+    onToggle: (Set<String>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // 한 행에 4개씩 배치. 마지막 행이 4개 미만이면 남은 자리를 Spacer로 채워 폭을 유지.
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        HOLIDAY_OPTIONS.chunked(4).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                rowItems.forEach { option ->
+                    // pill의 모든 코드가 선택돼 있을 때만 시각적으로 selected 처리.
+                    val isSelected = option.codes.all { it in selected }
+                    HolidayPillButton(
+                        label = option.label,
+                        selected = isSelected,
+                        onClick = { onToggle(option.codes) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HolidayPillButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .height(30.dp)
+            .clip(RoundedCornerShape(33.dp))
+            .background(if (selected) Green_D6F695 else LIGHT_GRAY)
+            .noRippleClickable(onClick)
+            .padding(vertical = 8.dp, horizontal = 12.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        YogheeText(
+            text = label,
+            color = BLACK,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
         )
     }
 }

@@ -83,6 +83,25 @@ class RegularClassRegisterViewModel @Inject constructor(
         }
     }
 
+    // pill 하나가 담당하는 코드 묶음을 통째로 추가/삭제.
+    // 이미 모두 선택돼 있으면 해제, 그 외에는 모두 추가.
+    fun onHolidayToggle(codes: Set<String>) {
+        _uiState.update {
+            val current = it.holidays
+            val allSelected = codes.all { code -> code in current }
+            val next = if (allSelected) current - codes else current + codes
+            it.copy(holidays = next)
+        }
+    }
+
+    // "전체 휴무" 체크박스 토글: 전체 선택 상태면 해제, 그 외에는 모두 선택.
+    fun onAllHolidayToggle() {
+        _uiState.update {
+            val next = if (it.holidays == ALL_HOLIDAY_CODES) emptySet() else ALL_HOLIDAY_CODES
+            it.copy(holidays = next)
+        }
+    }
+
     fun onImagesReordered(from: Int, to: Int) {
         val current = _uiState.value
         if (from == to) return
@@ -136,6 +155,7 @@ data class RegularClassRegisterUiState(
     val selectedCenterId: String? = null,
     val hasHoliday: Boolean = true,
     val holidayDaysOfWeek: Set<String> = emptySet(),
+    val holidays: Set<String> = emptySet(),
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

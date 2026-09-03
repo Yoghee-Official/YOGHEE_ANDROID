@@ -19,11 +19,7 @@ sealed class AppRoute(val route: String) {
             if (centerId.isNullOrBlank()) "registerCenter" else "registerCenter?centerId=$centerId"
     }
 
-    data object OneDayClassRegister : AppRoute("oneDayClassRegister/{typeIndex}") {
-        const val ARG_TYPE_INDEX = "typeIndex"
-
-        fun createRoute(typeIndex: Int): String = "oneDayClassRegister/$typeIndex"
-    }
+    data object OneDayClassRegister : AppRoute("oneDayClassRegister")
 
     data object RegularClassRegister : AppRoute("regularClassRegister")
 

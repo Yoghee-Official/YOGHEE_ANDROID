@@ -55,7 +55,6 @@ private const val TOTAL_STEPS = 6
 
 @Composable
 fun OneDayClassRegisterScreen(
-    typeIndex: Int,
     onBack: () -> Unit,
     onGoRegisterCenter: () -> Unit,
     onGoComplete: () -> Unit,
@@ -181,7 +180,7 @@ private fun OneDayClassRegisterContent(
                         onCategoryCodesChange = onCategoryCodesChange,
                         onBack = goPrevious,
                     )
-                    3 -> Step3Content(
+                    3 -> OneDayScheduleStepContent(
                         schedules = state.schedules,
                         onScheduleApplied = onScheduleApplied,
                         onScheduleEdit = onScheduleEdit,
@@ -251,7 +250,7 @@ private sealed interface SheetMode {
 }
 
 @Composable
-private fun Step3Content(
+private fun OneDayScheduleStepContent(
     schedules: List<ClassSchedule>,
     onScheduleApplied: (ClassSchedule) -> Unit,
     onScheduleEdit: (Int, ClassSchedule) -> Unit,
@@ -370,12 +369,12 @@ private fun OneDayClassRegisterScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Step3Content")
+@Preview(showBackground = true, name = "OneDayScheduleStepContent")
 @Composable
-private fun Step3ContentPreview() {
+private fun OneDayScheduleStepContentPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            Step3Content(
+            OneDayScheduleStepContent(
                 schedules = emptyList(),
                 onScheduleApplied = {},
                 onScheduleEdit = { _, _ -> },

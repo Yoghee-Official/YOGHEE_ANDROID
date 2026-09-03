@@ -92,8 +92,8 @@ private fun AppNavGraph(
         composable(AppRoute.RegisterClass.route) {
             SelectClassTypeScreen(
                 onBack = { navController.popBackStack() },
-                onGoOneDayClassRegister = { typeIndex ->
-                    navController.navigate(AppRoute.OneDayClassRegister.createRoute(typeIndex = typeIndex))
+                onGoOneDayClassRegister = {
+                    navController.navigate(AppRoute.OneDayClassRegister.route)
                 },
                 onGoRegularClassRegister = {
                     navController.navigate(AppRoute.RegularClassRegister.route)
@@ -101,15 +101,8 @@ private fun AppNavGraph(
             )
         }
 
-        composable(
-            route = AppRoute.OneDayClassRegister.route,
-            arguments = listOf(
-                navArgument(AppRoute.OneDayClassRegister.ARG_TYPE_INDEX) { type = NavType.IntType },
-            ),
-        ) { backStackEntry ->
-            val typeIndex = backStackEntry.arguments?.getInt(AppRoute.OneDayClassRegister.ARG_TYPE_INDEX) ?: 0
+        composable(AppRoute.OneDayClassRegister.route) {
             OneDayClassRegisterScreen(
-                typeIndex = typeIndex,
                 onBack = { navController.popBackStack() },
                 onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) },
                 onGoComplete = {

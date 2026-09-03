@@ -105,7 +105,7 @@ private val classTypes = listOf(
 @Composable
 fun SelectClassTypeScreen(
     onBack: () -> Unit,
-    onGoOneDayClassRegister: (Int) -> Unit,
+    onGoOneDayClassRegister: () -> Unit,
     onGoRegularClassRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -127,7 +127,7 @@ fun SelectClassTypeScreen(
 
 @Composable
 private fun SelectClassTypeContent(
-    onGoOneDayClassRegister: (Int) -> Unit,
+    onGoOneDayClassRegister: () -> Unit,
     onGoRegularClassRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -160,7 +160,7 @@ private fun SelectClassTypeContent(
                 onClick = {
                     // [0] 원데이, [2] 시즌, [3] 워크숍은 원데이 클래스 등록 화면으로 진입
                     // [1] 정규 수련은 정규 클래스 등록 화면으로 진입
-                    if (page == 1) onGoRegularClassRegister() else onGoOneDayClassRegister(page)
+                    if (page == 1) onGoRegularClassRegister() else onGoOneDayClassRegister()
                 },
             )
         }

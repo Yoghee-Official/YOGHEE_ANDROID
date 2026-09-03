@@ -67,6 +67,22 @@ class RegularClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onHasHolidayChange(value: Boolean) {
+        _uiState.update {
+            // "휴무일이 없어요"로 바꾸면 이전에 선택된 요일도 초기화한다.
+            if (value) it.copy(hasHoliday = true)
+            else it.copy(hasHoliday = false, holidayDaysOfWeek = emptySet())
+        }
+    }
+
+    fun onHolidayDayOfWeekToggle(dayCode: String) {
+        _uiState.update {
+            val current = it.holidayDaysOfWeek
+            val next = if (dayCode in current) current - dayCode else current + dayCode
+            it.copy(holidayDaysOfWeek = next)
+        }
+    }
+
     fun onImagesReordered(from: Int, to: Int) {
         val current = _uiState.value
         if (from == to) return
@@ -118,6 +134,8 @@ data class RegularClassRegisterUiState(
     val categoryCodes: Set<String> = emptySet(),
     val images: List<ImageItem> = emptyList(),
     val selectedCenterId: String? = null,
+    val hasHoliday: Boolean = true,
+    val holidayDaysOfWeek: Set<String> = emptySet(),
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

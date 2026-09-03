@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +24,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +56,7 @@ import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
+import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
@@ -412,6 +417,141 @@ internal fun ClassImageStepContent(
     }
 }
 
+internal val HOLIDAY_DAY_OF_WEEK_OPTIONS = listOf(
+    "MON" to "월",
+    "TUE" to "화",
+    "WED" to "수",
+    "THU" to "목",
+    "FRI" to "금",
+    "SAT" to "토",
+    "SUN" to "일",
+)
+
+@Composable
+internal fun ClassHolidayStepContent(
+    title: String,
+    hasHoliday: Boolean,
+    holidayDaysOfWeek: Set<String>,
+    onHasHolidayChange: (Boolean) -> Unit,
+    onHolidayDayOfWeekToggle: (String) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = title,
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+        ) {
+            RegisterSectionTitle(
+                title = "휴무일이 있나요?",
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(15.dp),
+            ) {
+                HolidayChoiceButton(
+                    text = "휴무일이 있어요",
+                    selected = hasHoliday,
+                    onClick = { onHasHolidayChange(true) },
+                    modifier = Modifier.weight(1f),
+                )
+                HolidayChoiceButton(
+                    text = "휴무일이 없어요",
+                    selected = !hasHoliday,
+                    onClick = { onHasHolidayChange(false) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (hasHoliday) {
+                HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY, modifier = Modifier.padding(top = 24.dp))
+                RegisterSectionTitle(
+                    title = "휴무요일 선택",
+                    modifier = Modifier.padding(top = 20.dp, start = 12.dp),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 33.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (code, label) ->
+                        HolidayDayOfWeekChip(
+                            label = label,
+                            selected = code in holidayDaysOfWeek,
+                            onClick = { onHolidayDayOfWeekToggle(code) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun HolidayChoiceButton(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .height(40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (selected) Green_D6F695 else LIGHT_GRAY)
+            .noRippleClickable(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        YogheeText(
+            text = text,
+            color = BLACK,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+@Composable
+private fun HolidayDayOfWeekChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .padding(horizontal = 15.dp, vertical = 13.dp)
+            .noRippleClickable(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        YogheeText(
+            text = label,
+            color = if (selected) GRAY else BLACK,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        if(selected) {
+            Image(
+                painter = painterResource(R.drawable.btn_selected_state),
+                contentDescription = "선택됨"
+            )
+        }
+    }
+}
+
 @Composable
 internal fun StepPlaceholderContent(
     step: Int,
@@ -473,7 +613,9 @@ internal fun RegisterBottomBar(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(116.dp).noRippleClickable(onPrevious),
+                modifier = Modifier
+                    .width(116.dp)
+                    .noRippleClickable(onPrevious),
             )
 
             Box(

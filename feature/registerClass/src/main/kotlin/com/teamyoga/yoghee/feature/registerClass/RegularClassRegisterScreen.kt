@@ -66,6 +66,8 @@ fun RegularClassRegisterScreen(
         onImagesAdded = viewModel::onImagesAdded,
         onImageRemoved = viewModel::onImageRemoved,
         onImagesReordered = viewModel::onImagesReordered,
+        onHasHolidayChange = viewModel::onHasHolidayChange,
+        onHolidayDayOfWeekToggle = viewModel::onHolidayDayOfWeekToggle,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -87,6 +89,8 @@ private fun RegularClassRegisterContent(
     onImagesAdded: (List<Uri>) -> Unit,
     onImageRemoved: (Int) -> Unit,
     onImagesReordered: (Int, Int) -> Unit,
+    onHasHolidayChange: (Boolean) -> Unit,
+    onHolidayDayOfWeekToggle: (String) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -164,7 +168,14 @@ private fun RegularClassRegisterContent(
                         onCategoryCodesChange = onCategoryCodesChange,
                         onBack = goPrevious,
                     )
-                    5 -> StepPlaceholderContent(step = 5, onBack = goPrevious)
+                    5 -> ClassHolidayStepContent(
+                        title = stringResource(R.string.regular_class_register_step5_title),
+                        hasHoliday = state.hasHoliday,
+                        holidayDaysOfWeek = state.holidayDaysOfWeek,
+                        onHasHolidayChange = onHasHolidayChange,
+                        onHolidayDayOfWeekToggle = onHolidayDayOfWeekToggle,
+                        onBack = goPrevious,
+                    )
                     6 -> StepPlaceholderContent(step = 6, onBack = goPrevious)
                 }
             }
@@ -203,18 +214,27 @@ private fun RegularClassRegisterScreenPreview() {
             onImagesAdded = {},
             onImageRemoved = {},
             onImagesReordered = { _, _ -> },
+            onHasHolidayChange = {},
+            onHolidayDayOfWeekToggle = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
     }
 }
 
-@Preview(showBackground = true, name = "RegularClassRegister Placeholder Step5")
+@Preview(showBackground = true, name = "RegularClassRegister Holiday Step5")
 @Composable
-private fun RegularClassRegisterPlaceholderPreview() {
+private fun RegularClassRegisterHolidayStepPreview() {
     YogheeTheme {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
-            StepPlaceholderContent(step = 5, onBack = {})
+            ClassHolidayStepContent(
+                title = "휴무 정보",
+                hasHoliday = true,
+                holidayDaysOfWeek = setOf("MON", "SUN"),
+                onHasHolidayChange = {},
+                onHolidayDayOfWeekToggle = {},
+                onBack = {},
+            )
         }
     }
 }

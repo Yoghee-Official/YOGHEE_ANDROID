@@ -183,7 +183,10 @@ private fun RegularClassRegisterContent(
                         onAllHolidayToggle = onAllHolidayToggle,
                         onBack = goPrevious,
                     )
-                    6 -> StepPlaceholderContent(step = 6, onBack = goPrevious)
+                    6 -> ClassOperationStepContent(
+                        title = stringResource(R.string.regular_class_register_step6_title),
+                        onBack = goPrevious,
+                    )
                 }
             }
             RegisterBottomBar(
@@ -245,6 +248,19 @@ private fun RegularClassRegisterHolidayStepPreview() {
                 onHolidayDayOfWeekToggle = {},
                 onHolidayToggle = {},
                 onAllHolidayToggle = {},
+                onBack = {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "RegularClassRegister Operation Step6")
+@Composable
+private fun RegularClassRegisterOperationStepPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            ClassOperationStepContent(
+                title = "운영 정보",
                 onBack = {},
             )
         }

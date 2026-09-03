@@ -689,6 +689,50 @@ private fun HolidayDayOfWeekChip(
 }
 
 @Composable
+internal fun ClassOperationStepContent(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = title,
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, start = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                YogheeText(
+                    text = "수련시간",
+                    color = BLACK,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                YogheeText(
+                    text = "한 타임 기준",
+                    color = GRAY,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
 internal fun StepPlaceholderContent(
     step: Int,
     onBack: () -> Unit,

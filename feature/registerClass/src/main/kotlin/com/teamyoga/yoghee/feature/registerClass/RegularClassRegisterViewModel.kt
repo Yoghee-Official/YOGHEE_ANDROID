@@ -155,7 +155,7 @@ data class RegularClassRegisterUiState(
     val selectedCenterId: String? = null,
     val hasHoliday: Boolean = true,
     val holidayDaysOfWeek: Set<String> = emptySet(),
-    val holidays: Set<String> = emptySet(),
+    val holidays: Set<String> = ALL_HOLIDAY_CODES,
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
 )

@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,7 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,6 +68,7 @@ import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
+import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
@@ -691,6 +698,7 @@ private fun HolidayDayOfWeekChip(
 @Composable
 internal fun ClassOperationStepContent(
     title: String,
+    holidayDaysOfWeek: Set<String>,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -705,17 +713,17 @@ internal fun ClassOperationStepContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .padding(start = 24.dp),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp, start = 8.dp),
+                    .padding(top = 38.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 YogheeText(
-                    text = "수련시간",
+                    text = "수련 시간",
                     color = BLACK,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -727,34 +735,132 @@ internal fun ClassOperationStepContent(
                     fontWeight = FontWeight.Bold,
                 )
             }
+            ScheduleGrid(
+                holidayDaysOfWeek = holidayDaysOfWeek,
+                onAddSchedule = { _, _ -> /* TODO: 바텀시트 오픈 */ }
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-internal fun StepPlaceholderContent(
-    step: Int,
-    onBack: () -> Unit,
+private fun ScheduleGrid(
+    holidayDaysOfWeek: Set<String>,
+    onAddSchedule: (dayCode: String, hour: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
-        YogheeHeader(
-            title = "Step $step",
-            onBack = onBack,
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            contentAlignment = Alignment.Center,
+    // 열 폭 76dp, 시간 헤더 32dp, 요일 행 44dp (HolidayDayOfWeekChip 자연 높이에 맞춤).
+    val columnWidth = 36.dp
+    val timeHeaderHeight = 50.dp
+    val rowHeight = 58.dp
+    val totalHours = 24
+    // 첫 진입 시 06:00을 첫 열로 노출. 스와이프하면 firstVisibleItemIndex가 변하며 활성 열도 이동한다.
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 6)
+    val activeHour by remember {
+        derivedStateOf { listState.firstVisibleItemIndex }
+    }
+
+    Row(modifier = modifier.fillMaxWidth()) {
+        // 좌측 sticky Y축: 요일 라벨. 가로 스크롤에 영향받지 않는다.
+        Column {
+            Spacer(modifier = Modifier.height(timeHeaderHeight))
+            HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (code, label) ->
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 12.dp)
+                        .height(rowHeight),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    HolidayDayOfWeekChip(
+                        label = label,
+                        selected = code in holidayDaysOfWeek,
+                        onClick = {},
+                    )
+                }
+            }
+        }
+        // 우측 가로 스크롤 영역: 24개 시간 열. 각 열의 셀 영역 중앙에 세로 선을 그리고 상하단에 점을 찍는다.
+        LazyRow(
+            state = listState,
+            horizontalArrangement = Arrangement.spacedBy(76.dp)
         ) {
-            YogheeText(
-                text = "Step $step (준비 중)",
-                color = BLACK,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-            )
+            items(items = (0 until totalHours).toList()) { hour ->
+                val isActive = hour == activeHour
+                Column(modifier = Modifier.width(columnWidth)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(timeHeaderHeight)
+                            .padding(top = 12.dp),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        YogheeText(
+                            text = "%02d:00".format(hour),
+                            color = GRAY,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .fillMaxWidth()
+                            .drawBehind {
+                                // 활성 열은 주황, 비활성 열은 연회색으로 세로 선 + 상하단 점을 그린다.
+                                val lineColor = if (isActive) MIND_ORANGE else LIGHT_GRAY
+                                val centerX = size.width / 2f
+                                val dotRadius = 3.dp.toPx()
+                                val topY = dotRadius
+                                val bottomY = size.height - dotRadius
+                                drawCircle(
+                                    color = lineColor,
+                                    radius = dotRadius,
+                                    center = Offset(centerX, topY),
+                                )
+                                drawLine(
+                                    color = lineColor,
+                                    start = Offset(centerX, topY),
+                                    end = Offset(centerX, bottomY),
+                                    strokeWidth = 1.dp.toPx(),
+                                )
+                                drawCircle(
+                                    color = lineColor,
+                                    radius = dotRadius,
+                                    center = Offset(centerX, bottomY),
+                                )
+                            },
+                    ) {
+                        HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (dayCode, _) ->
+                            val isHoliday = dayCode in holidayDaysOfWeek
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                                    .height(rowHeight),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (isActive && !isHoliday) {
+                                    YogheeText(
+                                        text = "+",
+                                        color = WHITE,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(MIND_ORANGE)
+                                            .noRippleClickable(
+                                                { onAddSchedule(dayCode, hour) }
+                                            ),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

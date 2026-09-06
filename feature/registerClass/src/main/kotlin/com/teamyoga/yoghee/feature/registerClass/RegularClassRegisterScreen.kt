@@ -185,6 +185,7 @@ private fun RegularClassRegisterContent(
                     )
                     6 -> ClassOperationStepContent(
                         title = stringResource(R.string.regular_class_register_step6_title),
+                        holidayDaysOfWeek = state.holidayDaysOfWeek,
                         onBack = goPrevious,
                     )
                 }
@@ -261,6 +262,7 @@ private fun RegularClassRegisterOperationStepPreview() {
         Box(modifier = Modifier.background(SAND_BEIGE)) {
             ClassOperationStepContent(
                 title = "운영 정보",
+                holidayDaysOfWeek = setOf("SUN"),
                 onBack = {},
             )
         }

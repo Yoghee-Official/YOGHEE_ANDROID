@@ -750,15 +750,20 @@ private fun ScheduleGrid(
     onAddSchedule: (dayCode: String, hour: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 열 폭 76dp, 시간 헤더 32dp, 요일 행 44dp (HolidayDayOfWeekChip 자연 높이에 맞춤).
     val columnWidth = 36.dp
     val timeHeaderHeight = 50.dp
     val rowHeight = 58.dp
     val totalHours = 24
     // 첫 진입 시 06:00을 첫 열로 노출. 스와이프하면 firstVisibleItemIndex가 변하며 활성 열도 이동한다.
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = 6)
+    // 왼쪽에 잘려있는 아이템은 활성화 대상에서 제외하고, 온전히 보이는 첫 아이템을 활성화한다.
     val activeHour by remember {
-        derivedStateOf { listState.firstVisibleItemIndex }
+        derivedStateOf {
+            listState.layoutInfo.visibleItemsInfo
+                .firstOrNull { it.offset >= 0 }
+                ?.index
+                ?: listState.firstVisibleItemIndex
+        }
     }
 
     Row(modifier = modifier.fillMaxWidth()) {
@@ -783,7 +788,7 @@ private fun ScheduleGrid(
         // 우측 가로 스크롤 영역: 24개 시간 열. 각 열의 셀 영역 중앙에 세로 선을 그리고 상하단에 점을 찍는다.
         LazyRow(
             state = listState,
-            horizontalArrangement = Arrangement.spacedBy(76.dp)
+            horizontalArrangement = Arrangement.spacedBy(76.dp),
         ) {
             items(items = (0 until totalHours).toList()) { hour ->
                 val isActive = hour == activeHour
@@ -793,13 +798,13 @@ private fun ScheduleGrid(
                             .fillMaxWidth()
                             .height(timeHeaderHeight)
                             .padding(top = 12.dp),
-                        contentAlignment = Alignment.TopEnd
+                        contentAlignment = Alignment.TopEnd,
                     ) {
                         YogheeText(
                             text = "%02d:00".format(hour),
                             color = GRAY,
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                     Column(
@@ -807,7 +812,6 @@ private fun ScheduleGrid(
                             .padding(start = 8.dp)
                             .fillMaxWidth()
                             .drawBehind {
-                                // 활성 열은 주황, 비활성 열은 연회색으로 세로 선 + 상하단 점을 그린다.
                                 val lineColor = if (isActive) MIND_ORANGE else LIGHT_GRAY
                                 val centerX = size.width / 2f
                                 val dotRadius = 3.dp.toPx()
@@ -847,13 +851,15 @@ private fun ScheduleGrid(
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center,
-                                        modifier = modifier
+                                        // 이전에 lowercase `modifier`(=ScheduleGrid의 파라미터)로 되어 있어
+                                        // 부모 padding이 상속되던 버그를 수정한다. 여기서는 새 Modifier로 시작.
+                                        modifier = Modifier
                                             .size(20.dp)
                                             .clip(CircleShape)
                                             .background(MIND_ORANGE)
-                                            .noRippleClickable(
-                                                { onAddSchedule(dayCode, hour) }
-                                            ),
+                                            .noRippleClickable {
+                                                onAddSchedule(dayCode, hour)
+                                            },
                                     )
                                 }
                             }

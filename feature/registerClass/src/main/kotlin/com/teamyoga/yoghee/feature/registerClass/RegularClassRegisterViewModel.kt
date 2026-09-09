@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -102,6 +103,13 @@ class RegularClassRegisterViewModel @Inject constructor(
         }
     }
 
+    // Step 6: 특정 요일에 스케줄 등록. 같은 요일에 여러 스케줄이 등록될 수 있으므로 그대로 append.
+    fun onScheduleAdded(dayCode: String, schedule: ClassSchedule) {
+        _uiState.update {
+            it.copy(schedules = it.schedules + ScheduleEntry(dayCode, schedule))
+        }
+    }
+
     fun onImagesReordered(from: Int, to: Int) {
         val current = _uiState.value
         if (from == to) return
@@ -156,6 +164,13 @@ data class RegularClassRegisterUiState(
     val hasHoliday: Boolean = true,
     val holidayDaysOfWeek: Set<String> = emptySet(),
     val holidays: Set<String> = ALL_HOLIDAY_CODES,
+    val schedules: List<ScheduleEntry> = emptyList(),
     val submitState: SubmitState = SubmitState.Idle,
     val centersState: CentersState = CentersState.Idle,
+)
+
+// 정규수련 스케줄 그리드에서 등록된 스케줄. dayCode는 HOLIDAY_DAY_OF_WEEK_OPTIONS의 key(MON..SUN).
+data class ScheduleEntry(
+    val dayCode: String,
+    val schedule: ClassSchedule,
 )

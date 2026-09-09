@@ -31,7 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
-import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import kotlinx.coroutines.launch
 
 private const val TOTAL_STEPS = 6
@@ -70,6 +70,7 @@ fun RegularClassRegisterScreen(
         onHolidayDayOfWeekToggle = viewModel::onHolidayDayOfWeekToggle,
         onHolidayToggle = viewModel::onHolidayToggle,
         onAllHolidayToggle = viewModel::onAllHolidayToggle,
+        onAddSchedule = viewModel::onScheduleAdded,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -95,6 +96,7 @@ private fun RegularClassRegisterContent(
     onHolidayDayOfWeekToggle: (String) -> Unit,
     onHolidayToggle: (Set<String>) -> Unit,
     onAllHolidayToggle: () -> Unit,
+    onAddSchedule: (dayCode: String, schedule: ClassSchedule) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -186,6 +188,7 @@ private fun RegularClassRegisterContent(
                     6 -> ClassOperationStepContent(
                         title = stringResource(R.string.regular_class_register_step6_title),
                         holidayDaysOfWeek = state.holidayDaysOfWeek,
+                        onAddSchedule = onAddSchedule,
                         onBack = goPrevious,
                     )
                 }
@@ -229,6 +232,7 @@ private fun RegularClassRegisterScreenPreview() {
             onHolidayDayOfWeekToggle = {},
             onHolidayToggle = {},
             onAllHolidayToggle = {},
+            onAddSchedule = { _, _ -> },
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -263,6 +267,7 @@ private fun RegularClassRegisterOperationStepPreview() {
             ClassOperationStepContent(
                 title = "운영 정보",
                 holidayDaysOfWeek = setOf("SUN"),
+                onAddSchedule = { _, _ -> },
                 onBack = {},
             )
         }

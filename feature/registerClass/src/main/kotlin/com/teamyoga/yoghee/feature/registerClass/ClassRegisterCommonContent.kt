@@ -74,6 +74,7 @@ import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import com.teamyoga.yoghee.feature.registerClass.components.ClassIntroductionSection
 import com.teamyoga.yoghee.feature.registerClass.components.ClassPurposeSection
+import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import com.teamyoga.yoghee.feature.registerClass.components.ImagePickerGrid
 import com.teamyoga.yoghee.feature.registerClass.components.ImageSource
@@ -82,6 +83,7 @@ import com.teamyoga.yoghee.feature.registerClass.components.LocationListItem
 import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
+import com.teamyoga.yoghee.feature.registerClass.components.RegularScheduleBottomSheet
 
 // 수련 등록 화면에서 공통으로 사용하는 Step Content 및 하단 바 컴포넌트.
 // OneDayClassRegisterScreen과 RegularClassRegisterScreen에서 재사용된다.
@@ -699,9 +701,13 @@ private fun HolidayDayOfWeekChip(
 internal fun ClassOperationStepContent(
     title: String,
     holidayDaysOfWeek: Set<String>,
+    onAddSchedule: (dayCode: String, schedule: ClassSchedule) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // + 버튼 클릭 시 (dayCode, hour) 저장 → 이 값이 not null이면 바텀시트 노출.
+    var pendingSchedule by remember { mutableStateOf<Pair<String, Int>?>(null) }
+
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
             title = title,
@@ -737,10 +743,29 @@ internal fun ClassOperationStepContent(
             }
             ScheduleGrid(
                 holidayDaysOfWeek = holidayDaysOfWeek,
-                onAddSchedule = { _, _ -> /* TODO: 바텀시트 오픈 */ }
+                onAddSchedule = { dayCode, hour -> pendingSchedule = dayCode to hour },
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+
+    pendingSchedule?.let { (dayCode, hour) ->
+        // 클릭한 셀의 시간을 시작시간으로, 다음 정시를 종료시간으로 초기 노출.
+        val initial = ClassSchedule(
+            startTime = "%02d:00".format(hour),
+            endTime = "%02d:00".format((hour + 1) % 24),
+            className = "",
+            minCount = 0,
+            maxCount = 0,
+        )
+        RegularScheduleBottomSheet(
+            initial = initial,
+            onDismiss = { pendingSchedule = null },
+            onApply = { schedule ->
+                onAddSchedule(dayCode, schedule)
+                pendingSchedule = null
+            },
+        )
     }
 }
 

@@ -59,6 +59,8 @@ data class ClassSchedule(
     val minCount: Int,
     val maxCount: Int,
     val dates: Set<CalendarDate> = emptySet(),
+    // 정규수련 스케줄 등록에서 사용하는 지도자 메모 필드. 다른 시트에서는 빈 값으로 유지.
+    val instructorMemo: String = "",
 )
 
 private const val MIN_COUNT = 0
@@ -156,6 +158,118 @@ fun ScheduleBottomSheet(
     }
 }
 
+/**
+ * 정규수련 등록(step 6)의 스케줄 그리드 + 버튼에서 사용하는 바텀시트.
+ * 기존 [ScheduleBottomSheet]와 달리 "수련명" 라벨 + "지도자 (메모)" 옵션 필드를 포함한다.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegularScheduleBottomSheet(
+    onDismiss: () -> Unit,
+    onApply: (ClassSchedule) -> Unit,
+    modifier: Modifier = Modifier,
+    initial: ClassSchedule? = null,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var startTime by remember { mutableStateOf(initial?.startTime ?: DEFAULT_TIME) }
+    var endTime by remember { mutableStateOf(initial?.endTime ?: DEFAULT_TIME) }
+    var className by remember { mutableStateOf(initial?.className ?: "") }
+    var instructorMemo by remember { mutableStateOf(initial?.instructorMemo ?: "") }
+    var minCount by remember { mutableIntStateOf(initial?.minCount ?: MIN_COUNT) }
+    var maxCount by remember { mutableIntStateOf(initial?.maxCount ?: MIN_COUNT) }
+    var pickerTarget by remember { mutableStateOf<TimePickerTarget?>(null) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = WHITE,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                TimeBox(
+                    label = "시작 시간",
+                    time = startTime,
+                    onClick = { pickerTarget = TimePickerTarget.START },
+                    modifier = Modifier.weight(1f),
+                )
+                TimeBox(
+                    label = "종료 시간",
+                    time = endTime,
+                    onClick = { pickerTarget = TimePickerTarget.END },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            LabeledTextField(
+                label = "수련명",
+                value = className,
+                onValueChange = { className = it },
+            )
+            LabeledTextField(
+                label = "지도자 (메모)",
+                value = instructorMemo,
+                onValueChange = { instructorMemo = it },
+                required = false,
+            )
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY)
+            CounterRow(
+                label = "최소 수련 가능 인원",
+                count = minCount,
+                onDecrement = { if (minCount > MIN_COUNT) minCount-- },
+                onIncrement = { if (minCount < MAX_COUNT) minCount++ },
+            )
+            CounterRow(
+                label = "최대 수련 가능 인원",
+                count = maxCount,
+                onDecrement = { if (maxCount > MIN_COUNT) maxCount-- },
+                onIncrement = { if (maxCount < MAX_COUNT) maxCount++ },
+            )
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = LIGHT_GRAY,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            ApplyButton(
+                modifier = Modifier.align(Alignment.End),
+                onClick = {
+                    onApply(
+                        ClassSchedule(
+                            startTime = startTime,
+                            endTime = endTime,
+                            className = className,
+                            minCount = minCount,
+                            maxCount = maxCount,
+                            instructorMemo = instructorMemo,
+                        )
+                    )
+                    onDismiss()
+                },
+            )
+        }
+    }
+
+    pickerTarget?.let { target ->
+        val current = if (target == TimePickerTarget.START) startTime else endTime
+        TimePickerDialog(
+            initialTime = current,
+            onDismiss = { pickerTarget = null },
+            onConfirm = { hour, minute ->
+                val formatted = "%02d:%02d".format(hour, minute)
+                if (target == TimePickerTarget.START) startTime = formatted else endTime = formatted
+                pickerTarget = null
+            },
+        )
+    }
+}
+
 @Composable
 private fun TimeBox(
     label: String,
@@ -200,6 +314,7 @@ private fun LabeledTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    required: Boolean = true,
 ) {
     Column(
         modifier = modifier
@@ -213,8 +328,10 @@ private fun LabeledTextField(
         YogheeText(
             text = buildAnnotatedString {
                 append(label)
-                withStyle(SpanStyle(color = MIND_ORANGE)) {
-                    append(" *")
+                if (required) {
+                    withStyle(SpanStyle(color = MIND_ORANGE)) {
+                        append(" *")
+                    }
                 }
             },
             color = BLACK,

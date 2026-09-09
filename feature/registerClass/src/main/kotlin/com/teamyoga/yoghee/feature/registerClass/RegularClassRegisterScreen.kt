@@ -188,6 +188,7 @@ private fun RegularClassRegisterContent(
                     6 -> ClassOperationStepContent(
                         title = stringResource(R.string.regular_class_register_step6_title),
                         holidayDaysOfWeek = state.holidayDaysOfWeek,
+                        schedules = state.schedules,
                         onAddSchedule = onAddSchedule,
                         onBack = goPrevious,
                     )
@@ -267,6 +268,7 @@ private fun RegularClassRegisterOperationStepPreview() {
             ClassOperationStepContent(
                 title = "운영 정보",
                 holidayDaysOfWeek = setOf("SUN"),
+                schedules = emptyList(),
                 onAddSchedule = { _, _ -> },
                 onBack = {},
             )

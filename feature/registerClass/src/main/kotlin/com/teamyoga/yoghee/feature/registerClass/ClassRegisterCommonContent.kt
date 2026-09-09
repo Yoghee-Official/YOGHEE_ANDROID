@@ -701,6 +701,7 @@ private fun HolidayDayOfWeekChip(
 internal fun ClassOperationStepContent(
     title: String,
     holidayDaysOfWeek: Set<String>,
+    schedules: List<ScheduleEntry>,
     onAddSchedule: (dayCode: String, schedule: ClassSchedule) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -758,8 +759,13 @@ internal fun ClassOperationStepContent(
             minCount = 0,
             maxCount = 0,
         )
+        // 시간 오버랩 감지에 사용할, 같은 요일의 기존 스케줄만 추려서 전달.
+        val existingDaySchedules = schedules
+            .filter { it.dayCode == dayCode }
+            .map { it.schedule }
         RegularScheduleBottomSheet(
             initial = initial,
+            existingDaySchedules = existingDaySchedules,
             onDismiss = { pendingSchedule = null },
             onApply = { schedule ->
                 onAddSchedule(dayCode, schedule)

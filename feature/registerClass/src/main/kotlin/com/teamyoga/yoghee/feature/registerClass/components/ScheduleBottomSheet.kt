@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
@@ -161,6 +162,8 @@ fun ScheduleBottomSheet(
 /**
  * 정규수련 등록(step 6)의 스케줄 그리드 + 버튼에서 사용하는 바텀시트.
  * 기존 [ScheduleBottomSheet]와 달리 "수련명" 라벨 + "지도자 (메모)" 옵션 필드를 포함한다.
+ *
+ * @param existingDaySchedules 해당 요일에 이미 등록된 스케줄 목록. 시간 오버랩 감지에 사용된다.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,6 +172,7 @@ fun RegularScheduleBottomSheet(
     onApply: (ClassSchedule) -> Unit,
     modifier: Modifier = Modifier,
     initial: ClassSchedule? = null,
+    existingDaySchedules: List<ClassSchedule> = emptyList(),
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var startTime by remember { mutableStateOf(initial?.startTime ?: DEFAULT_TIME) }
@@ -178,6 +182,15 @@ fun RegularScheduleBottomSheet(
     var minCount by remember { mutableIntStateOf(initial?.minCount ?: MIN_COUNT) }
     var maxCount by remember { mutableIntStateOf(initial?.maxCount ?: MIN_COUNT) }
     var pickerTarget by remember { mutableStateOf<TimePickerTarget?>(null) }
+
+    // 같은 요일에 이미 등록된 스케줄과 시간이 겹치는지 여부. startTime/endTime이 변할 때만 재계산.
+    val hasTimeConflict = remember(startTime, endTime, existingDaySchedules) {
+        timeRangeOverlapsAny(startTime, endTime, existingDaySchedules)
+    }
+    val canApply = startTime.isNotBlank() &&
+        endTime.isNotBlank() &&
+        className.isNotBlank() &&
+        !hasTimeConflict
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -237,8 +250,17 @@ fun RegularScheduleBottomSheet(
                 color = LIGHT_GRAY,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
+            if (hasTimeConflict) {
+                YogheeText(
+                    text = "* 동일한 시간에 중복된 수련이 있습니다. 시간을 조정해주세요!",
+                    color = MIND_ORANGE,
+                    fontSize = 10.sp,
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                )
+            }
             ApplyButton(
-                modifier = Modifier.align(Alignment.End),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                enabled = canApply,
                 onClick = {
                     onApply(
                         ClassSchedule(
@@ -267,6 +289,28 @@ fun RegularScheduleBottomSheet(
                 pickerTarget = null
             },
         )
+    }
+}
+
+// "HH:MM" 형식 시간을 분 단위 정수로 변환. 파싱 실패 시 null.
+private fun parseTimeToMinutes(time: String): Int? = runCatching {
+    val parts = time.split(":")
+    parts[0].toInt() * 60 + parts[1].toInt()
+}.getOrNull()
+
+// [startTime, endTime) 반개구간이 기존 스케줄 중 하나와 겹치는지 여부.
+private fun timeRangeOverlapsAny(
+    startTime: String,
+    endTime: String,
+    existing: List<ClassSchedule>,
+): Boolean {
+    val start = parseTimeToMinutes(startTime) ?: return false
+    val end = parseTimeToMinutes(endTime) ?: return false
+    if (start >= end) return false
+    return existing.any { schedule ->
+        val es = parseTimeToMinutes(schedule.startTime) ?: return@any false
+        val ee = parseTimeToMinutes(schedule.endTime) ?: return@any false
+        start < ee && es < end
     }
 }
 
@@ -414,16 +458,21 @@ private fun CounterButton(
 private fun ApplyButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .width(208.dp)
             .height(48.dp)
+            // enabled=false일 때 반투명 처리로 비활성화 시각화, 클릭 이벤트도 무시.
+            .alpha(if (enabled) 1f else 0.5f)
             .paint(
                 painter = painterResource(R.drawable.btn_continue_class_register),
                 contentScale = ContentScale.FillBounds,
             )
-            .noRippleClickable(onClick),
+            .noRippleClickable {
+                if (enabled) onClick()
+            },
         contentAlignment = Alignment.Center,
     ) {
         YogheeText(

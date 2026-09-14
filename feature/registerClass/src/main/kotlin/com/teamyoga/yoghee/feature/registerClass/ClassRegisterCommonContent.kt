@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,12 +23,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,8 +54,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.ceil
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.teamyoga.yoghee.core.common.formatCreatedAt
@@ -64,6 +66,7 @@ import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.FLOW_BLUE
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
@@ -669,6 +672,95 @@ private fun HolidayPillButton(
     }
 }
 
+// --- ScheduleGrid 상수 ---
+// 컬럼(1시간)의 시각적 콘텐츠 폭.
+private val GRID_COLUMN_WIDTH = 36.dp
+// 컬럼 사이 간격.
+private val GRID_COLUMN_SPACING = 76.dp
+// 시간당 pitch. 카드 위치/폭 계산의 기준.
+private val GRID_HOUR_PITCH = 112.dp
+// 시간 헤더 영역 높이.
+private val GRID_TIME_HEADER_HEIGHT = 50.dp
+// 요일 행 콘텐츠 높이(카드가 채우는 영역, 칩 위치).
+private val GRID_ROW_HEIGHT = 58.dp
+// 요일 행 하단 여백. 다음 행과의 시각적 간격.
+private val GRID_ROW_BOTTOM_PADDING = 12.dp
+// 요일 행 간 stride(= ROW_HEIGHT + BOTTOM_PADDING). 오버레이 좌표 계산 기준.
+private val GRID_ROW_STRIDE = GRID_ROW_HEIGHT + GRID_ROW_BOTTOM_PADDING
+// 세로 선이 컬럼 왼쪽 경계에서 얼마나 떨어진 곳에 그려지는지.
+// (start padding 8dp + 내부 Column 폭 28dp / 2 = 14dp) = 22dp
+private val GRID_LINE_OFFSET_IN_COLUMN = 22.dp
+// + 버튼 지름.
+private val GRID_ADD_BUTTON_SIZE = 20.dp
+private const val GRID_TOTAL_HOURS = 24
+private const val GRID_INITIAL_HOUR = 6
+
+private val GRID_TOTAL_WIDTH = GRID_HOUR_PITCH * GRID_TOTAL_HOURS
+private val GRID_TOTAL_HEIGHT =
+    GRID_TIME_HEADER_HEIGHT + GRID_ROW_STRIDE * HOLIDAY_DAY_OF_WEEK_OPTIONS.size
+
+// "HH:MM" → 자정 이후 총 분 수.
+private fun parseTimeToMinutes(time: String): Int? {
+    val parts = time.split(":")
+    if (parts.size != 2) return null
+    val h = parts[0].toIntOrNull() ?: return null
+    val m = parts[1].toIntOrNull() ?: return null
+    return h * 60 + m
+}
+
+// (dayCode, hour) 셀을 점유하는 스케줄을 반환. 시(hour) 셀 범위 [hour*60, (hour+1)*60) 와 오버랩 판정.
+private fun findCoveringSchedule(
+    schedules: List<ScheduleEntry>,
+    dayCode: String,
+    hour: Int,
+): ClassSchedule? {
+    val hourStart = hour * 60
+    val hourEnd = (hour + 1) * 60
+    for (entry in schedules) {
+        if (entry.dayCode != dayCode) continue
+        val start = parseTimeToMinutes(entry.schedule.startTime) ?: continue
+        val end = parseTimeToMinutes(entry.schedule.endTime) ?: continue
+        if (start >= end) continue
+        if (start < hourEnd && hourStart < end) return entry.schedule
+    }
+    return null
+}
+
+@Composable
+private fun ScheduleCard(
+    schedule: ClassSchedule,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(FLOW_BLUE)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        YogheeText(
+            text = "${schedule.startTime} ~ ${schedule.endTime}",
+            color = BLACK,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
+        )
+        YogheeText(
+            text = schedule.className,
+            color = BLACK,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        if (schedule.instructorMemo.isNotBlank()) {
+            YogheeText(
+                text = schedule.instructorMemo,
+                color = BLACK,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+    }
+}
+
 @Composable
 private fun HolidayDayOfWeekChip(
     label: String,
@@ -744,6 +836,7 @@ internal fun ClassOperationStepContent(
             }
             ScheduleGrid(
                 holidayDaysOfWeek = holidayDaysOfWeek,
+                schedules = schedules,
                 onAddSchedule = { dayCode, hour -> pendingSchedule = dayCode to hour },
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -775,130 +868,214 @@ internal fun ClassOperationStepContent(
     }
 }
 
+/**
+ * 시간표 그리드.
+ *
+ * 구조:
+ * - 좌측 Y축(요일 라벨) sticky
+ * - 우측: horizontalScroll Box 안에 두 레이어
+ *   1) 베이스 그리드: 24개 HourColumn (시간 헤더 + 세로 선 + `+` 버튼)
+ *   2) 스케줄 카드 오버레이: 컴포지션 순서상 뒤에 나와 자연스레 위에 그려짐
+ *
+ * 카드는 개별 컬럼에 종속되지 않고 `offset(x, y)`로 절대 배치되므로,
+ * 시작 컬럼이 뷰포트를 벗어나도 유지되고, zIndex/requiredWidth 트릭이 필요 없다.
+ */
 @Composable
 private fun ScheduleGrid(
     holidayDaysOfWeek: Set<String>,
+    schedules: List<ScheduleEntry>,
     onAddSchedule: (dayCode: String, hour: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val columnWidth = 36.dp
-    val timeHeaderHeight = 50.dp
-    val rowHeight = 58.dp
-    val totalHours = 24
-    // 첫 진입 시 06:00을 첫 열로 노출. 스와이프하면 firstVisibleItemIndex가 변하며 활성 열도 이동한다.
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 6)
-    // 왼쪽에 잘려있는 아이템은 활성화 대상에서 제외하고, 온전히 보이는 첫 아이템을 활성화한다.
-    val activeHour by remember {
+    val density = LocalDensity.current
+    val hourPitchPx = with(density) { GRID_HOUR_PITCH.toPx() }
+    val scrollState = rememberScrollState(
+        initial = with(density) { (GRID_HOUR_PITCH * GRID_INITIAL_HOUR).toPx() }.toInt(),
+    )
+    val activeHour by remember(hourPitchPx) {
         derivedStateOf {
-            listState.layoutInfo.visibleItemsInfo
-                .firstOrNull { it.offset >= 0 }
-                ?.index
-                ?: listState.firstVisibleItemIndex
+            ceil(scrollState.value / hourPitchPx).toInt().coerceIn(0, GRID_TOTAL_HOURS - 1)
         }
     }
 
     Row(modifier = modifier.fillMaxWidth()) {
-        // 좌측 sticky Y축: 요일 라벨. 가로 스크롤에 영향받지 않는다.
-        Column {
-            Spacer(modifier = Modifier.height(timeHeaderHeight))
-            HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (code, label) ->
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = 12.dp)
-                        .height(rowHeight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    HolidayDayOfWeekChip(
-                        label = label,
-                        selected = code in holidayDaysOfWeek,
-                        onClick = {},
-                    )
-                }
-            }
-        }
-        // 우측 가로 스크롤 영역: 24개 시간 열. 각 열의 셀 영역 중앙에 세로 선을 그리고 상하단에 점을 찍는다.
-        LazyRow(
-            state = listState,
-            horizontalArrangement = Arrangement.spacedBy(76.dp),
+        YAxis(holidayDaysOfWeek = holidayDaysOfWeek)    // 요일 sticky 영역
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scrollState),
         ) {
-            items(items = (0 until totalHours).toList()) { hour ->
-                val isActive = hour == activeHour
-                Column(modifier = Modifier.width(columnWidth)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(timeHeaderHeight)
-                            .padding(top = 12.dp),
-                        contentAlignment = Alignment.TopEnd,
-                    ) {
-                        YogheeText(
-                            text = "%02d:00".format(hour),
-                            color = GRAY,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .fillMaxWidth()
-                            .drawBehind {
-                                val lineColor = if (isActive) MIND_ORANGE else LIGHT_GRAY
-                                val centerX = size.width / 2f
-                                val dotRadius = 3.dp.toPx()
-                                val topY = dotRadius
-                                val bottomY = size.height - dotRadius
-                                drawCircle(
-                                    color = lineColor,
-                                    radius = dotRadius,
-                                    center = Offset(centerX, topY),
-                                )
-                                drawLine(
-                                    color = lineColor,
-                                    start = Offset(centerX, topY),
-                                    end = Offset(centerX, bottomY),
-                                    strokeWidth = 1.dp.toPx(),
-                                )
-                                drawCircle(
-                                    color = lineColor,
-                                    radius = dotRadius,
-                                    center = Offset(centerX, bottomY),
-                                )
-                            },
-                    ) {
-                        HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (dayCode, _) ->
-                            val isHoliday = dayCode in holidayDaysOfWeek
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 12.dp)
-                                    .height(rowHeight),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (isActive && !isHoliday) {
-                                    YogheeText(
-                                        text = "+",
-                                        color = WHITE,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center,
-                                        // 이전에 lowercase `modifier`(=ScheduleGrid의 파라미터)로 되어 있어
-                                        // 부모 padding이 상속되던 버그를 수정한다. 여기서는 새 Modifier로 시작.
-                                        modifier = Modifier
-                                            .size(20.dp)
-                                            .clip(CircleShape)
-                                            .background(MIND_ORANGE)
-                                            .noRippleClickable {
-                                                onAddSchedule(dayCode, hour)
-                                            },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+            Box(
+                modifier = Modifier
+                    .width(GRID_TOTAL_WIDTH)
+                    .height(GRID_TOTAL_HEIGHT),
+            ) {
+                // 레이어 순서 = 그리기 순서. 뒤에 나온 것이 위에 렌더된다.
+                // 1) 베이스 그리드(시간 헤더 + 세로 선) → 2) 카드 → 3) + 버튼
+                BaseGrid(activeHour = activeHour)
+                SchedulesOverlay(schedules = schedules)
+                AddButtonsOverlay(
+                    activeHour = activeHour,
+                    holidayDaysOfWeek = holidayDaysOfWeek,
+                    schedules = schedules,
+                    onAddSchedule = onAddSchedule,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun YAxis(holidayDaysOfWeek: Set<String>) {
+    Column {
+        Spacer(modifier = Modifier.height(GRID_TIME_HEADER_HEIGHT))
+        HOLIDAY_DAY_OF_WEEK_OPTIONS.forEach { (code, label) ->
+            Box(
+                modifier = Modifier
+                    .padding(bottom = GRID_ROW_BOTTOM_PADDING)
+                    .height(GRID_ROW_HEIGHT),
+                contentAlignment = Alignment.Center,
+            ) {
+                HolidayDayOfWeekChip(
+                    label = label,
+                    selected = code in holidayDaysOfWeek,
+                    onClick = {},
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BaseGrid(activeHour: Int) {
+    Row(horizontalArrangement = Arrangement.spacedBy(GRID_COLUMN_SPACING)) {
+        (0 until GRID_TOTAL_HOURS).forEach { hour ->
+            HourColumn(hour = hour, isActive = hour == activeHour)
+        }
+    }
+}
+
+@Composable
+private fun HourColumn(hour: Int, isActive: Boolean) {
+    Column(modifier = Modifier.width(GRID_COLUMN_WIDTH)) {
+        TimeHeader(hour = hour)
+        // 요일 셀 iteration 없이 단일 Box. 세로 선만 그리고, + 버튼과 카드는 오버레이가 담당한다.
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .fillMaxWidth()
+                .height(GRID_ROW_STRIDE * HOLIDAY_DAY_OF_WEEK_OPTIONS.size)
+                .drawBehind { drawVerticalLine(isActive) },
+        )
+    }
+}
+
+@Composable
+private fun TimeHeader(hour: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(GRID_TIME_HEADER_HEIGHT)
+            .padding(top = 12.dp),
+        contentAlignment = Alignment.TopEnd,
+    ) {
+        YogheeText(
+            text = "%02d:00".format(hour),
+            color = GRAY,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+private fun AddScheduleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    YogheeText(
+        text = "+",
+        color = WHITE,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .size(GRID_ADD_BUTTON_SIZE)
+            .clip(CircleShape)
+            .background(MIND_ORANGE)
+            .noRippleClickable(onClick),
+    )
+}
+
+private fun DrawScope.drawVerticalLine(isActive: Boolean) {
+    val lineColor = if (isActive) MIND_ORANGE else LIGHT_GRAY
+    val centerX = size.width / 2f
+    val dotRadius = 3.dp.toPx()
+    val topY = dotRadius
+    val bottomY = size.height - dotRadius
+    drawCircle(color = lineColor, radius = dotRadius, center = Offset(centerX, topY))
+    drawLine(
+        color = lineColor,
+        start = Offset(centerX, topY),
+        end = Offset(centerX, bottomY),
+        strokeWidth = 1.dp.toPx(),
+    )
+    drawCircle(color = lineColor, radius = dotRadius, center = Offset(centerX, bottomY))
+}
+
+/**
+ * 스케줄 카드 오버레이. 각 카드는 absolute offset(x, y) 로 배치되어
+ * 컬럼 종속에서 자유롭고 뷰포트 스크롤과 독립적으로 좌표가 유지된다.
+ *
+ * cardY = TIME_HEADER + ROW_STRIDE × dayIndex (Y축 요일 행 stride와 일치).
+ */
+@Composable
+private fun SchedulesOverlay(schedules: List<ScheduleEntry>) {
+    val pitchPerMinute = GRID_HOUR_PITCH.value / 60f
+    schedules.forEach { entry ->
+        val startMin = parseTimeToMinutes(entry.schedule.startTime) ?: return@forEach
+        val endMin = parseTimeToMinutes(entry.schedule.endTime) ?: return@forEach
+        if (startMin >= endMin) return@forEach
+        val dayIndex = HOLIDAY_DAY_OF_WEEK_OPTIONS.indexOfFirst { it.first == entry.dayCode }
+        if (dayIndex < 0) return@forEach
+
+        val cardX = (startMin * pitchPerMinute).dp + GRID_LINE_OFFSET_IN_COLUMN
+        val cardY = GRID_TIME_HEADER_HEIGHT + GRID_ROW_STRIDE * dayIndex
+        val cardWidth = ((endMin - startMin) * pitchPerMinute).dp
+        ScheduleCard(
+            schedule = entry.schedule,
+            modifier = Modifier
+                .offset(x = cardX, y = cardY)
+                .width(cardWidth)
+                .height(GRID_ROW_HEIGHT),
+        )
+    }
+}
+
+/**
+ * + 버튼 오버레이. SchedulesOverlay 뒤에 놓여 카드 위로 그려진다.
+ * 활성 시(activeHour) × 비휴무 요일 × 이미 커버 중인 스케줄 없음 셀에만 노출.
+ */
+@Composable
+private fun AddButtonsOverlay(
+    activeHour: Int,
+    holidayDaysOfWeek: Set<String>,
+    schedules: List<ScheduleEntry>,
+    onAddSchedule: (String, Int) -> Unit,
+) {
+    // + 버튼을 각 셀 콘텐츠 영역(ROW_HEIGHT) 정중앙에 위치시키기 위한 오프셋.
+    val buttonYWithinCell = (GRID_ROW_HEIGHT - GRID_ADD_BUTTON_SIZE) / 2
+    val buttonXOffset = GRID_LINE_OFFSET_IN_COLUMN - GRID_ADD_BUTTON_SIZE / 2
+
+    HOLIDAY_DAY_OF_WEEK_OPTIONS.forEachIndexed { dayIndex, (dayCode, _) ->
+        if (dayCode in holidayDaysOfWeek) return@forEachIndexed
+
+        val buttonX = GRID_HOUR_PITCH * activeHour + buttonXOffset
+        val buttonY = GRID_TIME_HEADER_HEIGHT + GRID_ROW_STRIDE * dayIndex + buttonYWithinCell
+        AddScheduleButton(
+            onClick = { onAddSchedule(dayCode, activeHour) },
+            modifier = Modifier.offset(x = buttonX, y = buttonY),
+        )
     }
 }
 

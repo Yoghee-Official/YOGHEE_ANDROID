@@ -687,9 +687,11 @@ private val GRID_ROW_HEIGHT = 58.dp
 private val GRID_ROW_BOTTOM_PADDING = 12.dp
 // 요일 행 간 stride(= ROW_HEIGHT + BOTTOM_PADDING). 오버레이 좌표 계산 기준.
 private val GRID_ROW_STRIDE = GRID_ROW_HEIGHT + GRID_ROW_BOTTOM_PADDING
-// 세로 선이 컬럼 왼쪽 경계에서 얼마나 떨어진 곳에 그려지는지.
-// (start padding 8dp + 내부 Column 폭 28dp / 2 = 14dp) = 22dp
-private val GRID_LINE_OFFSET_IN_COLUMN = 22.dp
+// 오버레이(카드/+버튼)의 X 시작 위치.
+// 이론상: start padding 8dp + 내부 컬럼 폭 28dp / 2 = 22dp
+// 실제 렌더링에서는 stroke 안티에일리어싱/서브픽셀 반올림으로 카드가 선보다 살짝 왼쪽에
+// 보이는 경향이 있어, +2dp 시각 튜닝을 반영해 24dp 사용.
+private val GRID_LINE_OFFSET_IN_COLUMN = 24.dp
 // + 버튼 지름.
 private val GRID_ADD_BUTTON_SIZE = 20.dp
 private const val GRID_TOTAL_HOURS = 24
@@ -1069,6 +1071,8 @@ private fun AddButtonsOverlay(
 
     HOLIDAY_DAY_OF_WEEK_OPTIONS.forEachIndexed { dayIndex, (dayCode, _) ->
         if (dayCode in holidayDaysOfWeek) return@forEachIndexed
+        // 이미 활성 시간(activeHour)에 스케줄이 등록된 요일은 + 버튼 미노출.
+        if (findCoveringSchedule(schedules, dayCode, activeHour) != null) return@forEachIndexed
 
         val buttonX = GRID_HOUR_PITCH * activeHour + buttonXOffset
         val buttonY = GRID_TIME_HEADER_HEIGHT + GRID_ROW_STRIDE * dayIndex + buttonYWithinCell

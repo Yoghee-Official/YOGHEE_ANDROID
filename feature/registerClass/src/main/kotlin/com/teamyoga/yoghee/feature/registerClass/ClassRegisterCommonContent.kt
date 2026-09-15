@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,8 +32,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -56,8 +61,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.window.PopupPositionProvider
 import kotlin.math.ceil
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -732,35 +744,170 @@ private fun findCoveringSchedule(
 private fun ScheduleCard(
     schedule: ClassSchedule,
     modifier: Modifier = Modifier,
+    onEdit: () -> Unit = {},
+    onCopy: () -> Unit = {},
+    onDelete: () -> Unit = {},
 ) {
-    Column(
+    // 카드 클릭 시 MoreVert + 팝업이 동시에 표시된다.
+    // - 카드 클릭: menuOpen 토글 (열림/닫힘)
+    // - 팝업 바깥 탭 또는 메뉴 아이템 선택: menuOpen = false
+    var menuOpen by remember { mutableStateOf(false) }
+    Box(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(FLOW_BLUE)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .noRippleClickable { menuOpen = !menuOpen },
     ) {
-        YogheeText(
-            text = "${schedule.startTime} ~ ${schedule.endTime}",
-            color = BLACK,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
-        )
-        YogheeText(
-            text = schedule.className,
-            color = BLACK,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        if (schedule.instructorMemo.isNotBlank()) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             YogheeText(
-                text = schedule.instructorMemo,
+                text = "${schedule.startTime} ~ ${schedule.endTime}",
                 color = BLACK,
                 fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
+            )
+            YogheeText(
+                text = schedule.className,
+                color = BLACK,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            if (schedule.instructorMemo.isNotBlank()) {
+                YogheeText(
+                    text = schedule.instructorMemo,
+                    color = BLACK,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
+        if (menuOpen) {
+            MoreVertMenu(
+                expanded = true, // menuOpen인 동안 팝업도 항상 표시
+                onExpandedChange = { if (!it) menuOpen = false },
+                onEdit = onEdit,
+                onCopy = onCopy,
+                onDelete = onDelete,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp),
             )
         }
     }
+}
+
+/**
+ * 카드 우측 상단의 MoreVert(⋮) 아이콘과 클릭 시 노출되는 수정/복사/삭제 팝업.
+ * 팝업은 앵커(아이콘) 왼쪽으로 8dp 떨어진 지점에 우측 끝을 맞춰 배치된다.
+ */
+@Composable
+private fun MoreVertMenu(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onEdit: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val density = LocalDensity.current
+    val gapXPx = with(density) { 10.dp.roundToPx() }
+    val gapYPx = with(density) { 4.dp.roundToPx() }
+    Box(modifier = modifier) {
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = "메뉴 열기",
+            tint = GRAY,
+            modifier = Modifier
+                .size(20.dp)
+                .noRippleClickable { onExpandedChange(true) },
+        )
+        if (expanded) {
+            Popup(
+                onDismissRequest = { onExpandedChange(false) },
+                properties = PopupProperties(focusable = true),
+                popupPositionProvider = remember(gapXPx, gapYPx) {
+                    // 앵커(MoreVert) 우측으로 gapXPx 떨어진 지점에 팝업 좌측 끝, top은 앵커 top에서 gapYPx 위.
+                    object : PopupPositionProvider {
+                        override fun calculatePosition(
+                            anchorBounds: IntRect,
+                            windowSize: IntSize,
+                            layoutDirection: LayoutDirection,
+                            popupContentSize: IntSize,
+                        ): IntOffset = IntOffset(
+                            x = anchorBounds.right + gapXPx,
+                            y = anchorBounds.top - gapYPx,
+                        )
+                    }
+                },
+            ) {
+                MoreMenuContent(
+                    onEdit = {
+                        onExpandedChange(false)
+                        onEdit()
+                    },
+                    onCopy = {
+                        onExpandedChange(false)
+                        onCopy()
+                    },
+                    onDelete = {
+                        onExpandedChange(false)
+                        onDelete()
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoreMenuContent(
+    onEdit: () -> Unit,
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = WHITE,
+        border = BorderStroke(1.dp, LIGHT_GRAY),
+        shadowElevation = 0.dp,
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            MoreMenuItem(text = "수정", onClick = onEdit)
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(40.dp)
+                    .padding(vertical = 4.dp),
+                thickness = 1.dp,
+                color = LIGHT_GRAY,
+            )
+            MoreMenuItem(text = "복사", onClick = onCopy)
+            HorizontalDivider(
+                modifier = Modifier
+                    .width(40.dp)
+                    .padding(vertical = 4.dp),
+                thickness = 1.dp,
+                color = LIGHT_GRAY,
+            )
+            MoreMenuItem(text = "삭제", onClick = onDelete)
+        }
+    }
+}
+
+@Composable
+private fun MoreMenuItem(text: String, onClick: () -> Unit) {
+    YogheeText(
+        text = text,
+        color = BLACK,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.noRippleClickable(onClick),
+    )
 }
 
 @Composable

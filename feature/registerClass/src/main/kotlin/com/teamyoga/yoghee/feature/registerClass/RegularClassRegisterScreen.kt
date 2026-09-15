@@ -71,6 +71,8 @@ fun RegularClassRegisterScreen(
         onHolidayToggle = viewModel::onHolidayToggle,
         onAllHolidayToggle = viewModel::onAllHolidayToggle,
         onAddSchedule = viewModel::onScheduleAdded,
+        onEditSchedule = viewModel::onScheduleUpdated,
+        onRemoveSchedule = viewModel::onScheduleRemoved,
         onSubmit = viewModel::submit,
         onErrorConsumed = viewModel::onErrorConsumed,
         modifier = modifier,
@@ -97,6 +99,8 @@ private fun RegularClassRegisterContent(
     onHolidayToggle: (Set<String>) -> Unit,
     onAllHolidayToggle: () -> Unit,
     onAddSchedule: (dayCode: String, schedule: ClassSchedule) -> Unit,
+    onEditSchedule: (oldEntry: ScheduleEntry, newSchedule: ClassSchedule) -> Unit,
+    onRemoveSchedule: (entry: ScheduleEntry) -> Unit,
     onSubmit: () -> Unit,
     onErrorConsumed: () -> Unit,
     modifier: Modifier = Modifier,
@@ -190,6 +194,8 @@ private fun RegularClassRegisterContent(
                         holidayDaysOfWeek = state.holidayDaysOfWeek,
                         schedules = state.schedules,
                         onAddSchedule = onAddSchedule,
+                        onEditSchedule = onEditSchedule,
+                        onRemoveSchedule = onRemoveSchedule,
                         onBack = goPrevious,
                     )
                 }
@@ -234,6 +240,8 @@ private fun RegularClassRegisterScreenPreview() {
             onHolidayToggle = {},
             onAllHolidayToggle = {},
             onAddSchedule = { _, _ -> },
+            onEditSchedule = { _, _ -> },
+            onRemoveSchedule = {},
             onSubmit = {},
             onErrorConsumed = {},
         )
@@ -270,6 +278,8 @@ private fun RegularClassRegisterOperationStepPreview() {
                 holidayDaysOfWeek = setOf("SUN"),
                 schedules = emptyList(),
                 onAddSchedule = { _, _ -> },
+                onEditSchedule = { _, _ -> },
+                onRemoveSchedule = {},
                 onBack = {},
             )
         }

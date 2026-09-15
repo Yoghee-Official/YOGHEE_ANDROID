@@ -942,11 +942,13 @@ internal fun ClassOperationStepContent(
     holidayDaysOfWeek: Set<String>,
     schedules: List<ScheduleEntry>,
     onAddSchedule: (dayCode: String, schedule: ClassSchedule) -> Unit,
+    onEditSchedule: (oldEntry: ScheduleEntry, newSchedule: ClassSchedule) -> Unit,
+    onRemoveSchedule: (entry: ScheduleEntry) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // + 버튼 클릭 시 (dayCode, hour) 저장 → 이 값이 not null이면 바텀시트 노출.
-    var pendingSchedule by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    // 바텀시트 모드: null이면 닫힘, 아니면 지정된 모드로 열림.
+    var sheetMode by remember { mutableStateOf<ScheduleSheetMode?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
@@ -984,35 +986,59 @@ internal fun ClassOperationStepContent(
             ScheduleGrid(
                 holidayDaysOfWeek = holidayDaysOfWeek,
                 schedules = schedules,
-                onAddSchedule = { dayCode, hour -> pendingSchedule = dayCode to hour },
+                onAddSchedule = { dayCode, hour -> sheetMode = ScheduleSheetMode.Add(dayCode, hour) },
+                onEditSchedule = { entry -> sheetMode = ScheduleSheetMode.Edit(entry) },
+                onCopySchedule = { entry -> sheetMode = ScheduleSheetMode.Copy(entry) },
+                onDeleteSchedule = onRemoveSchedule,
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
-    pendingSchedule?.let { (dayCode, hour) ->
-        // 클릭한 셀의 시간을 시작시간으로, 다음 정시를 종료시간으로 초기 노출.
-        val initial = ClassSchedule(
-            startTime = "%02d:00".format(hour),
-            endTime = "%02d:00".format((hour + 1) % 24),
-            className = "",
-            minCount = 0,
-            maxCount = 0,
-        )
-        // 시간 오버랩 감지에 사용할, 같은 요일의 기존 스케줄만 추려서 전달.
+    sheetMode?.let { mode ->
+        // 모드별 initial 값 / dayCode / 중복 검사 시 제외할 entry(Edit일 때 자기 자신) 준비.
+        val initial: ClassSchedule = when (mode) {
+            is ScheduleSheetMode.Add -> ClassSchedule(
+                startTime = "%02d:00".format(mode.hour),
+                endTime = "%02d:00".format((mode.hour + 1) % 24),
+                className = "",
+                minCount = 0,
+                maxCount = 0,
+            )
+            is ScheduleSheetMode.Edit -> mode.entry.schedule
+            is ScheduleSheetMode.Copy -> mode.entry.schedule
+        }
+        val targetDayCode: String = when (mode) {
+            is ScheduleSheetMode.Add -> mode.dayCode
+            is ScheduleSheetMode.Edit -> mode.entry.dayCode
+            is ScheduleSheetMode.Copy -> mode.entry.dayCode
+        }
+        val excludeEntry: ScheduleEntry? = (mode as? ScheduleSheetMode.Edit)?.entry
         val existingDaySchedules = schedules
-            .filter { it.dayCode == dayCode }
+            .filter { it.dayCode == targetDayCode && it != excludeEntry }
             .map { it.schedule }
+
         RegularScheduleBottomSheet(
             initial = initial,
             existingDaySchedules = existingDaySchedules,
-            onDismiss = { pendingSchedule = null },
+            onDismiss = { sheetMode = null },
             onApply = { schedule ->
-                onAddSchedule(dayCode, schedule)
-                pendingSchedule = null
+                when (mode) {
+                    is ScheduleSheetMode.Add -> onAddSchedule(mode.dayCode, schedule)
+                    is ScheduleSheetMode.Edit -> onEditSchedule(mode.entry, schedule)
+                    is ScheduleSheetMode.Copy -> onAddSchedule(mode.entry.dayCode, schedule)
+                }
+                sheetMode = null
             },
         )
     }
+}
+
+// 바텀시트가 어떤 목적으로 열렸는지 구분해 apply/필터 로직을 분기하는 데 사용.
+private sealed interface ScheduleSheetMode {
+    data class Add(val dayCode: String, val hour: Int) : ScheduleSheetMode
+    data class Edit(val entry: ScheduleEntry) : ScheduleSheetMode
+    data class Copy(val entry: ScheduleEntry) : ScheduleSheetMode
 }
 
 /**
@@ -1032,6 +1058,9 @@ private fun ScheduleGrid(
     holidayDaysOfWeek: Set<String>,
     schedules: List<ScheduleEntry>,
     onAddSchedule: (dayCode: String, hour: Int) -> Unit,
+    onEditSchedule: (ScheduleEntry) -> Unit,
+    onCopySchedule: (ScheduleEntry) -> Unit,
+    onDeleteSchedule: (ScheduleEntry) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -1060,7 +1089,12 @@ private fun ScheduleGrid(
                 // 레이어 순서 = 그리기 순서. 뒤에 나온 것이 위에 렌더된다.
                 // 1) 베이스 그리드(시간 헤더 + 세로 선) → 2) 카드 → 3) + 버튼
                 BaseGrid(activeHour = activeHour)
-                SchedulesOverlay(schedules = schedules)
+                SchedulesOverlay(
+                    schedules = schedules,
+                    onEditSchedule = onEditSchedule,
+                    onCopySchedule = onCopySchedule,
+                    onDeleteSchedule = onDeleteSchedule,
+                )
                 AddButtonsOverlay(
                     activeHour = activeHour,
                     holidayDaysOfWeek = holidayDaysOfWeek,
@@ -1181,7 +1215,12 @@ private fun DrawScope.drawVerticalLine(isActive: Boolean) {
  * cardY = TIME_HEADER + ROW_STRIDE × dayIndex (Y축 요일 행 stride와 일치).
  */
 @Composable
-private fun SchedulesOverlay(schedules: List<ScheduleEntry>) {
+private fun SchedulesOverlay(
+    schedules: List<ScheduleEntry>,
+    onEditSchedule: (ScheduleEntry) -> Unit,
+    onCopySchedule: (ScheduleEntry) -> Unit,
+    onDeleteSchedule: (ScheduleEntry) -> Unit,
+) {
     val pitchPerMinute = GRID_HOUR_PITCH.value / 60f
     schedules.forEach { entry ->
         val startMin = parseTimeToMinutes(entry.schedule.startTime) ?: return@forEach
@@ -1195,6 +1234,9 @@ private fun SchedulesOverlay(schedules: List<ScheduleEntry>) {
         val cardWidth = ((endMin - startMin) * pitchPerMinute).dp
         ScheduleCard(
             schedule = entry.schedule,
+            onEdit = { onEditSchedule(entry) },
+            onCopy = { onCopySchedule(entry) },
+            onDelete = { onDeleteSchedule(entry) },
             modifier = Modifier
                 .offset(x = cardX, y = cardY)
                 .width(cardWidth)

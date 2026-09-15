@@ -110,6 +110,24 @@ class RegularClassRegisterViewModel @Inject constructor(
         }
     }
 
+    fun onScheduleRemoved(entry: ScheduleEntry) {
+        _uiState.update {
+            it.copy(schedules = it.schedules - entry)
+        }
+    }
+
+    // 리스트 내 원본 위치는 유지하고 스케줄만 새 값으로 교체.
+    fun onScheduleUpdated(oldEntry: ScheduleEntry, newSchedule: ClassSchedule) {
+        _uiState.update { state ->
+            state.copy(
+                schedules = state.schedules.map { entry ->
+                    if (entry == oldEntry) ScheduleEntry(oldEntry.dayCode, newSchedule)
+                    else entry
+                },
+            )
+        }
+    }
+
     fun onImagesReordered(from: Int, to: Int) {
         val current = _uiState.value
         if (from == to) return

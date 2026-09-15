@@ -699,11 +699,9 @@ private val GRID_ROW_HEIGHT = 58.dp
 private val GRID_ROW_BOTTOM_PADDING = 12.dp
 // 요일 행 간 stride(= ROW_HEIGHT + BOTTOM_PADDING). 오버레이 좌표 계산 기준.
 private val GRID_ROW_STRIDE = GRID_ROW_HEIGHT + GRID_ROW_BOTTOM_PADDING
-// 오버레이(카드/+버튼)의 X 시작 위치.
-// 이론상: start padding 8dp + 내부 컬럼 폭 28dp / 2 = 22dp
-// 실제 렌더링에서는 stroke 안티에일리어싱/서브픽셀 반올림으로 카드가 선보다 살짝 왼쪽에
-// 보이는 경향이 있어, +2dp 시각 튜닝을 반영해 24dp 사용.
-private val GRID_LINE_OFFSET_IN_COLUMN = 24.dp
+// 오버레이(카드/+버튼)의 X 시작 위치. 세로 선과 정중앙 정렬.
+// = start padding 8dp + 내부 컬럼 폭 28dp / 2 = 22dp
+private val GRID_LINE_OFFSET_IN_COLUMN = 22.dp
 // + 버튼 지름.
 private val GRID_ADD_BUTTON_SIZE = 20.dp
 private const val GRID_TOTAL_HOURS = 24
@@ -1097,9 +1095,13 @@ private fun YAxis(holidayDaysOfWeek: Set<String>) {
 
 @Composable
 private fun BaseGrid(activeHour: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(GRID_COLUMN_SPACING)) {
+    // spacedBy를 사용하지 않고 각 셀을 GRID_HOUR_PITCH(112dp) 폭의 Box로 감싼다.
+    // Row의 아이템당 반올림을 한 번으로 통일해 오버레이 좌표 계산과 완벽히 일치시킴.
+    Row {
         (0 until GRID_TOTAL_HOURS).forEach { hour ->
-            HourColumn(hour = hour, isActive = hour == activeHour)
+            Box(modifier = Modifier.width(GRID_HOUR_PITCH)) {
+                HourColumn(hour = hour, isActive = hour == activeHour)
+            }
         }
     }
 }

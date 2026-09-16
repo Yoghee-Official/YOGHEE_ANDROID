@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.window.PopupPositionProvider
@@ -949,6 +950,8 @@ internal fun ClassOperationStepContent(
 ) {
     // 바텀시트 모드: null이면 닫힘, 아니면 지정된 모드로 열림.
     var sheetMode by remember { mutableStateOf<ScheduleSheetMode?>(null) }
+    // 삭제 확인 다이얼로그 대상 entry. not null이면 다이얼로그 노출.
+    var pendingDeleteEntry by remember { mutableStateOf<ScheduleEntry?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         YogheeHeader(
@@ -989,7 +992,7 @@ internal fun ClassOperationStepContent(
                 onAddSchedule = { dayCode, hour -> sheetMode = ScheduleSheetMode.Add(dayCode, hour) },
                 onEditSchedule = { entry -> sheetMode = ScheduleSheetMode.Edit(entry) },
                 onCopySchedule = { entry -> sheetMode = ScheduleSheetMode.Copy(entry) },
-                onDeleteSchedule = onRemoveSchedule,
+                onDeleteSchedule = { entry -> pendingDeleteEntry = entry },
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -1031,6 +1034,70 @@ internal fun ClassOperationStepContent(
                 sheetMode = null
             },
         )
+    }
+
+    pendingDeleteEntry?.let { entry ->
+        ConfirmDialog(
+            message = "삭제 하시겠습니까?",
+            onDismiss = { pendingDeleteEntry = null },
+            onConfirm = {
+                onRemoveSchedule(entry)
+                pendingDeleteEntry = null
+            },
+        )
+    }
+}
+
+@Composable
+private fun ConfirmDialog(
+    message: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    dismissText: String = "닫기",
+    confirmText: String = "확인",
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .background(WHITE, RoundedCornerShape(7.dp))
+                .padding(vertical = 24.dp, horizontal = 60.dp),
+        ) {
+            YogheeText(
+                text = message,
+                color = BLACK,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 17.dp),
+                horizontalArrangement = Arrangement.spacedBy(17.dp, Alignment.CenterHorizontally),
+            ) {
+                YogheeText(
+                    text = dismissText,
+                    color = BLACK,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(color = LIGHT_GRAY)
+                        .noRippleClickable(onDismiss)
+                        .padding(horizontal = 28.dp, vertical = 7.dp),
+                )
+                YogheeText(
+                    text = confirmText,
+                    color = WHITE,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(color = LAND_BROWN)
+                        .noRippleClickable(onConfirm)
+                        .padding(horizontal = 28.dp, vertical = 7.dp),
+                )
+            }
+        }
     }
 }
 

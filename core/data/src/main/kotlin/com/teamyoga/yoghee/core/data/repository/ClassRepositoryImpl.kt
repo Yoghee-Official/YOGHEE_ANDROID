@@ -16,6 +16,7 @@ import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
 import com.teamyoga.yoghee.core.domain.model.CreateClassPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.model.CreateRefundPolicyParam
+import com.teamyoga.yoghee.core.domain.model.CreateRegularClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import javax.inject.Inject
 
@@ -46,6 +47,19 @@ class ClassRepositoryImpl @Inject constructor(
             ),
             // TODO: 휴일 UI 미구현
             holidayPolicy = null,
+        )
+        return classService.createClass(request).data.orEmpty()
+    }
+
+    override suspend fun createRegularClass(params: CreateRegularClassParams): String {
+        val request = CreateClassRequest(
+            type = params.type,
+            name = params.name,
+            description = params.description,
+            centerId = params.centerId,
+            featureCodes = params.featureCodes,
+            categoryCodes = params.categoryCodes,
+            images = params.images,
         )
         return classService.createClass(request).data.orEmpty()
     }

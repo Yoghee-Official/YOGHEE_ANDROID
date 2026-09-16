@@ -60,7 +60,7 @@ class ImageRepositoryImpl @Inject constructor(
         val body = file.bytes.toRequestBody(file.contentType.toMediaTypeOrNull())
         val request = Request.Builder()
             .url(presignedUrl)
-            .post(body)
+            .put(body)
             .build()
         uploadHttpClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) {

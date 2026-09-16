@@ -1,12 +1,16 @@
 package com.teamyoga.yoghee.feature.registerClass
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teamyoga.yoghee.core.domain.model.CreateRegularClassParams
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
+import com.teamyoga.yoghee.core.domain.repository.ImageRepository
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
 import com.teamyoga.yoghee.feature.registerClass.components.ImageItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,9 +19,13 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+private const val REGULAR_CLASS_TYPE = "R"
+
 @HiltViewModel
 class RegularClassRegisterViewModel @Inject constructor(
     private val classRepository: ClassRepository,
+    private val imageRepository: ImageRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegularClassRegisterUiState())
@@ -139,11 +147,40 @@ class RegularClassRegisterViewModel @Inject constructor(
         }
     }
 
-    // Step 5, 6이 placeholder라 실제 스케줄/가격 입력이 없어 API 호출은 스킵하고 완료 처리.
-    // Step 5, 6 UI 확정 시 OneDayClassRegisterViewModel.submit()와 유사한 로직으로 교체 예정.
+    // 현재는 Step 1 필드(name, description, featureCodes)만 서버로 전송.
+    // 나머지 Step 필드는 UI 확정 시 CreateRegularClassParams / Repository 매핑에 순차 추가.
     fun submit() {
         if (_uiState.value.submitState is SubmitState.Loading) return
-        _uiState.update { it.copy(submitState = SubmitState.Success) }
+
+        val state = _uiState.value
+        _uiState.update { it.copy(submitState = SubmitState.Loading) }
+
+        viewModelScope.launch {
+            runCatching {
+                val imageUrls = uploadImagesIfAny(imageRepository, state.images, context)
+                classRepository.createRegularClass(
+                    CreateRegularClassParams(
+                        type = REGULAR_CLASS_TYPE,
+                        name = state.name,
+                        description = state.description,
+                        centerId = state.selectedCenterId.orEmpty(),
+                        featureCodes = state.classPurposes.toList(),
+                        categoryCodes = state.categoryCodes.toList(),
+                        images = imageUrls,
+                    )
+                )
+            }.onSuccess {
+                _uiState.update { it.copy(submitState = SubmitState.Success) }
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(
+                        submitState = SubmitState.Error(
+                            throwable.message ?: "클래스 등록에 실패했습니다."
+                        )
+                    )
+                }
+            }
+        }
     }
 
     fun onErrorConsumed() {

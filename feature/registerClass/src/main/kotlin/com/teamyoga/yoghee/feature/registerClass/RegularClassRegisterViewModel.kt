@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.teamyoga.yoghee.core.domain.model.CreateHolidayPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateRegularClassParams
+import com.teamyoga.yoghee.core.domain.model.RegularClassScheduleParam
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import com.teamyoga.yoghee.core.domain.repository.ImageRepository
 import com.teamyoga.yoghee.feature.registerClass.components.ClassSchedule
@@ -166,7 +168,9 @@ class RegularClassRegisterViewModel @Inject constructor(
                         centerId = state.selectedCenterId.orEmpty(),
                         featureCodes = state.classPurposes.toList(),
                         categoryCodes = state.categoryCodes.toList(),
+                        schedules = state.schedules.mapNotNull { it.toParam() },
                         images = imageUrls,
+                        holidayPolicy = buildHolidayPolicy(state),
                     )
                 )
             }.onSuccess {
@@ -181,6 +185,40 @@ class RegularClassRegisterViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    // hasHoliday=false면 두 배열 모두 빈 값으로 전송한다.
+    private fun buildHolidayPolicy(state: RegularClassRegisterUiState): CreateHolidayPolicyParam {
+        if (!state.hasHoliday) {
+            return CreateHolidayPolicyParam(weeklyOffDays = emptyList(), publicHolidays = emptyList())
+        }
+        val weeklyOffDays = state.holidayDaysOfWeek
+            .mapNotNull { dayCodeToIsoNumber(it) }
+            .sorted()
+        return CreateHolidayPolicyParam(
+            weeklyOffDays = weeklyOffDays,
+            publicHolidays = state.holidays.toList(),
+        )
+    }
+
+    // HOLIDAY_DAY_OF_WEEK_OPTIONS 순서를 그대로 사용해 ISO-8601(월=1..일=7)로 변환한다.
+    private fun dayCodeToIsoNumber(code: String): Int? {
+        val index = HOLIDAY_DAY_OF_WEEK_OPTIONS.indexOfFirst { it.first == code }
+        return if (index < 0) null else index + 1
+    }
+
+    // 알 수 없는 dayCode(있을 수 없으나 방어적으로)만 건너뛴다.
+    private fun ScheduleEntry.toParam(): RegularClassScheduleParam? {
+        val dayOfWeek = dayCodeToIsoNumber(dayCode) ?: return null
+        return RegularClassScheduleParam(
+            name = schedule.className,
+            dayOfWeek = dayOfWeek,
+            startTime = schedule.startTime,
+            endTime = schedule.endTime,
+            minCapacity = schedule.minCount,
+            maxCapacity = schedule.maxCount,
+            instructorNote = schedule.instructorMemo,
+        )
     }
 
     fun onErrorConsumed() {

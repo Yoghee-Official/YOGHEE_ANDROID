@@ -5,6 +5,7 @@ import com.teamyoga.yoghee.core.data.remote.model.CenterDetailDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
+import com.teamyoga.yoghee.core.data.remote.model.CreateHolidayPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateRefundPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateTicketDto
@@ -14,9 +15,11 @@ import com.teamyoga.yoghee.core.domain.model.CenterDetail
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
 import com.teamyoga.yoghee.core.domain.model.CreateClassPolicyParam
+import com.teamyoga.yoghee.core.domain.model.CreateHolidayPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
 import com.teamyoga.yoghee.core.domain.model.CreateRefundPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateRegularClassParams
+import com.teamyoga.yoghee.core.domain.model.RegularClassScheduleParam
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import javax.inject.Inject
 
@@ -59,10 +62,27 @@ class ClassRepositoryImpl @Inject constructor(
             centerId = params.centerId,
             featureCodes = params.featureCodes,
             categoryCodes = params.categoryCodes,
+            schedules = params.schedules.map { it.toDto() },
             images = params.images,
+            holidayPolicy = params.holidayPolicy.toDto(),
         )
         return classService.createClass(request).data.orEmpty()
     }
+
+    private fun CreateHolidayPolicyParam.toDto(): CreateHolidayPolicyDto = CreateHolidayPolicyDto(
+        weeklyOffDays = weeklyOffDays,
+        publicHolidays = publicHolidays,
+    )
+
+    private fun RegularClassScheduleParam.toDto(): CreateScheduleDto = CreateScheduleDto(
+        dayOfWeek = dayOfWeek,
+        startTime = startTime,
+        endTime = endTime,
+        minCapacity = minCapacity,
+        maxCapacity = maxCapacity,
+        name = name,
+        instructorNote = instructorNote,
+    )
 
     override suspend fun getCenters(): List<Center> =
         classService.getCenters().data.map { it.toDomain() }

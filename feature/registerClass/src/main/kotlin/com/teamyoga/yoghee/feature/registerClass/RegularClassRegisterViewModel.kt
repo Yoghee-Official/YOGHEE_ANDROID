@@ -96,13 +96,31 @@ class RegularClassRegisterViewModel @Inject constructor(
 
     // pill 하나가 담당하는 코드 묶음을 통째로 추가/삭제.
     // 이미 모두 선택돼 있으면 해제, 그 외에는 모두 추가.
+    // 제거 시, 이번 토글로 상위 pill(예: 추석 연휴)이 "완전 선택 → 부분 선택"으로 바뀌면
+    // 그 상위 pill의 나머지 코드도 함께 정리해 UI와 데이터를 일치시킨다.
     fun onHolidayToggle(codes: Set<String>) {
         _uiState.update {
             val current = it.holidays
             val allSelected = codes.all { code -> code in current }
-            val next = if (allSelected) current - codes else current + codes
+            val afterToggle = if (allSelected) current - codes else current + codes
+            val next = if (allSelected) cleanupPartialHolidayPills(current, afterToggle) else afterToggle
             it.copy(holidays = next)
         }
+    }
+
+    private fun cleanupPartialHolidayPills(
+        before: Set<String>,
+        after: Set<String>,
+    ): Set<String> {
+        var result = after
+        HOLIDAY_OPTIONS.forEach { option ->
+            val wasFullySelected = option.codes.all { it in before }
+            val isFullySelectedNow = option.codes.all { it in result }
+            if (wasFullySelected && !isFullySelectedNow) {
+                result = result - option.codes
+            }
+        }
+        return result
     }
 
     // "전체 휴무" 체크박스 토글: 전체 선택 상태면 해제, 그 외에는 모두 선택.

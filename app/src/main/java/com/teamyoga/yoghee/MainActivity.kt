@@ -195,7 +195,7 @@ private fun AppNavGraph(
             val id = backStackEntry.arguments?.getString(AppRoute.Detail.ARG_ID).orEmpty()
             DetailScreen(
                 id = id,
-                onGoMain = { navController.navigate(AppRoute.Main.route) },
+                onBack = { navController.popBackStack() },
             )
         }
     }

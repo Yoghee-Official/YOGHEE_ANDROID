@@ -8,12 +8,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface DetailUiState {
     data object Loading : DetailUiState
-    data class Success(val classDetail: ClassDetail) : DetailUiState
+    data class Success(
+        val classDetail: ClassDetail,
+        // API 응답의 isFavorite 를 초기값으로 갖고, 토글은 로컬 상태로 관리한다.
+        val isBookmarked: Boolean,
+    ) : DetailUiState
     data class Error(val message: String) : DetailUiState
 }
 
@@ -30,7 +35,7 @@ class DetailViewModel @Inject constructor(
 
     fun load(classId: String) {
         if (classId.isBlank()) {
-            _uiState.value = DetailUiState.Error("잘못된 classId 입니다.")
+            _uiState.value = DetailUiState.Error("수련 상세 정보를 불러오지 못했습니다.")
             return
         }
         if (loadedClassId == classId && _uiState.value is DetailUiState.Success) return
@@ -40,9 +45,20 @@ class DetailViewModel @Inject constructor(
             _uiState.value = DetailUiState.Loading
             _uiState.value = runCatching { classRepository.getClassDetail(classId) }
                 .fold(
-                    onSuccess = { DetailUiState.Success(it) },
+                    onSuccess = { DetailUiState.Success(classDetail = it, isBookmarked = it.isFavorite) },
                     onFailure = { DetailUiState.Error(it.message ?: "수련 상세 정보를 불러오지 못했습니다.") },
                 )
+        }
+    }
+
+    // TODO: 북마크 토글 API 연동 필요. 현재는 로컬 상태만 갱신.
+    fun toggleBookmark() {
+        _uiState.update { current ->
+            if (current is DetailUiState.Success) {
+                current.copy(isBookmarked = !current.isBookmarked)
+            } else {
+                current
+            }
         }
     }
 }

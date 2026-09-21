@@ -1,6 +1,7 @@
 package com.teamyoga.yoghee.core.data.remote
 
 import com.teamyoga.yoghee.core.data.remote.model.CenterDetailResponse
+import com.teamyoga.yoghee.core.data.remote.model.ClassDetailResponse
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterResponse
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
@@ -18,6 +19,11 @@ interface ClassService {
     suspend fun createClass(
         @Body request: CreateClassRequest,
     ): CreateClassResponse
+
+    @GET("api/class/{classId}")
+    suspend fun getClassDetail(
+        @Path("classId") classId: String,
+    ): ClassDetailResponse
 
     @GET("api/center")
     suspend fun getCenters(): GetCentersResponse

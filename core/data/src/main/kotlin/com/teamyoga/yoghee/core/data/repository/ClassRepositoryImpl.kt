@@ -2,6 +2,16 @@ package com.teamyoga.yoghee.core.data.repository
 
 import com.teamyoga.yoghee.core.data.remote.ClassService
 import com.teamyoga.yoghee.core.data.remote.model.CenterDetailDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassCategoryDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassCenterDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassDetailDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassFeatureDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassMasterInfoDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassPolicyDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassRefundPolicyDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassScheduleDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassScheduleMonthDto
+import com.teamyoga.yoghee.core.data.remote.model.ClassTicketDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
@@ -10,9 +20,21 @@ import com.teamyoga.yoghee.core.data.remote.model.CreateRefundPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateTicketDto
 import com.teamyoga.yoghee.core.data.remote.model.MyCenterDto
+import com.teamyoga.yoghee.core.data.remote.model.ReviewDto
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.CenterDetail
+import com.teamyoga.yoghee.core.domain.model.ClassCategory
+import com.teamyoga.yoghee.core.domain.model.ClassCenter
+import com.teamyoga.yoghee.core.domain.model.ClassDetail
+import com.teamyoga.yoghee.core.domain.model.ClassFeature
+import com.teamyoga.yoghee.core.domain.model.ClassMasterInfo
+import com.teamyoga.yoghee.core.domain.model.ClassPolicy
+import com.teamyoga.yoghee.core.domain.model.ClassRefundPolicy
+import com.teamyoga.yoghee.core.domain.model.ClassReview
+import com.teamyoga.yoghee.core.domain.model.ClassSchedule
+import com.teamyoga.yoghee.core.domain.model.ClassScheduleMonth
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
+import com.teamyoga.yoghee.core.domain.model.ClassTicket
 import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
 import com.teamyoga.yoghee.core.domain.model.CreateClassPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateHolidayPolicyParam
@@ -104,6 +126,12 @@ class ClassRepositoryImpl @Inject constructor(
         return centerId
     }
 
+    override suspend fun getClassDetail(classId: String): ClassDetail {
+        val dto = classService.getClassDetail(classId).data
+            ?: error("수련 상세 정보를 불러오지 못했습니다.")
+        return dto.toDomain()
+    }
+
     private fun CreateCenterParams.toRequest(): CreateCenterRequest {
         val fullAddress = buildString {
             append(roadAddress)
@@ -169,5 +197,130 @@ class ClassRepositoryImpl @Inject constructor(
         addressDetail = addressDetail,
         amenityCodes = amenityCodes,
         categoryCodes = categoryCodes,
+    )
+
+    private fun ClassDetailDto.toDomain(): ClassDetail = ClassDetail(
+        classId = classId,
+        type = type,
+        name = name,
+        description = description,
+        price = price,
+        originalPrice = originalPrice,
+        discountRate = discountRate,
+        images = images,
+        thumbnail = thumbnail,
+        categories = categories.map { it.toDomain() },
+        features = features.map { it.toDomain() },
+        favoriteCount = favoriteCount,
+        isFavorite = isFavorite,
+        reviewCount = reviewCount,
+        rating = rating,
+        recentReviews = recentReviews.map { it.toClassReview() },
+        policy = policy?.toDomain(),
+        schedules = schedules.map { it.toDomain() },
+        scheduleYear = scheduleYear,
+        scheduleMonth = scheduleMonth,
+        scheduleMonths = scheduleMonths.map { it.toDomain() },
+        tickets = tickets.map { it.toDomain() },
+        center = center?.toDomain(),
+        masterInfo = masterInfo?.toDomain(),
+    )
+
+    private fun ClassCategoryDto.toDomain(): ClassCategory = ClassCategory(
+        code = code,
+        name = name,
+    )
+
+    private fun ClassFeatureDto.toDomain(): ClassFeature = ClassFeature(
+        code = code,
+        description = description,
+    )
+
+    // MainResponse 의 ReviewDto 를 Class 상세용 ClassReview 로 매핑.
+    // 필드 누락 시 안전한 기본값(빈 문자열, 0)을 제공한다.
+    private fun ReviewDto.toClassReview(): ClassReview = ClassReview(
+        reviewId = reviewId.orEmpty(),
+        userUuid = userUuid.orEmpty(),
+        nickname = nickname.orEmpty(),
+        userLevel = userLevel ?: 0,
+        profileUrl = profileUrl.orEmpty(),
+        thumbnail = thumbnail.orEmpty(),
+        content = content.orEmpty(),
+        rating = rating ?: 0.0,
+        createdAt = createdAt.orEmpty(),
+    )
+
+    private fun ClassPolicyDto.toDomain(): ClassPolicy = ClassPolicy(
+        discountRate = discountRate,
+        discountStartDate = discountStartDate,
+        discountEndDate = discountEndDate,
+        reservationNote = reservationNote,
+        refundPolicies = refundPolicies.map { it.toDomain() },
+    )
+
+    private fun ClassRefundPolicyDto.toDomain(): ClassRefundPolicy = ClassRefundPolicy(
+        hoursBeforeClass = hoursBeforeClass,
+        refundRate = refundRate,
+    )
+
+    private fun ClassScheduleDto.toDomain(): ClassSchedule = ClassSchedule(
+        scheduleId = scheduleId,
+        sessionId = sessionId,
+        sessionStatus = sessionStatus,
+        currentCount = currentCount,
+        remainingCapacity = remainingCapacity,
+        bookable = bookable,
+        unavailableReason = unavailableReason,
+        alreadyReserved = alreadyReserved,
+        dayOfWeek = dayOfWeek,
+        specificDate = specificDate,
+        startTime = startTime,
+        endTime = endTime,
+        minCapacity = minCapacity,
+        maxCapacity = maxCapacity,
+        content = content,
+        instructorName = instructorName,
+        effectiveFrom = effectiveFrom,
+        effectiveTo = effectiveTo,
+    )
+
+    private fun ClassScheduleMonthDto.toDomain(): ClassScheduleMonth = ClassScheduleMonth(
+        year = year,
+        month = month,
+    )
+
+    private fun ClassTicketDto.toDomain(): ClassTicket = ClassTicket(
+        ticketId = ticketId,
+        ticketType = ticketType,
+        price = price,
+        originalPrice = originalPrice,
+        discountRate = discountRate,
+        validMonths = validMonths,
+        weeklyCount = weeklyCount,
+        totalSessions = totalSessions,
+    )
+
+    private fun ClassCenterDto.toDomain(): ClassCenter = ClassCenter(
+        centerId = centerId,
+        name = name,
+        description = description,
+        thumbnail = thumbnail,
+        sido = sido,
+        sigungu = sigungu,
+        roadAddress = roadAddress,
+        jibunAddress = jibunAddress,
+        detailAddress = detailAddress,
+        latitude = latitude,
+        longitude = longitude,
+        amenities = amenities,
+        facilities = facilities,
+    )
+
+    private fun ClassMasterInfoDto.toDomain(): ClassMasterInfo = ClassMasterInfo(
+        nickname = nickname,
+        profileImage = profileImage,
+        introduction = introduction,
+        career = career,
+        certificate = certificate,
     )
 }

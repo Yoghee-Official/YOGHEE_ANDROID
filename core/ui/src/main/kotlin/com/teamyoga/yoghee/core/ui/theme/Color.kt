@@ -13,6 +13,8 @@ val Green_D6F695 = Color(0xFFD6F695)
 val Green_F1FFD4 = Color(0xFFF1FFD4)
 
 val SAND_BEIGE = Color(0xFFFCFAF4)
+val SAND_BEIGE_ALPHA50 = Color(0x80FCFAF4)
+
 val FLOW_BLUE = Color(0xFFCAE1FD)
 val WHITE = Color(0xFFFFFFFF)
 val BLACK = Color(0xFF000000)

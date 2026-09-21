@@ -49,6 +49,9 @@
     <string name="one_day_class_register_step3_title">수련 정보</string>
     <string name="one_day_class_register_step4_title">수련 장소 등록</string>
     <string name="one_day_class_register_step5_title">이미지 등록</string>
+    <string name="one_day_class_register_step6_title">금액 정보</string>
+    <string name="regular_class_register_step5_title">휴무 정보</string>
+    <string name="regular_class_register_step6_title">운영 정보</string>
     <string name="previous_page">이전 페이지</string>
     <string name="continue_page">계속</string>
 </resources>

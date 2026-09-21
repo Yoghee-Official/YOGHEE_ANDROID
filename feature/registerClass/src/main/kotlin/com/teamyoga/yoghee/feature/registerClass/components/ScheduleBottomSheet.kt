@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.layout.ContentScale
@@ -59,6 +60,8 @@ data class ClassSchedule(
     val minCount: Int,
     val maxCount: Int,
     val dates: Set<CalendarDate> = emptySet(),
+    // 정규수련 스케줄 등록에서 사용하는 지도자 메모 필드. 다른 시트에서는 빈 값으로 유지.
+    val instructorMemo: String = "",
 )
 
 private const val MIN_COUNT = 0
@@ -156,6 +159,161 @@ fun ScheduleBottomSheet(
     }
 }
 
+/**
+ * 정규수련 등록(step 6)의 스케줄 그리드 + 버튼에서 사용하는 바텀시트.
+ * 기존 [ScheduleBottomSheet]와 달리 "수련명" 라벨 + "지도자 (메모)" 옵션 필드를 포함한다.
+ *
+ * @param existingDaySchedules 해당 요일에 이미 등록된 스케줄 목록. 시간 오버랩 감지에 사용된다.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegularScheduleBottomSheet(
+    onDismiss: () -> Unit,
+    onApply: (ClassSchedule) -> Unit,
+    modifier: Modifier = Modifier,
+    initial: ClassSchedule? = null,
+    existingDaySchedules: List<ClassSchedule> = emptyList(),
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var startTime by remember { mutableStateOf(initial?.startTime ?: DEFAULT_TIME) }
+    var endTime by remember { mutableStateOf(initial?.endTime ?: DEFAULT_TIME) }
+    var className by remember { mutableStateOf(initial?.className ?: "") }
+    var instructorMemo by remember { mutableStateOf(initial?.instructorMemo ?: "") }
+    var minCount by remember { mutableIntStateOf(initial?.minCount ?: MIN_COUNT) }
+    var maxCount by remember { mutableIntStateOf(initial?.maxCount ?: MIN_COUNT) }
+    var pickerTarget by remember { mutableStateOf<TimePickerTarget?>(null) }
+
+    // 같은 요일에 이미 등록된 스케줄과 시간이 겹치는지 여부. startTime/endTime이 변할 때만 재계산.
+    val hasTimeConflict = remember(startTime, endTime, existingDaySchedules) {
+        timeRangeOverlapsAny(startTime, endTime, existingDaySchedules)
+    }
+    val canApply = startTime.isNotBlank() &&
+        endTime.isNotBlank() &&
+        className.isNotBlank() &&
+        !hasTimeConflict
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = WHITE,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                TimeBox(
+                    label = "시작 시간",
+                    time = startTime,
+                    onClick = { pickerTarget = TimePickerTarget.START },
+                    modifier = Modifier.weight(1f),
+                )
+                TimeBox(
+                    label = "종료 시간",
+                    time = endTime,
+                    onClick = { pickerTarget = TimePickerTarget.END },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            LabeledTextField(
+                label = "수련명",
+                value = className,
+                onValueChange = { className = it },
+            )
+            LabeledTextField(
+                label = "지도자 (메모)",
+                value = instructorMemo,
+                onValueChange = { instructorMemo = it },
+                required = false,
+            )
+            HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY)
+            CounterRow(
+                label = "최소 수련 가능 인원",
+                count = minCount,
+                onDecrement = { if (minCount > MIN_COUNT) minCount-- },
+                onIncrement = { if (minCount < MAX_COUNT) minCount++ },
+            )
+            CounterRow(
+                label = "최대 수련 가능 인원",
+                count = maxCount,
+                onDecrement = { if (maxCount > MIN_COUNT) maxCount-- },
+                onIncrement = { if (maxCount < MAX_COUNT) maxCount++ },
+            )
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = LIGHT_GRAY,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            if (hasTimeConflict) {
+                YogheeText(
+                    text = "* 동일한 시간에 중복된 수련이 있습니다. 시간을 조정해주세요!",
+                    color = MIND_ORANGE,
+                    fontSize = 10.sp,
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                )
+            }
+            ApplyButton(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                enabled = canApply,
+                onClick = {
+                    onApply(
+                        ClassSchedule(
+                            startTime = startTime,
+                            endTime = endTime,
+                            className = className,
+                            minCount = minCount,
+                            maxCount = maxCount,
+                            instructorMemo = instructorMemo,
+                        )
+                    )
+                    onDismiss()
+                },
+            )
+        }
+    }
+
+    pickerTarget?.let { target ->
+        val current = if (target == TimePickerTarget.START) startTime else endTime
+        TimePickerDialog(
+            initialTime = current,
+            onDismiss = { pickerTarget = null },
+            onConfirm = { hour, minute ->
+                val formatted = "%02d:%02d".format(hour, minute)
+                if (target == TimePickerTarget.START) startTime = formatted else endTime = formatted
+                pickerTarget = null
+            },
+        )
+    }
+}
+
+// "HH:MM" 형식 시간을 분 단위 정수로 변환. 파싱 실패 시 null.
+private fun parseTimeToMinutes(time: String): Int? = runCatching {
+    val parts = time.split(":")
+    parts[0].toInt() * 60 + parts[1].toInt()
+}.getOrNull()
+
+// [startTime, endTime) 반개구간이 기존 스케줄 중 하나와 겹치는지 여부.
+private fun timeRangeOverlapsAny(
+    startTime: String,
+    endTime: String,
+    existing: List<ClassSchedule>,
+): Boolean {
+    val start = parseTimeToMinutes(startTime) ?: return false
+    val end = parseTimeToMinutes(endTime) ?: return false
+    if (start >= end) return false
+    return existing.any { schedule ->
+        val es = parseTimeToMinutes(schedule.startTime) ?: return@any false
+        val ee = parseTimeToMinutes(schedule.endTime) ?: return@any false
+        start < ee && es < end
+    }
+}
+
 @Composable
 private fun TimeBox(
     label: String,
@@ -200,6 +358,7 @@ private fun LabeledTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    required: Boolean = true,
 ) {
     Column(
         modifier = modifier
@@ -213,8 +372,10 @@ private fun LabeledTextField(
         YogheeText(
             text = buildAnnotatedString {
                 append(label)
-                withStyle(SpanStyle(color = MIND_ORANGE)) {
-                    append(" *")
+                if (required) {
+                    withStyle(SpanStyle(color = MIND_ORANGE)) {
+                        append(" *")
+                    }
                 }
             },
             color = BLACK,
@@ -297,16 +458,21 @@ private fun CounterButton(
 private fun ApplyButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .width(208.dp)
             .height(48.dp)
+            // enabled=false일 때 반투명 처리로 비활성화 시각화, 클릭 이벤트도 무시.
+            .alpha(if (enabled) 1f else 0.5f)
             .paint(
                 painter = painterResource(R.drawable.btn_continue_class_register),
                 contentScale = ContentScale.FillBounds,
             )
-            .noRippleClickable(onClick),
+            .noRippleClickable {
+                if (enabled) onClick()
+            },
         contentAlignment = Alignment.Center,
     ) {
         YogheeText(

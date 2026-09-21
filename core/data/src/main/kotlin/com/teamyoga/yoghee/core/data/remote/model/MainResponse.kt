@@ -14,7 +14,7 @@ data class MainData(
     val imageBanner: List<BannerDto>? = null,
     val interestedClass: List<InterestedClassDto>? = null,
     val top10Class: List<InterestedClassDto>? = null,
-    val todayClass: List<ClassDto>? = null,
+    val todayClass: TodayClassDto? = null,
     val interestedCenter: List<CenterDto>? = null,
     val newReview: List<ReviewDto>? = null,
     val layoutOrder: List<LayoutOrderDto>? = null
@@ -73,7 +73,8 @@ data class LayoutOrderDto(
 )
 
 @Serializable
-data class ClassDto(
+data class TodayClassDto(
     val classId: String? = null,
-    val className: String? = null
+    val className: String? = null,
+    val message: String? = null
 )

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,26 +35,29 @@ import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 fun LocationRegisterButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    borderColor: Color,
+    titleColor: Color,
+    subTitleColor: Color
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(WHITE)
-            .border(width = 1.dp, color = MIND_ORANGE, shape = RoundedCornerShape(8.dp))
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
             .noRippleClickable(onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         YogheeText(
-            text = "새 요가원 등록하기",
-            color = MIND_ORANGE,
+            text = "수련 장소 추가",
+            color = titleColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )
         YogheeText(
             text = "등록하신 수련 장소가 없나요?\n새 요가원을 등록 해주세요.",
-            color = BLACK,
+            color = subTitleColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
         )
@@ -61,7 +65,7 @@ fun LocationRegisterButton(
 }
 
 @Composable
-fun LocationListItem(
+fun LocationListEditableItem(
     date: String,
     name: String,
     location: String,
@@ -136,6 +140,50 @@ fun LocationListItem(
 }
 
 @Composable
+fun LocationListItem(
+    date: String,
+    name: String,
+    location: String,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
+) {
+    val borderColor = if (selected) MIND_ORANGE else LIGHT_GRAY
+    val nameColor = if (selected) MIND_ORANGE else BLACK
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(WHITE)
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
+            .then(if (onClick != null) Modifier.noRippleClickable(onClick) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        YogheeText(
+            text = date,
+            color = GRAY,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        YogheeText(
+            text = name,
+            color = nameColor,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        HorizontalDivider(thickness = 1.dp, color = LIGHT_GRAY)
+        YogheeText(
+            text = location,
+            color = BLACK,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@Composable
 private fun LocationActionButton(
     text: String,
     onClick: () -> Unit,
@@ -164,6 +212,9 @@ private fun LocationRegisterButtonPreview() {
         LocationRegisterButton(
             onClick = {},
             modifier = Modifier.padding(16.dp),
+            titleColor = MIND_ORANGE,
+            subTitleColor = BLACK,
+            borderColor = MIND_ORANGE
         )
     }
 }
@@ -172,11 +223,36 @@ private fun LocationRegisterButtonPreview() {
 @Composable
 private fun LocationListItemPreview() {
     YogheeTheme {
-        LocationListItem(
+        LocationListEditableItem(
             date = "2026-08-01",
             name = "정환요가원",
             location = "경기 남양주시 다산중앙로123번길 22-26 899호",
             modifier = Modifier.padding(16.dp),
         )
+    }
+}
+
+@Preview(showBackground = true, name = "LocationListItem Selectable")
+@Composable
+private fun LocationListItemSelectablePreview() {
+    YogheeTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LocationListItem(
+                date = "2026-08-01",
+                name = "정환요가원 (선택됨)",
+                location = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                selected = true,
+                onClick = {},
+            )
+            LocationListItem(
+                date = "2026-08-01",
+                name = "정환요가원 (미선택)",
+                location = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                selected = false,
+                onClick = {},
+            )
+        }
     }
 }

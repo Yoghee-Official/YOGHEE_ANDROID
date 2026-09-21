@@ -37,9 +37,9 @@ fun MainResponse.toDomain(): List<MainSection> =
             }
             MainDataKey.YOGA_CATEGORY -> MainSection.YogaCategory(title = entry.text)
             MainDataKey.TODAY_CLASS -> data.todayClass?.let {
-                MainSection.TodayClasses(
+                MainSection.TodayClassSection(
                     title = entry.text,
-                    classes = it.map { dto -> dto.toDomain() }
+                    item = it.toDomain()
                 )
             }
             MainDataKey.INTERESTED_CENTER -> data.interestedCenter?.let {
@@ -60,9 +60,10 @@ fun MainResponse.toDomain(): List<MainSection> =
         }
     }
 
-private fun ClassDto.toDomain() = TodayClass(
+private fun TodayClassDto.toDomain() = TodayClass(
     classId = classId,
-    className = className
+    className = className,
+    message = message
 )
 
 private fun BannerDto.toDomain() = MainBanner(

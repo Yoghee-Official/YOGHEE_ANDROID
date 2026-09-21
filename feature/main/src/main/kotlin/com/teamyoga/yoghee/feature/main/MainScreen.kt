@@ -107,6 +107,7 @@ internal fun MainScreen(
                     onGoCategory = onGoCategory,
                     onGoLocation = onGoLocation,
                     onGoRegisterClass = onGoRegisterClass,
+                    onGoDetail = onGoDetail,
                 )
                 is MainUiState.Error -> Text(
                     text = uiState.message,
@@ -138,6 +139,7 @@ private fun SuccessContent(
     onGoCategory: () -> Unit,
     onGoLocation: () -> Unit,
     onGoRegisterClass: () -> Unit,
+    onGoDetail: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isRegular = trainingType == TrainingType.REGULAR
@@ -158,12 +160,14 @@ private fun SuccessContent(
                     InterestedClass(
                         title = section.title,
                         classData = section.interestedClassList,
+                        onItemClick = onGoDetail,
                         modifier = sectionModifier
                     )
                 is MainSection.Top10Classes ->
                     Top10Class(
                         title = section.title,
                         classData = section.classes,
+                        onItemClick = onGoDetail,
                         modifier = sectionModifier
                     )
                 is MainSection.YogaCategory ->

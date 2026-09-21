@@ -76,7 +76,9 @@ private fun AppNavGraph(
                 onGoCategory = { navController.navigate(AppRoute.Category.route) },
                 onGoLocation = { navController.navigate(AppRoute.Location.route) },
                 onGoProfile = { navController.navigate(AppRoute.Profile.route) },
-                onGoDetail = { navController.navigate(AppRoute.Detail.createRoute(id = "1")) },
+                onGoDetail = { classId ->
+                    navController.navigate(AppRoute.Detail.createRoute(id = classId))
+                },
                 onGoLogin = { navController.navigate(AppRoute.Login.route) },
                 onGoContentFeed = { navController.navigate(AppRoute.ContentFeed.route) },
                 onGoRegisterClass = { navController.navigate(AppRoute.RegisterClass.route) },

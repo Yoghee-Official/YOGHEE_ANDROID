@@ -1,6 +1,8 @@
 package com.teamyoga.yoghee.feature.main.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +36,7 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 fun InterestedClass(
     title: String?,
     classData: List<InterestedClass>,
+    onItemClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -45,7 +49,10 @@ fun InterestedClass(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
         ) {
             items(classData) { item ->
-                InterestedClassItem(item)
+                InterestedClassItem(
+                    classData = item,
+                    onItemClick = onItemClick,
+                )
             }
         }
     }
@@ -53,10 +60,19 @@ fun InterestedClass(
 
 @Composable
 fun InterestedClassItem(
-    classData: InterestedClass
+    classData: InterestedClass,
+    onItemClick: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier.width(145.dp)
+        modifier = Modifier
+            .width(145.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
+                // classId 가 null 인 경우 클릭 무시
+                classData.classId?.let(onItemClick)
+            }
     ) {
         Box(modifier = Modifier.size(145.dp)) {
             YogheeImage(
@@ -144,7 +160,8 @@ private fun InterestedClassPreview() {
                 isFavorite = false,
                 thumbnail = null
             )
-        )
+        ),
+        onItemClick = {}
     )
 }
 
@@ -162,6 +179,7 @@ private fun InterestedClassItemPreview() {
             rating = 4.8,
             isFavorite = false,
             thumbnail = null
-        )
+        ),
+        onItemClick = {}
     )
 }

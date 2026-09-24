@@ -177,7 +177,7 @@ private fun RecommendFeatureRow(
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(start = 24.dp),
+        contentPadding = PaddingValues(start = 24.dp, end = 24.dp),
     ) {
         items(visible) { feature ->
             RecommendFeatureChip(description = feature.description)

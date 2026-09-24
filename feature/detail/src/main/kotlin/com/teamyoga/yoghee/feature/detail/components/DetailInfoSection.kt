@@ -60,11 +60,13 @@ fun DetailInfoSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp),
+            .padding(vertical = 32.dp),
     ) {
         // 3a 수련명 + 3b 리뷰 평점/개수
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
             verticalAlignment = Alignment.Top,
         ) {
             ClassNameText(
@@ -89,7 +91,8 @@ fun DetailInfoSection(
             maxLines = 2,
             fontWeight = FontWeight.Medium,
             overflow = TextOverflow.Ellipsis,
-        )
+            modifier = Modifier.padding(horizontal = 24.dp),
+            )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -174,7 +177,7 @@ private fun RecommendFeatureRow(
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 0.dp),
+        contentPadding = PaddingValues(start = 24.dp),
     ) {
         items(visible) { feature ->
             RecommendFeatureChip(description = feature.description)

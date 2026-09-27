@@ -1,6 +1,7 @@
 package com.teamyoga.yoghee.feature.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,10 +17,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.domain.model.ClassDetail
+import com.teamyoga.yoghee.core.ui.component.YogheeText
+import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
 import com.teamyoga.yoghee.feature.detail.components.DetailInfoSection
@@ -153,6 +158,32 @@ private fun SuccessContent(
             item {
                 DetailMasterBanner(masterInfo = masterInfo)
             }
+        }
+
+        // Section 4b: 수련 설명
+        item {
+            Text(
+                text = "수련 설명",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = BLACK,
+                modifier = Modifier
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                    .border(
+                        width = 1.dp,
+                        color = BLACK,
+                        shape = RoundedCornerShape(28.dp)
+                    )
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            )
+            YogheeText(
+                text = classDetail.description,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = BLACK,
+                modifier = Modifier
+                    .padding(top = 16.dp, start = 24.dp, end = 24.dp)
+            )
         }
     }
 }

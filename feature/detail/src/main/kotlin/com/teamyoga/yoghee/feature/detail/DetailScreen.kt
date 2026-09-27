@@ -23,6 +23,7 @@ import com.teamyoga.yoghee.core.domain.model.ClassDetail
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
 import com.teamyoga.yoghee.feature.detail.components.DetailInfoSection
+import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
 import com.teamyoga.yoghee.feature.detail.components.DetailTopBar
 
 @Composable
@@ -146,6 +147,12 @@ private fun SuccessContent(
                         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
                     ),
             )
+        }
+        // Section 4a + 4aa: 대표 강사 배너 (플립)
+        classDetail.masterInfo?.let { masterInfo ->
+            item {
+                DetailMasterBanner(masterInfo = masterInfo)
+            }
         }
     }
 }

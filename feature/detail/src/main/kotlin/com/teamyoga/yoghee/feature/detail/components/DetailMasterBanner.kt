@@ -44,9 +44,7 @@ import com.teamyoga.yoghee.core.domain.model.ClassMasterInfo
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.component.YogheeText
-import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.BLACK_50
-import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.LAND_BROWN
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
@@ -170,7 +168,7 @@ private fun MasterBannerBack(masterInfo: ClassMasterInfo) {
 }
 
 @Composable
-private fun MasterBannerBackRow(label: String, value: String) {
+private fun MasterBannerBackRow(label: String, value: String, maxLine: Int = 1) {
     Row {
         YogheeText(
             text = label,
@@ -185,6 +183,8 @@ private fun MasterBannerBackRow(label: String, value: String) {
             color = WHITE,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
+            maxLines = maxLine,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

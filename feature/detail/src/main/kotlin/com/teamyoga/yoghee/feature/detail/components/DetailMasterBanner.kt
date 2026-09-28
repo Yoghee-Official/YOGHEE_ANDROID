@@ -128,6 +128,7 @@ private fun MasterBannerFront(masterInfo: ClassMasterInfo) {
                 text = masterInfo.nickname,
                 color = WHITE,
                 fontSize = 12.sp,
+                maxLines = 1,
                 fontWeight = FontWeight.Medium,
             )
             Spacer(modifier = Modifier.height(4.dp))

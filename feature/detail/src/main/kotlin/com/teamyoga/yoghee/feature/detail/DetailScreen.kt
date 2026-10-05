@@ -26,6 +26,7 @@ import com.teamyoga.yoghee.core.domain.model.ClassDetail
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.WHITE
+import com.teamyoga.yoghee.feature.detail.components.DetailCategorySection
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
 import com.teamyoga.yoghee.feature.detail.components.DetailInfoSection
 import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
@@ -184,6 +185,11 @@ private fun SuccessContent(
                 modifier = Modifier
                     .padding(top = 16.dp, start = 24.dp, end = 24.dp)
             )
+        }
+
+        // Section 4c: 수련에 녹아있는 요소 (카테고리)
+        item {
+            DetailCategorySection(categories = classDetail.categories)
         }
     }
 }

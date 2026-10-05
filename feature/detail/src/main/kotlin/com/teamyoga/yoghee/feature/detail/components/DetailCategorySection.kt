@@ -119,11 +119,12 @@ private fun CategoryItem(
 
 /**
  * category.code → drawable 매핑. 미등록 code 는 null 반환 → placeholder.
+ * code 값은 ClassCategoryCatalog 와 동일한 서버 약속 문자열을 사용한다.
  */
 @DrawableRes
 private fun categoryIconRes(code: String): Int? = when (code) {
-    "C_FLYING" -> R.drawable.ic_flying
-    "C_SIVANANDA" -> R.drawable.ic_sivananda
+    "flying_yoga" -> R.drawable.ic_flying
+    "sivananda" -> R.drawable.ic_sivananda
     else -> null
 }
 
@@ -132,9 +133,9 @@ private fun categoryIconRes(code: String): Int? = when (code) {
 private fun DetailCategorySectionPreview() {
     DetailCategorySection(
         categories = listOf(
-            ClassCategory(code = "C_FLYING", name = "플라잉"),
-            ClassCategory(code = "C_SIVANANDA", name = "시바난다"),
-            ClassCategory(code = "C_VINYASA", name = "빈야사"),
+            ClassCategory(code = "flying_yoga", name = "플라잉 요가"),
+            ClassCategory(code = "sivananda", name = "쉬바난다"),
+            ClassCategory(code = "vinyasa", name = "빈야사"),
         ),
     )
 }
@@ -144,12 +145,12 @@ private fun DetailCategorySectionPreview() {
 private fun DetailCategorySectionOverflowPreview() {
     DetailCategorySection(
         categories = listOf(
-            ClassCategory(code = "C_FLYING", name = "플라잉"),
-            ClassCategory(code = "C_SIVANANDA", name = "시바난다"),
-            ClassCategory(code = "C_A", name = "카테고리A"),
-            ClassCategory(code = "C_B", name = "카테고리B"),
-            ClassCategory(code = "C_C", name = "카테고리C"),
-            ClassCategory(code = "C_D", name = "노출안됨"),
+            ClassCategory(code = "flying_yoga", name = "플라잉 요가"),
+            ClassCategory(code = "sivananda", name = "쉬바난다"),
+            ClassCategory(code = "vinyasa", name = "빈야사"),
+            ClassCategory(code = "hatha", name = "하타"),
+            ClassCategory(code = "ashtanga", name = "아쉬탕가"),
+            ClassCategory(code = "iyengar", name = "노출안됨"),
         ),
     )
 }

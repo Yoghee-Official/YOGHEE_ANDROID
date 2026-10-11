@@ -1,7 +1,6 @@
 package com.teamyoga.yoghee.feature.detail
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,11 +25,14 @@ import com.teamyoga.yoghee.core.domain.model.ClassDetail
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.WHITE
+import com.teamyoga.yoghee.feature.detail.components.DetailAmenitySection
 import com.teamyoga.yoghee.feature.detail.components.DetailCategorySection
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
 import com.teamyoga.yoghee.feature.detail.components.DetailInfoSection
 import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
+import com.teamyoga.yoghee.feature.detail.components.DetailTimeTable
 import com.teamyoga.yoghee.feature.detail.components.DetailTopBar
+import com.teamyoga.yoghee.feature.detail.components.RoundBorderTitle
 
 @Composable
 fun DetailScreen(
@@ -163,19 +165,9 @@ private fun SuccessContent(
 
         // Section 4b: 수련 설명
         item {
-            Text(
+            RoundBorderTitle(
                 text = "수련 설명",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = BLACK,
-                modifier = Modifier
-                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
-                    .border(
-                        width = 1.dp,
-                        color = BLACK,
-                        shape = RoundedCornerShape(28.dp)
-                    )
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                modifier = Modifier.padding(top = 32.dp, start = 16.dp, end = 16.dp),
             )
             YogheeText(
                 text = classDetail.description,
@@ -190,6 +182,14 @@ private fun SuccessContent(
         // Section 4c: 수련에 녹아있는 요소 (카테고리)
         item {
             DetailCategorySection(categories = classDetail.categories)
+            // todo:: 수련 방식
+            // todo:: 수련 대상
+        }
+
+        item {
+            DetailAmenitySection(title = "수련원 보유 물품", amenities = classDetail.center?.amenities.orEmpty(), 21)
+            DetailAmenitySection(title = "편의시설", amenities = classDetail.center?.facilities.orEmpty(), 10)
+            DetailTimeTable(title = "수련 시간표", schedules = classDetail.schedules)
         }
     }
 }

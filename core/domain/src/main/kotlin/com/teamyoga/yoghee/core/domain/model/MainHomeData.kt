@@ -7,7 +7,8 @@ import kotlin.String
 
 data class TodayClass(
     val classId: String?,
-    val className: String?
+    val className: String?,
+    val message: String?
 )
 
 data class MainBanner(

@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -29,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -107,7 +105,8 @@ private val classTypes = listOf(
 @Composable
 fun SelectClassTypeScreen(
     onBack: () -> Unit,
-    onGoOneDayClassRegister: (Int) -> Unit,
+    onGoOneDayClassRegister: () -> Unit,
+    onGoRegularClassRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -121,13 +120,15 @@ fun SelectClassTypeScreen(
         )
         SelectClassTypeContent(
             onGoOneDayClassRegister = onGoOneDayClassRegister,
+            onGoRegularClassRegister = onGoRegularClassRegister,
         )
     }
 }
 
 @Composable
 private fun SelectClassTypeContent(
-    onGoOneDayClassRegister: (Int) -> Unit,
+    onGoOneDayClassRegister: () -> Unit,
+    onGoRegularClassRegister: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -158,8 +159,8 @@ private fun SelectClassTypeContent(
                 type = classTypes[page],
                 onClick = {
                     // [0] 원데이, [2] 시즌, [3] 워크숍은 원데이 클래스 등록 화면으로 진입
-                    // [1] 정규 수련은 별도 화면 (별도 작업)
-                    if (page != 1) onGoOneDayClassRegister(page)
+                    // [1] 정규 수련은 정규 클래스 등록 화면으로 진입
+                    if (page == 1) onGoRegularClassRegister() else onGoOneDayClassRegister()
                 },
             )
         }
@@ -312,7 +313,11 @@ private fun ClassTypeBanner(
 @Composable
 private fun SelectClassTypeScreenPreview() {
     YogheeTheme {
-        SelectClassTypeScreen(onBack = {}, onGoOneDayClassRegister = {})
+        SelectClassTypeScreen(
+            onBack = {},
+            onGoOneDayClassRegister = {},
+            onGoRegularClassRegister = {},
+        )
     }
 }
 

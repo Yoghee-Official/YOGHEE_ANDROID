@@ -2,6 +2,7 @@ package com.teamyoga.yoghee.feature.registerClass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,12 +33,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.teamyoga.yoghee.core.common.formatCreatedAt
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.component.YogheeHeader
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -57,6 +60,8 @@ import com.teamyoga.yoghee.feature.registerClass.components.CONTENT_MAX_LENGTH
 import com.teamyoga.yoghee.feature.registerClass.components.HintTextField
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressBottomSheet
 import com.teamyoga.yoghee.feature.registerClass.components.KakaoAddressResult
+import com.teamyoga.yoghee.feature.registerClass.components.LocationListEditableItem
+import com.teamyoga.yoghee.feature.registerClass.components.LocationRegisterButton
 import com.teamyoga.yoghee.feature.registerClass.components.MultiSelectChipsSection
 import com.teamyoga.yoghee.feature.registerClass.components.RegisterSectionTitle
 
@@ -325,6 +330,121 @@ private fun CenterForm.applyKakaoResult(result: KakaoAddressResult): CenterForm 
         jibunAddress = result.jibunAddress,
         zonecode = result.zonecode,
     )
+
+@Composable
+internal fun YogaPlaceRegisterScreen(
+    centersState: CentersState,
+    onLoadCenters: () -> Unit,
+    onBack: () -> Unit,
+    onRegisterLocationClick: () -> Unit,
+    onEditCenterClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(Unit) { onLoadCenters() }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        YogheeHeader(
+            title = stringResource(R.string.one_day_class_register_step4_title),
+            onBack = onBack,
+            subTitle = stringResource(R.string.inquire),
+            onSubTitleClick = {},
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
+            RegisterSectionTitle(
+                title = "장소 등록하기",
+                modifier = Modifier.padding(top = 20.dp),
+            )
+            LocationRegisterButton(
+                onClick = onRegisterLocationClick,
+                modifier = Modifier.padding(top = 16.dp),
+                borderColor = MIND_ORANGE,
+                titleColor = MIND_ORANGE,
+                subTitleColor = BLACK
+            )
+            CentersSection(
+                centersState = centersState,
+                onAddClass = onRegisterLocationClick,
+                onEditAddress = onEditCenterClick,
+                modifier = Modifier.padding(top = 33.dp),
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun CentersSection(
+    centersState: CentersState,
+    onAddClass: () -> Unit,
+    onEditAddress: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (centersState) {
+        CentersState.Idle -> Unit
+        CentersState.Loading -> {
+            Column(modifier = modifier.fillMaxWidth()) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = LAND_BROWN)
+                }
+            }
+        }
+        is CentersState.Success -> {
+            if (centersState.centers.isEmpty()) return
+            Column(
+                modifier = modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                RegisterSectionTitle(title = "요가원 불러오기")
+                centersState.centers.forEach { center ->
+                    LocationListEditableItem(
+                        date = formatCreatedAt(center.createdAt),
+                        name = center.name,
+                        location = center.address,
+                        onAddClass = onAddClass,
+                        onEditAddress = { onEditAddress(center.centerId) },
+                    )
+                }
+            }
+        }
+        is CentersState.Error -> Unit
+    }
+}
+
+@Preview(showBackground = true, name = "YogaPlaceRegisterScreen")
+@Composable
+private fun YogaPlaceRegisterScreenPreview() {
+    YogheeTheme {
+        Box(modifier = Modifier.background(SAND_BEIGE)) {
+            YogaPlaceRegisterScreen(
+                centersState = CentersState.Success(
+                    centers = listOf(
+                        com.teamyoga.yoghee.core.domain.model.Center(
+                            centerId = "center-1234abcd",
+                            name = "정환요가원",
+                            address = "경기 남양주시 다산중앙로123번길 22-26 899호",
+                            createdAt = "2026-08-01T16:18:37.131Z",
+                        ),
+                    ),
+                ),
+                onLoadCenters = {},
+                onBack = {},
+                onRegisterLocationClick = {},
+                onEditCenterClick = {},
+            )
+        }
+    }
+}
 
 @Preview(showBackground = true, showSystemUi = true, name = "RegisterCenterScreen Filled")
 @Composable

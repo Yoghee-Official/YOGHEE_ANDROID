@@ -15,9 +15,9 @@ sealed class MainSection {
 
     data class YogaCategory(val title: String?) : MainSection()
 
-    data class TodayClasses(
+    data class TodayClassSection(
         val title: String?,
-        val classes: List<TodayClass>
+        val item: TodayClass
     ) : MainSection()
 
     data class InterestedCenters(

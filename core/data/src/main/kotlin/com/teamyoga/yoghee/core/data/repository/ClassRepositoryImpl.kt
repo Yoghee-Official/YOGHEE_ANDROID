@@ -3,16 +3,27 @@ package com.teamyoga.yoghee.core.data.repository
 import com.teamyoga.yoghee.core.data.remote.ClassService
 import com.teamyoga.yoghee.core.data.remote.model.CenterDetailDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
+import com.teamyoga.yoghee.core.data.remote.model.CreateClassPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
+import com.teamyoga.yoghee.core.data.remote.model.CreateHolidayPolicyDto
+import com.teamyoga.yoghee.core.data.remote.model.CreateRefundPolicyDto
 import com.teamyoga.yoghee.core.data.remote.model.CreateScheduleDto
+import com.teamyoga.yoghee.core.data.remote.model.CreateTicketDto
 import com.teamyoga.yoghee.core.data.remote.model.MyCenterDto
 import com.teamyoga.yoghee.core.domain.model.Center
 import com.teamyoga.yoghee.core.domain.model.CenterDetail
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
 import com.teamyoga.yoghee.core.domain.model.CreateCenterParams
+import com.teamyoga.yoghee.core.domain.model.CreateClassPolicyParam
+import com.teamyoga.yoghee.core.domain.model.CreateHolidayPolicyParam
 import com.teamyoga.yoghee.core.domain.model.CreateOneDayClassParams
+import com.teamyoga.yoghee.core.domain.model.CreateRefundPolicyParam
+import com.teamyoga.yoghee.core.domain.model.CreateRegularClassParams
+import com.teamyoga.yoghee.core.domain.model.RegularClassScheduleParam
 import com.teamyoga.yoghee.core.domain.repository.ClassRepository
 import javax.inject.Inject
+
+private const val ONE_DAY_TICKET_TYPE = "ONE_DAY"
 
 class ClassRepositoryImpl @Inject constructor(
     private val classService: ClassService,
@@ -27,15 +38,51 @@ class ClassRepositoryImpl @Inject constructor(
             featureCodes = params.featureCodes,
             categoryCodes = params.categoryCodes,
             schedules = params.schedules.map { it.toDto() },
-            // TODO: Step 4~7 UI 완성 시 값 채우기
-            images = emptyList(),
-            price = 0,
-            policy = null,
+            images = params.images,
+            price = params.price,
+            policy = params.policy?.toDto(),
+            // 하루수련은 항상 ONE_DAY 티켓 1장이며 가격은 class price와 동일.
+            tickets = listOf(
+                CreateTicketDto(
+                    ticketType = ONE_DAY_TICKET_TYPE,
+                    price = params.price,
+                )
+            ),
+            // TODO: 휴일 UI 미구현
             holidayPolicy = null,
-            tickets = emptyList(),
         )
         return classService.createClass(request).data.orEmpty()
     }
+
+    override suspend fun createRegularClass(params: CreateRegularClassParams): String {
+        val request = CreateClassRequest(
+            type = params.type,
+            name = params.name,
+            description = params.description,
+            centerId = params.centerId,
+            featureCodes = params.featureCodes,
+            categoryCodes = params.categoryCodes,
+            schedules = params.schedules.map { it.toDto() },
+            images = params.images,
+            holidayPolicy = params.holidayPolicy.toDto(),
+        )
+        return classService.createClass(request).data.orEmpty()
+    }
+
+    private fun CreateHolidayPolicyParam.toDto(): CreateHolidayPolicyDto = CreateHolidayPolicyDto(
+        weeklyOffDays = weeklyOffDays,
+        publicHolidays = publicHolidays,
+    )
+
+    private fun RegularClassScheduleParam.toDto(): CreateScheduleDto = CreateScheduleDto(
+        dayOfWeek = dayOfWeek,
+        startTime = startTime,
+        endTime = endTime,
+        minCapacity = minCapacity,
+        maxCapacity = maxCapacity,
+        name = name,
+        instructorNote = instructorNote,
+    )
 
     override suspend fun getCenters(): List<Center> =
         classService.getCenters().data.map { it.toDomain() }
@@ -88,6 +135,18 @@ class ClassRepositoryImpl @Inject constructor(
         minCapacity = minCapacity,
         maxCapacity = maxCapacity,
         name = name,
+    )
+
+    private fun CreateClassPolicyParam.toDto(): CreateClassPolicyDto = CreateClassPolicyDto(
+        discountPrice = discountPrice,
+        discountRate = discountRate,
+        reservationNote = reservationNote,
+        refundPolicies = refundPolicies.map { it.toDto() },
+    )
+
+    private fun CreateRefundPolicyParam.toDto(): CreateRefundPolicyDto = CreateRefundPolicyDto(
+        hoursBeforeClass = hoursBeforeClass,
+        refundRate = refundRate,
     )
 
     private fun MyCenterDto.toDomain(): Center = Center(

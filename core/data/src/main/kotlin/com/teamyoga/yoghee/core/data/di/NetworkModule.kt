@@ -6,6 +6,7 @@ import com.teamyoga.yoghee.core.data.remote.AuthService
 import com.teamyoga.yoghee.core.data.remote.CategoryService
 import com.teamyoga.yoghee.core.data.remote.ClassService
 import com.teamyoga.yoghee.core.data.remote.FeedService
+import com.teamyoga.yoghee.core.data.remote.ImageService
 import com.teamyoga.yoghee.core.data.remote.MainService
 import com.teamyoga.yoghee.core.data.remote.auth.AuthInterceptor
 import com.teamyoga.yoghee.core.data.remote.auth.TokenAuthenticator
@@ -40,7 +41,7 @@ annotation class AppHttp
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://www.yoghee.xyz/"
+    private const val BASE_URL = "https://www.dopidopi.xyz/"
 
     @Provides
     @Singleton
@@ -134,6 +135,11 @@ object NetworkModule {
     @Singleton
     fun provideClassService(@AppHttp retrofit: Retrofit): ClassService =
         retrofit.create(ClassService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideImageService(@AppHttp retrofit: Retrofit): ImageService =
+        retrofit.create(ImageService::class.java)
 
     private fun buildRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
         val contentType = "application/json".toMediaType()

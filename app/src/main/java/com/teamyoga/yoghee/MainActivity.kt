@@ -22,8 +22,10 @@ import com.teamyoga.yoghee.feature.detail.DetailScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
+import com.teamyoga.yoghee.feature.registerClass.ClassRegisterCompleteScreen
 import com.teamyoga.yoghee.feature.registerClass.OneDayClassRegisterScreen
 import com.teamyoga.yoghee.feature.registerClass.RegisterCenterScreen
+import com.teamyoga.yoghee.feature.registerClass.RegularClassRegisterScreen
 import com.teamyoga.yoghee.feature.registerClass.SelectClassTypeScreen
 import com.teamyoga.yoghee.feature.search.SearchScreen
 import com.teamyoga.yoghee.splash.SplashScreen
@@ -90,25 +92,46 @@ private fun AppNavGraph(
         composable(AppRoute.RegisterClass.route) {
             SelectClassTypeScreen(
                 onBack = { navController.popBackStack() },
-                onGoOneDayClassRegister = { typeIndex ->
-                    navController.navigate(AppRoute.OneDayClassRegister.createRoute(typeIndex = typeIndex))
+                onGoOneDayClassRegister = {
+                    navController.navigate(AppRoute.OneDayClassRegister.route)
+                },
+                onGoRegularClassRegister = {
+                    navController.navigate(AppRoute.RegularClassRegister.route)
                 },
             )
         }
 
-        composable(
-            route = AppRoute.OneDayClassRegister.route,
-            arguments = listOf(
-                navArgument(AppRoute.OneDayClassRegister.ARG_TYPE_INDEX) { type = NavType.IntType },
-            ),
-        ) { backStackEntry ->
-            val typeIndex = backStackEntry.arguments?.getInt(AppRoute.OneDayClassRegister.ARG_TYPE_INDEX) ?: 0
+        composable(AppRoute.OneDayClassRegister.route) {
             OneDayClassRegisterScreen(
-                typeIndex = typeIndex,
                 onBack = { navController.popBackStack() },
                 onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) },
-                onGoEditCenter = { centerId ->
-                    navController.navigate(AppRoute.RegisterCenter.createRoute(centerId = centerId))
+                onGoComplete = {
+                    // 완료 화면 진입 시 등록 스택 정리
+                    navController.navigate(AppRoute.ClassRegisterComplete.route) {
+                        popUpTo(AppRoute.RegisterClass.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(AppRoute.RegularClassRegister.route) {
+            RegularClassRegisterScreen(
+                onBack = { navController.popBackStack() },
+                onGoRegisterCenter = { navController.navigate(AppRoute.RegisterCenter.createRoute()) },
+                onGoComplete = {
+                    navController.navigate(AppRoute.ClassRegisterComplete.route) {
+                        popUpTo(AppRoute.RegisterClass.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(AppRoute.ClassRegisterComplete.route) {
+            ClassRegisterCompleteScreen(
+                onDone = {
+                    navController.navigate(AppRoute.Profile.route) {
+                        popUpTo(AppRoute.ClassRegisterComplete.route) { inclusive = true }
+                    }
                 },
             )
         }

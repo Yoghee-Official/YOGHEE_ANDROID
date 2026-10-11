@@ -52,7 +52,7 @@ data class CreateHolidayPolicyDto(
 
 @Serializable
 data class CreateTicketDto(
-    val ticketId: String,
+    val ticketId: String? = null,
     val ticketType: String = "",
     val price: Int = 0,
     val weeklyCount: Int = 0,

@@ -46,4 +46,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // 위치 섹션 지도 — Kakao Vector Maps v2
+    implementation(libs.kakao.map)
 }

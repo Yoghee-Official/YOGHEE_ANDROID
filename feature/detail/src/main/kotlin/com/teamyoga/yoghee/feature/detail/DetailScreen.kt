@@ -29,6 +29,7 @@ import com.teamyoga.yoghee.feature.detail.components.DetailAmenitySection
 import com.teamyoga.yoghee.feature.detail.components.DetailCategorySection
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
 import com.teamyoga.yoghee.feature.detail.components.DetailInfoSection
+import com.teamyoga.yoghee.feature.detail.components.DetailLocationMap
 import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
 import com.teamyoga.yoghee.feature.detail.components.DetailTimeTable
 import com.teamyoga.yoghee.feature.detail.components.DetailTopBar
@@ -190,6 +191,7 @@ private fun SuccessContent(
             DetailAmenitySection(title = "수련원 보유 물품", amenities = classDetail.center?.amenities.orEmpty(), 21)
             DetailAmenitySection(title = "편의시설", amenities = classDetail.center?.facilities.orEmpty(), 10)
             DetailTimeTable(title = "수련 시간표", schedules = classDetail.schedules)
+            DetailLocationMap(title = "위치", center = classDetail.center)
         }
     }
 }

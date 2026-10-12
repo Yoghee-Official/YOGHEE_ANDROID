@@ -81,6 +81,8 @@ dependencies {
     implementation(project(":feature:registerClass"))
 
     implementation(libs.kakao.user)
+    // Application 에서 Kakao Vector Maps v2 초기화 호출 필요 (실제 MapView 사용은 feature:detail)
+    implementation(libs.kakao.map)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

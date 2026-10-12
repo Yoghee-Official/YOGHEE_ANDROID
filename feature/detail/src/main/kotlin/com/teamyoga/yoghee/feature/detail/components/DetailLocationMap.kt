@@ -144,12 +144,12 @@ private fun CenterPinLabel(
     Text(
         text = label,
         color = WHITE,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
         modifier = modifier
             .background(color = MIND_ORANGE, shape = bubble)
             // 아래 tailHeight 만큼 여유를 둬야 글자가 뾰족이 영역을 침범하지 않는다.
-            .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp + SpeechBubbleShape.TAIL_HEIGHT),
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp + SpeechBubbleShape.TAIL_HEIGHT),
     )
 }
 
@@ -159,7 +159,7 @@ private fun CenterPinLabel(
  * - 뾰족이 꼭짓점이 Shape 의 bottom-center 가 되므로 핀 포인터가 지도 상 "정확한 위치"를 가리킨다.
  */
 private class SpeechBubbleShape(
-    private val cornerRadius: Dp = 6.dp,
+    private val cornerRadius: Dp = 16.dp,
     private val tailWidth: Dp = 10.dp,
     private val tailHeight: Dp = TAIL_HEIGHT,
 ) : Shape {

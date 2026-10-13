@@ -32,6 +32,7 @@ import com.teamyoga.yoghee.core.domain.model.NewReview
 import com.teamyoga.yoghee.core.ui.component.NewReviewSection
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.GHEE_YELLO
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.feature.detail.components.DetailAmenitySection
@@ -228,6 +229,18 @@ private fun SuccessContent(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 NewReviewSection(reviews = classDetail.recentReviews.map { it.toNewReview() })
+                Spacer(modifier = Modifier.height(16.dp))
+                // 리뷰 전체보기
+                YogheeText(
+                    text = "리뷰 전체보기",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = BLACK,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .background(color = GHEE_YELLO, shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp)
+                )
             }
         }
     }

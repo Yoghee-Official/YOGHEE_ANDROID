@@ -2,10 +2,13 @@ package com.teamyoga.yoghee.core.data.local.crypto
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplates
+import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
+import java.security.KeyStore
 
 /**
  * Tink 기반 문자열 암호화 wrapper
@@ -21,15 +24,38 @@ class TokenCipher(context: Context) {
         // Keystore 안에 해당 이름의 마스터 키를 만들거나 가져옴
         val masterKeyUri = "android-keystore://$MASTER_KEY_ALIAS"
 
-        // 키셋을 SharedPreferences에 저장하되, 마스터 키로 한 번 더 암호화해서 보관한다.
-        val keysetHandle = AndroidKeysetManager.Builder()
+        // 1차 시도 실패 시(백업 복원 / Keystore 손상 등으로 keyset-key 불일치) 양쪽을 모두 폐기 후 재생성.
+        // 복구 시 기존 저장 토큰은 복호화 불가 → 유저는 재로그인 필요하지만 앱 즉사는 막는다.
+        val keysetHandle = runCatching { buildKeysetHandle(context, masterKeyUri) }
+            .recoverCatching { originalError ->
+                Log.w(TAG, "Keyset load failed, resetting and rebuilding.", originalError)
+                context.deleteSharedPreferences(KEYSET_PREFS_FILE)
+                deleteMasterKey()
+                buildKeysetHandle(context, masterKeyUri)
+            }
+            .getOrThrow()
+
+        aead = keysetHandle.getPrimitive(Aead::class.java)
+    }
+
+    private fun buildKeysetHandle(context: Context, masterKeyUri: String): KeysetHandle =
+        AndroidKeysetManager.Builder()
             .withSharedPref(context, KEYSET_NAME, KEYSET_PREFS_FILE)
             .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
             .withMasterKeyUri(masterKeyUri)
             .build()
             .keysetHandle
 
-        aead = keysetHandle.getPrimitive(Aead::class.java)
+    // Android Keystore 에서 손상된 마스터 키 엔트리를 제거. 실패해도 복구 흐름 자체는 계속 간다.
+    private fun deleteMasterKey() {
+        try {
+            val keystore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
+            if (keystore.containsAlias(MASTER_KEY_ALIAS)) {
+                keystore.deleteEntry(MASTER_KEY_ALIAS)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to delete master key from Android Keystore", e)
+        }
     }
 
     /**
@@ -52,6 +78,9 @@ class TokenCipher(context: Context) {
     }
 
     companion object {
+        private const val TAG = "TokenCipher"
+        private const val ANDROID_KEYSTORE = "AndroidKeyStore"
+
         // Keystore에 만들어질 마스터 키의 별칭. 앱 패키지명을 prefix로 두면 충돌 위험이 적다.
         private const val MASTER_KEY_ALIAS = "yoghee_token_master_key"
 

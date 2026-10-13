@@ -39,6 +39,7 @@ import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.MapView
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.teamyoga.yoghee.core.domain.model.ClassCenter
+import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
@@ -82,6 +83,13 @@ fun DetailLocationMap(
             )
             CenterPinLabel(label = center.name)
         }
+        YogheeText(
+            text = center.description,
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(top = 16.dp, start = 24.dp, end = 9.dp)
+        )
     }
 }
 

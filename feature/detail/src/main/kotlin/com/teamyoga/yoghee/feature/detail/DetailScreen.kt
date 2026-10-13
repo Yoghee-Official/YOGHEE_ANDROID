@@ -340,7 +340,7 @@ private fun DetailBottomBar(
             )
             YogheeText(
                 text = "예약하기",
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MIND_ORANGE,
                 modifier = Modifier

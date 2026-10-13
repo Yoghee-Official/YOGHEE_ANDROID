@@ -1,4 +1,4 @@
-package com.teamyoga.yoghee.feature.main.components
+package com.teamyoga.yoghee.core.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

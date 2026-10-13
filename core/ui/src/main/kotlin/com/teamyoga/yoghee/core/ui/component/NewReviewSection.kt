@@ -1,6 +1,8 @@
-package com.teamyoga.yoghee.feature.main.components
+package com.teamyoga.yoghee.core.ui.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,8 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.domain.model.NewReview
 import com.teamyoga.yoghee.core.ui.R
-import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY

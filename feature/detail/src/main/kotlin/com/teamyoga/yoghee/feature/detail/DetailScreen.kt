@@ -258,6 +258,7 @@ private fun SuccessContent(
         }
         DetailBottomBar(
             price = classDetail.price,
+            discountRate = classDetail.discountRate,
             // TODO: 문의하기 액션 연결
             onInquiry = {},
             // TODO: 예약하기 액션 연결
@@ -270,55 +271,82 @@ private fun SuccessContent(
 @Composable
 private fun DetailBottomBar(
     price: Int,
+    discountRate: Int,
     onInquiry: () -> Unit,
     onReserve: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(BOTTOM_BAR_HEIGHT)
-            .background(color = Green_D6F695)
-            .padding(top = 25.dp, bottom = 48.dp, start = 26.dp, end = 17.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        YogheeText(
-            text = "1회 금액",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = BLACK,
-        )
-        YogheeText(
-            text = "${"%,d".format(price)}원",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = BLACK,
-            modifier = Modifier.padding(start = 4.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        YogheeText(
-            text = "문의하기",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = BLACK,
+    Column(modifier = modifier) {
+        Row(
             modifier = Modifier
-                .noRippleClickable(onInquiry)
-        )
-        VerticalDivider(
+                .padding(start = 16.dp)
+                .background(
+                    color = MIND_ORANGE,
+                    shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            YogheeText(
+                text = "할인율",
+                color = WHITE,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            YogheeText(
+                text = "${discountRate}%",
+                color = WHITE,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        Row(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(horizontal = 28.dp),
-            thickness = 1.dp,
-            color = BLACK,
-        )
-        YogheeText(
-            text = "예약하기",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = MIND_ORANGE,
-            modifier = Modifier
-                .noRippleClickable(onReserve),
-        )
+                .fillMaxWidth()
+                .height(BOTTOM_BAR_HEIGHT)
+                .background(color = Green_D6F695)
+                .padding(top = 25.dp, bottom = 48.dp, start = 26.dp, end = 17.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            YogheeText(
+                text = "1회 금액",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = BLACK,
+            )
+            YogheeText(
+                text = "${"%,d".format(price)}원",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = BLACK,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            YogheeText(
+                text = "문의하기",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = BLACK,
+                modifier = Modifier
+                    .noRippleClickable(onInquiry)
+            )
+            VerticalDivider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(horizontal = 28.dp),
+                thickness = 1.dp,
+                color = BLACK,
+            )
+            YogheeText(
+                text = "예약하기",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MIND_ORANGE,
+                modifier = Modifier
+                    .noRippleClickable(onReserve),
+            )
+        }
     }
 }
 

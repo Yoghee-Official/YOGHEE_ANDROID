@@ -18,6 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -126,26 +130,31 @@ private fun NewReviewItem(
             review.rating?.let { StarScore(score = it) }
         }
         Spacer(modifier = Modifier.height(8.dp))
+        // 본문이 4줄을 초과하면 ellipsize + 하단 "더보기" 노출.
+        var isOverflow by remember(review.content) { mutableStateOf(false) }
         Text(
             text = review.content.orEmpty(),
             fontSize = 12.sp,
             color = BLACK,
             fontWeight = FontWeight.Medium,
-            maxLines = 5,
+            maxLines = 4,
             overflow = TextOverflow.Ellipsis,
+            onTextLayout = { result -> isOverflow = result.hasVisualOverflow },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             lineHeight = 12.sp
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(   // 더보기
-            text = stringResource(R.string.show_more),
-            fontSize = 10.sp,
-            color = GRAY,
-            textDecoration = TextDecoration.Underline,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Right,
-            modifier = Modifier.fillMaxWidth().padding(end = 8.dp)
-        )
+        if (isOverflow) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(   // 더보기
+                text = stringResource(R.string.show_more),
+                fontSize = 10.sp,
+                color = GRAY,
+                textDecoration = TextDecoration.Underline,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Right,
+                modifier = Modifier.fillMaxWidth().padding(end = 8.dp)
+            )
+        }
     }
 }
 

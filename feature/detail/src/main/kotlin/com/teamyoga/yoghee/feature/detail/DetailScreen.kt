@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -215,7 +216,15 @@ private fun SuccessContent(
                 ) {
                     RoundBorderTitle(text = "리뷰 ★${classDetail.rating}")
                     Spacer(modifier = Modifier.weight(1f))
-                    YogheeText(text = "${"%,d".format(classDetail.reviewCount)}개", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = BLACK)
+                    YogheeText(
+                        // 99,999 초과면 "99,999+개" 로 표시 (디자인상 5자리 캡).
+                        text = if (classDetail.reviewCount > 99_999) "99,999+개"
+                        else "${"%,d".format(classDetail.reviewCount)}개",
+                        fontSize = 12.sp,
+                        textDecoration = TextDecoration.Underline,
+                        fontWeight = FontWeight.Medium,
+                        color = BLACK,
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 NewReviewSection(reviews = classDetail.recentReviews.map { it.toNewReview() })

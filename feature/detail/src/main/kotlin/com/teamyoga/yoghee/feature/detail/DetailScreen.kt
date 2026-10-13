@@ -3,9 +3,12 @@ package com.teamyoga.yoghee.feature.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -15,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,7 +38,10 @@ import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GHEE_YELLO
 import com.teamyoga.yoghee.core.ui.theme.GRAY
+import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
+import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
+import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 import com.teamyoga.yoghee.feature.detail.components.DetailAmenitySection
 import com.teamyoga.yoghee.feature.detail.components.DetailCategorySection
 import com.teamyoga.yoghee.feature.detail.components.DetailImagePager
@@ -120,6 +127,8 @@ private fun ErrorContent(
     }
 }
 
+private val BOTTOM_BAR_HEIGHT = 92.dp
+
 @Composable
 private fun SuccessContent(
     classDetail: ClassDetail,
@@ -130,11 +139,14 @@ private fun SuccessContent(
     onRatingClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .background(WHITE),
-    ) {
+    Box(modifier = modifier
+        .fillMaxSize()
+        .background(WHITE)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            // BottomBar 에 가리지 않도록 하단 패딩 추가.
+            contentPadding = PaddingValues(bottom = BOTTOM_BAR_HEIGHT + 93.dp),
+        ) {
         // Section 1 + Section 2: 이미지 위에 TopBar 오버레이. 스크롤 시 함께 이동.
         item {
             Box {
@@ -243,6 +255,70 @@ private fun SuccessContent(
                 )
             }
         }
+        }
+        DetailBottomBar(
+            price = classDetail.price,
+            // TODO: 문의하기 액션 연결
+            onInquiry = {},
+            // TODO: 예약하기 액션 연결
+            onReserve = {},
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+@Composable
+private fun DetailBottomBar(
+    price: Int,
+    onInquiry: () -> Unit,
+    onReserve: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(BOTTOM_BAR_HEIGHT)
+            .background(color = Green_D6F695)
+            .padding(top = 25.dp, bottom = 48.dp, start = 26.dp, end = 17.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        YogheeText(
+            text = "1회 금액",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = BLACK,
+        )
+        YogheeText(
+            text = "${"%,d".format(price)}원",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BLACK,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        YogheeText(
+            text = "문의하기",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BLACK,
+            modifier = Modifier
+                .noRippleClickable(onInquiry)
+        )
+        VerticalDivider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 28.dp),
+            thickness = 1.dp,
+            color = BLACK,
+        )
+        YogheeText(
+            text = "예약하기",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MIND_ORANGE,
+            modifier = Modifier
+                .noRippleClickable(onReserve),
+        )
     }
 }
 

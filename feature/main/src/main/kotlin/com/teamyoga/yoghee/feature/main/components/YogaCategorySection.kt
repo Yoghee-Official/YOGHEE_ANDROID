@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.core.ui.component.SubTitle
+import com.teamyoga.yoghee.core.ui.component.Title
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.util.noRippleClickable
 

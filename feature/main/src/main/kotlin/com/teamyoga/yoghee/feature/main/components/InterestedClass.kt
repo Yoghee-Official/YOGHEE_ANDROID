@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import com.teamyoga.yoghee.core.domain.model.InterestedClass
 import com.teamyoga.yoghee.core.ui.R
+import com.teamyoga.yoghee.core.ui.component.Title
 import com.teamyoga.yoghee.core.ui.component.RatingLabel
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.theme.BLACK

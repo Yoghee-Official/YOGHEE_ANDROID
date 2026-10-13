@@ -23,7 +23,7 @@ import com.teamyoga.yoghee.feature.main.components.BannerPager
 import com.teamyoga.yoghee.feature.main.components.FloatingBottomNavigation
 import com.teamyoga.yoghee.feature.main.components.InterestedClass
 import com.teamyoga.yoghee.feature.main.components.MainHeader
-import com.teamyoga.yoghee.feature.main.components.NewReviewSection
+import com.teamyoga.yoghee.core.ui.component.NewReviewSection
 import com.teamyoga.yoghee.feature.main.components.RegisterClass
 import com.teamyoga.yoghee.feature.main.components.Top10Class
 import com.teamyoga.yoghee.feature.main.components.YogaCategorySection

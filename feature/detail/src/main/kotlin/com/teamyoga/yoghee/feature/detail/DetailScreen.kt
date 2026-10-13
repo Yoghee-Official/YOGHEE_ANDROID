@@ -3,13 +3,16 @@ package com.teamyoga.yoghee.feature.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,8 +25,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.teamyoga.yoghee.core.domain.model.ClassDetail
+import com.teamyoga.yoghee.core.domain.model.ClassReview
+import com.teamyoga.yoghee.core.domain.model.NewReview
+import com.teamyoga.yoghee.core.ui.component.NewReviewSection
 import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
+import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.feature.detail.components.DetailAmenitySection
 import com.teamyoga.yoghee.feature.detail.components.DetailCategorySection
@@ -193,5 +200,37 @@ private fun SuccessContent(
             DetailTimeTable(title = "수련 시간표", schedules = classDetail.schedules)
             DetailLocationMap(title = "위치", center = classDetail.center)
         }
+
+        if (classDetail.recentReviews.isNotEmpty()) {
+            item {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = GRAY,
+                    modifier = Modifier.padding(top = 32.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
+                )
+                RoundBorderTitle(
+                    text = "리뷰 ★${classDetail.rating}",
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                NewReviewSection(reviews = classDetail.recentReviews.map { it.toNewReview() })
+            }
+        }
     }
 }
+
+/**
+ * ClassReview(모든 필드 non-null) 를 공통 UI 컴포넌트가 요구하는 NewReview(nullable) 로 변환.
+ * 두 모델이 사실상 같은 데이터를 담지만 nullability 가 달라 매핑이 필요.
+ */
+private fun ClassReview.toNewReview(): NewReview = NewReview(
+    reviewId = reviewId,
+    userUuid = userUuid,
+    thumbnail = thumbnail,
+    content = content,
+    rating = rating,
+    createdAt = createdAt,
+    nickname = nickname,
+    userLevel = userLevel,
+    profileUrl = profileUrl,
+)

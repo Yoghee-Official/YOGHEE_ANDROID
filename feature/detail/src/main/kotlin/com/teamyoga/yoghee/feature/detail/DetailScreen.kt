@@ -3,6 +3,7 @@ package com.teamyoga.yoghee.feature.detail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -208,10 +209,14 @@ private fun SuccessContent(
                     color = GRAY,
                     modifier = Modifier.padding(top = 32.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
                 )
-                RoundBorderTitle(
-                    text = "리뷰 ★${classDetail.rating}",
-                    modifier = Modifier.padding(start = 16.dp),
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RoundBorderTitle(text = "리뷰 ★${classDetail.rating}")
+                    Spacer(modifier = Modifier.weight(1f))
+                    YogheeText(text = "${"%,d".format(classDetail.reviewCount)}개", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = BLACK)
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 NewReviewSection(reviews = classDetail.recentReviews.map { it.toNewReview() })
             }

@@ -52,6 +52,7 @@ import com.teamyoga.yoghee.feature.detail.components.DetailLocationMap
 import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
 import com.teamyoga.yoghee.feature.detail.components.DetailTimeTable
 import com.teamyoga.yoghee.feature.detail.components.DetailTopBar
+import com.teamyoga.yoghee.feature.detail.components.RegularScheduleTable
 import com.teamyoga.yoghee.feature.detail.components.RoundBorderTitle
 import kotlinx.coroutines.launch
 
@@ -219,7 +220,11 @@ private fun SuccessContent(
         item {
             DetailAmenitySection(title = "수련원 보유 물품", amenities = classDetail.center?.amenities.orEmpty(), 21)
             DetailAmenitySection(title = "편의시설", amenities = classDetail.center?.facilities.orEmpty(), 10)
-            DetailTimeTable(title = "수련 시간표", schedules = classDetail.schedules)
+            if (classDetail.type == "R") {
+                RegularScheduleTable(title = "수련 시간표", schedules = classDetail.schedules)
+            } else {
+                DetailTimeTable(title = "수련 일정", schedules = classDetail.schedules)
+            }
             DetailLocationMap(title = "위치", center = classDetail.center)
         }
 
@@ -263,14 +268,37 @@ private fun SuccessContent(
             }
         }
         }
-        DetailBottomBar(
-            price = classDetail.price,
-            discountRate = classDetail.discountRate,
-            // TODO: 문의하기 액션 연결
-            onInquiry = {},
-            // TODO: 예약하기 액션 연결
-            onReserve = {},
-            modifier = Modifier.align(Alignment.BottomCenter),
+        if (classDetail.type == "R") {
+            RegularClassBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
+        } else {
+            DetailBottomBar(
+                price = classDetail.price,
+                discountRate = classDetail.discountRate,
+                // TODO: 문의하기 액션 연결
+                onInquiry = {},
+                // TODO: 예약하기 액션 연결
+                onReserve = {},
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RegularClassBottomBar(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(BOTTOM_BAR_HEIGHT)
+            .background(Green_D6F695)
+            .noRippleClickable { /* TODO: 상담하기 액션 연결 */ },
+        contentAlignment = Alignment.Center,
+    ) {
+        YogheeText(
+            text = "상담하기",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = BLACK,
         )
     }
 }

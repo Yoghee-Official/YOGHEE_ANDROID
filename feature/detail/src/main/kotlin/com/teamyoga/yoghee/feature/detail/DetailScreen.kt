@@ -73,8 +73,6 @@ fun DetailScreen(
             isBookmarked = state.isBookmarked,
             onBack = onBack,
             onToggleBookmark = viewModel::toggleBookmark,
-            // TODO: 대표 이미지 클릭 시 이미지 팝업 화면 이동 (후속)
-            onImageClick = {},
             // TODO: 리뷰 평점 클릭 시 리뷰 영역으로 앵커링 이동 (후속: 리뷰 섹션 구현 후)
             onRatingClick = {},
             modifier = modifier,
@@ -135,7 +133,6 @@ private fun SuccessContent(
     isBookmarked: Boolean,
     onBack: () -> Unit,
     onToggleBookmark: () -> Unit,
-    onImageClick: (page: Int) -> Unit,
     onRatingClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -152,7 +149,6 @@ private fun SuccessContent(
             Box {
                 DetailImagePager(
                     images = classDetail.images,
-                    onImageClick = onImageClick,
                 )
                 DetailTopBar(
                     isBookmarked = isBookmarked,

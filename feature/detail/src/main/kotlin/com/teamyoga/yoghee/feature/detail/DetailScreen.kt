@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -22,6 +23,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,7 @@ import com.teamyoga.yoghee.feature.detail.components.DetailMasterBanner
 import com.teamyoga.yoghee.feature.detail.components.DetailTimeTable
 import com.teamyoga.yoghee.feature.detail.components.DetailTopBar
 import com.teamyoga.yoghee.feature.detail.components.RoundBorderTitle
+import kotlinx.coroutines.launch
 
 @Composable
 fun DetailScreen(
@@ -73,8 +76,6 @@ fun DetailScreen(
             isBookmarked = state.isBookmarked,
             onBack = onBack,
             onToggleBookmark = viewModel::toggleBookmark,
-            // TODO: 리뷰 평점 클릭 시 리뷰 영역으로 앵커링 이동 (후속: 리뷰 섹션 구현 후)
-            onRatingClick = {},
             modifier = modifier,
         )
         is DetailUiState.Error -> ErrorContent(
@@ -133,13 +134,17 @@ private fun SuccessContent(
     isBookmarked: Boolean,
     onBack: () -> Unit,
     onToggleBookmark: () -> Unit,
-    onRatingClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val reviewItemIndex = 5 + if (classDetail.masterInfo != null) 1 else 0
+
     Box(modifier = modifier
         .fillMaxSize()
         .background(WHITE)) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             // BottomBar 에 가리지 않도록 하단 패딩 추가.
             contentPadding = PaddingValues(bottom = BOTTOM_BAR_HEIGHT + 93.dp),
@@ -166,7 +171,13 @@ private fun SuccessContent(
                 reviewCount = classDetail.reviewCount,
                 center = classDetail.center,
                 features = classDetail.features,
-                onRatingClick = onRatingClick,
+                onRatingClick = {
+                    if (classDetail.recentReviews.isNotEmpty()) {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(reviewItemIndex)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .offset(y = (-20).dp)
                     .background(

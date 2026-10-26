@@ -1,24 +1,38 @@
 package com.teamyoga.yoghee.feature.detail.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +41,7 @@ import com.teamyoga.yoghee.core.ui.component.YogheeText
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GHEE_YELLO
 import com.teamyoga.yoghee.core.ui.theme.GRAY
+import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
 import java.util.Calendar
@@ -98,6 +113,201 @@ fun DetailTimeTable(
             }
         }
     }
+}
+
+@Composable
+fun RegularScheduleTable(
+    title: String,
+    schedules: List<ClassSchedule>,
+    modifier: Modifier = Modifier,
+) {
+    if (schedules.isEmpty()) return
+
+    val weekdayNames = listOf("월", "화", "수", "목", "금", "토", "일")
+    val today = remember { todayScheduleDate() }
+    var monthOffset by remember { mutableIntStateOf(0) }
+    val (displayYear, displayMonth) = remember(today, monthOffset) {
+        addMonths(today.year, today.month, monthOffset)
+    }
+    val gridStartMinute = (schedules.minOf { it.startTime.toMinuteOfDay() } / 60 * 60).coerceAtMost(8 * 60)
+    val gridEndMinute = (((schedules.maxOf { it.endTime.toMinuteOfDay() } + 59) / 60) * 60)
+        .coerceAtLeast(21 * 60)
+        .coerceAtMost(24 * 60)
+    val pixelsPerMinute = 1.1f
+    val gridHeight = ((gridEndMinute - gridStartMinute) * pixelsPerMinute).dp
+    val scrollState = rememberScrollState()
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = GRAY,
+            modifier = Modifier.padding(top = 32.dp, bottom = 32.dp, start = 16.dp, end = 16.dp),
+        )
+
+        RoundBorderTitle(text = title, modifier = Modifier.padding(bottom = 16.dp, start = 16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .background(
+                    color = LIGHT_GRAY,
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                )
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            YogheeText(
+                text = displayYear.toString(),
+                color = BLACK,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = "◀",
+                color = GRAY,
+                fontSize = 8.sp,
+                modifier = Modifier.clickable { monthOffset-- },
+            )
+            YogheeText(
+                text = "${displayMonth}월",
+                color = BLACK,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 30.dp)
+            )
+            Text(
+                text = "▶",
+                color = BLACK,
+                fontSize = 8.sp,
+                modifier = Modifier.clickable { monthOffset++ },
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .background(
+                    color = LIGHT_GRAY,
+                    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                )
+                .padding(bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            weekdayNames.forEach { weekday ->
+                YogheeText(
+                    text = weekday,
+                    color = BLACK,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(540.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFFFAF9F6))
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp),
+        ) {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth().height(gridHeight)) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val hourSpacing = (60 * pixelsPerMinute).dp.toPx()
+                    var y = hourSpacing
+                    while (y < size.height) {
+                        drawLine(
+                            color = Color(0xFFE7E5E1),
+                            start = androidx.compose.ui.geometry.Offset(0f, y),
+                            end = androidx.compose.ui.geometry.Offset(size.width, y),
+                            strokeWidth = 1.dp.toPx(),
+                            pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                                floatArrayOf(5.dp.toPx(), 4.dp.toPx()),
+                            ),
+                        )
+                        y += hourSpacing
+                    }
+                }
+                Row(modifier = Modifier.fillMaxSize()) {
+                    weekdayNames.indices.forEach { index ->
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            if (index > 0) {
+                                androidx.compose.foundation.Canvas(
+                                    modifier = Modifier.fillMaxHeight().width(1.dp),
+                                ) {
+                                    drawLine(
+                                        color = Color(0xFFE7E5E1),
+                                        start = androidx.compose.ui.geometry.Offset(size.width / 2, 0f),
+                                        end = androidx.compose.ui.geometry.Offset(size.width / 2, size.height),
+                                        strokeWidth = 1.dp.toPx(),
+                                        pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                                            floatArrayOf(5.dp.toPx(), 4.dp.toPx()),
+                                        ),
+                                    )
+                                }
+                            }
+                            schedules.filter { it.dayOfWeek == index + 1 }
+                                .sortedBy { it.startTime }
+                                .forEachIndexed { cardIndex, schedule ->
+                                    val cardStart = schedule.startTime.toMinuteOfDay()
+                                    val cardEnd = schedule.endTime.toMinuteOfDay()
+                                    val top = ((cardStart - gridStartMinute).coerceAtLeast(0) * pixelsPerMinute).dp
+                                    val cardHeight = ((cardEnd - cardStart).coerceAtLeast(35) * pixelsPerMinute).dp
+                                    val cardColor = if (cardIndex % 3 == 1) Color(0xFFD7F59A) else Color(0xFFCCE1FA)
+                                    Column(
+                                        modifier = Modifier
+                                            .offset(y = top)
+                                            .padding(horizontal = 2.dp)
+                                            .fillMaxWidth()
+                                            .height(cardHeight)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(cardColor)
+                                            .padding(horizontal = 2.dp, vertical = 6.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        YogheeText(
+                                            text = "${schedule.startTime}\n~ ${schedule.endTime}",
+                                            color = BLACK,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        YogheeText(
+                                            text = schedule.content,
+                                            color = BLACK,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        YogheeText(
+                                            text = schedule.instructorName,
+                                            color = BLACK,
+                                            fontSize = 9.sp,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun String.toMinuteOfDay(): Int {
+    val parts = split(":")
+    val hour = parts.getOrNull(0)?.toIntOrNull() ?: return 0
+    val minute = parts.getOrNull(1)?.toIntOrNull() ?: return 0
+    return hour.coerceIn(0, 23) * 60 + minute.coerceIn(0, 59)
 }
 
 @Composable

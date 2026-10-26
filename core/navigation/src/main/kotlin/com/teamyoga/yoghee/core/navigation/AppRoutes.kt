@@ -30,5 +30,11 @@ sealed class AppRoute(val route: String) {
 
         fun createRoute(id: String): String = "detail/$id"
     }
+
+    data object Reviews : AppRoute("reviews/{id}") {
+        const val ARG_ID = "id"
+
+        fun createRoute(id: String): String = "reviews/$id"
+    }
 }
 

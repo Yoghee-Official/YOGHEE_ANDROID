@@ -19,6 +19,7 @@ import com.teamyoga.yoghee.feature.category.CategoryScreen
 import com.teamyoga.yoghee.feature.category.LocationRoute
 import com.teamyoga.yoghee.feature.contentFeed.ContentFeedScreen
 import com.teamyoga.yoghee.feature.detail.DetailScreen
+import com.teamyoga.yoghee.feature.detail.ReviewListScreen
 import com.teamyoga.yoghee.feature.login.LoginRoute
 import com.teamyoga.yoghee.feature.main.MainScreen
 import com.teamyoga.yoghee.feature.profile.ProfileScreen
@@ -194,6 +195,20 @@ private fun AppNavGraph(
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString(AppRoute.Detail.ARG_ID).orEmpty()
             DetailScreen(
+                id = id,
+                onBack = { navController.popBackStack() },
+                onGoReviews = { classId ->
+                    navController.navigate(AppRoute.Reviews.createRoute(classId))
+                },
+            )
+        }
+
+        composable(
+            route = AppRoute.Reviews.route,
+            arguments = listOf(navArgument(AppRoute.Reviews.ARG_ID) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString(AppRoute.Reviews.ARG_ID).orEmpty()
+            ReviewListScreen(
                 id = id,
                 onBack = { navController.popBackStack() },
             )

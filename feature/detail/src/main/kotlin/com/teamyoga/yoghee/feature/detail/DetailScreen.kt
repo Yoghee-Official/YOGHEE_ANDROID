@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 fun DetailScreen(
     id: String,
     onBack: () -> Unit,
+    onGoReviews: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DetailViewModel = hiltViewModel(),
 ) {
@@ -77,6 +78,7 @@ fun DetailScreen(
             isBookmarked = state.isBookmarked,
             onBack = onBack,
             onToggleBookmark = viewModel::toggleBookmark,
+            onGoReviews = { onGoReviews(state.classDetail.classId) },
             modifier = modifier,
         )
         is DetailUiState.Error -> ErrorContent(
@@ -135,6 +137,7 @@ private fun SuccessContent(
     isBookmarked: Boolean,
     onBack: () -> Unit,
     onToggleBookmark: () -> Unit,
+    onGoReviews: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -264,6 +267,7 @@ private fun SuccessContent(
                         .padding(horizontal = 16.dp)
                         .background(color = GHEE_YELLO, shape = RoundedCornerShape(8.dp))
                         .padding(10.dp)
+                        .noRippleClickable(onGoReviews)
                 )
             }
         }

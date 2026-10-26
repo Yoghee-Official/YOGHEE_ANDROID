@@ -50,6 +50,14 @@ data class ClassReview(
     val createdAt: String,
 )
 
+data class ClassReviewPage(
+    val reviews: List<ClassReview>,
+    val page: Int,
+    val totalPages: Int,
+    val totalCount: Int,
+    val hasNext: Boolean,
+)
+
 data class ClassPolicy(
     val discountRate: Int,
     val discountStartDate: String,

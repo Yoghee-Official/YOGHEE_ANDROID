@@ -31,6 +31,7 @@ import com.teamyoga.yoghee.core.domain.model.ClassMasterInfo
 import com.teamyoga.yoghee.core.domain.model.ClassPolicy
 import com.teamyoga.yoghee.core.domain.model.ClassRefundPolicy
 import com.teamyoga.yoghee.core.domain.model.ClassReview
+import com.teamyoga.yoghee.core.domain.model.ClassReviewPage
 import com.teamyoga.yoghee.core.domain.model.ClassSchedule
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleMonth
 import com.teamyoga.yoghee.core.domain.model.ClassScheduleParam
@@ -130,6 +131,17 @@ class ClassRepositoryImpl @Inject constructor(
         val dto = classService.getClassDetail(classId).data
             ?: error("수련 상세 정보를 불러오지 못했습니다.")
         return dto.toDomain()
+    }
+
+    override suspend fun getClassReviews(classId: String, page: Int, sort: String): ClassReviewPage {
+        val response = classService.getClassReviews(classId, page, sort)
+        return ClassReviewPage(
+            reviews = response.reviews.map { it.toClassReview() },
+            page = response.page,
+            totalPages = response.totalPages,
+            totalCount = response.totalCount,
+            hasNext = response.hasNext,
+        )
     }
 
     private fun CreateCenterParams.toRequest(): CreateCenterRequest {

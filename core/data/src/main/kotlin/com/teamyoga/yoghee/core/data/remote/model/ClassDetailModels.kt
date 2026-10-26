@@ -11,6 +11,15 @@ data class ClassDetailResponse(
 )
 
 @Serializable
+data class ClassReviewsResponse(
+    val reviews: List<ReviewDto> = emptyList(),
+    val page: Int = 0,
+    val totalPages: Int = 0,
+    val totalCount: Int = 0,
+    val hasNext: Boolean = false,
+)
+
+@Serializable
 data class ClassDetailDto(
     val classId: String = "",
     val type: String = "",

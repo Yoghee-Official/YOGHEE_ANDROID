@@ -2,6 +2,7 @@ package com.teamyoga.yoghee.core.data.remote
 
 import com.teamyoga.yoghee.core.data.remote.model.CenterDetailResponse
 import com.teamyoga.yoghee.core.data.remote.model.ClassDetailResponse
+import com.teamyoga.yoghee.core.data.remote.model.ClassReviewsResponse
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterRequest
 import com.teamyoga.yoghee.core.data.remote.model.CreateCenterResponse
 import com.teamyoga.yoghee.core.data.remote.model.CreateClassRequest
@@ -13,6 +14,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ClassService {
     @POST("api/class")
@@ -24,6 +26,13 @@ interface ClassService {
     suspend fun getClassDetail(
         @Path("classId") classId: String,
     ): ClassDetailResponse
+
+    @GET("api/review/{classId}")
+    suspend fun getClassReviews(
+        @Path("classId") classId: String,
+        @Query("page") page: Int,
+        @Query("sort") sort: String,
+    ): ClassReviewsResponse
 
     @GET("api/center")
     suspend fun getCenters(): GetCentersResponse

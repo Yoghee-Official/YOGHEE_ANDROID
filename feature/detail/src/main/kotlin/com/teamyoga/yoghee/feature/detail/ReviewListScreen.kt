@@ -116,7 +116,7 @@ fun ReviewListScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             YogheeText(
-                                text = "4.5",//todo:: 실제 값 넣기
+                                text = "%.1f".format(state.rating),
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = BLACK,

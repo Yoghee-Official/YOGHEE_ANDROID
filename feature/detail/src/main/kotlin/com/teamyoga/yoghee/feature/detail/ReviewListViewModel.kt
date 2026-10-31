@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 sealed interface ReviewListUiState {
     data object Loading : ReviewListUiState
     data class Success(
+        val rating: Double,
         val reviews: List<ClassReview>,
         val page: Int,
         val totalPages: Int,
@@ -77,6 +78,7 @@ class ReviewListViewModel @Inject constructor(
                             )
                             if (query.value == request) {
                                 _uiState.value = ReviewListUiState.Success(
+                                    rating = page.rating,
                                     reviews = page.reviews,
                                     page = page.page,
                                     totalPages = page.totalPages,

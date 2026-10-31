@@ -12,6 +12,14 @@ data class ClassDetailResponse(
 
 @Serializable
 data class ClassReviewsResponse(
+    val code: Int,
+    val status: String,
+    val data: ClassReviewsData,
+)
+
+@Serializable
+data class ClassReviewsData(
+    val rating: Double = 0.0,
     val reviews: List<ReviewDto> = emptyList(),
     val page: Int = 0,
     val totalPages: Int = 0,

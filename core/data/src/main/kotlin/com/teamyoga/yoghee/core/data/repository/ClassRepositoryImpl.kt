@@ -135,12 +135,14 @@ class ClassRepositoryImpl @Inject constructor(
 
     override suspend fun getClassReviews(classId: String, page: Int, sort: String): ClassReviewPage {
         val response = classService.getClassReviews(classId, page, sort)
+        val data = response.data
         return ClassReviewPage(
-            reviews = response.reviews.map { it.toClassReview() },
-            page = response.page,
-            totalPages = response.totalPages,
-            totalCount = response.totalCount,
-            hasNext = response.hasNext,
+            rating = data.rating,
+            reviews = data.reviews.map { it.toClassReview() },
+            page = data.page,
+            totalPages = data.totalPages,
+            totalCount = data.totalCount,
+            hasNext = data.hasNext,
         )
     }
 

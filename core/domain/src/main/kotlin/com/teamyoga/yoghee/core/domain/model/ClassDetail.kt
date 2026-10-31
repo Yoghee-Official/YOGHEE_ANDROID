@@ -51,6 +51,7 @@ data class ClassReview(
 )
 
 data class ClassReviewPage(
+    val rating: Double,
     val reviews: List<ClassReview>,
     val page: Int,
     val totalPages: Int,

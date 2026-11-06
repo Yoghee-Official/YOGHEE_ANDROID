@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import com.teamyoga.yoghee.core.common.formatReviewCreatedAt
 import com.teamyoga.yoghee.core.domain.model.NewReview
 import com.teamyoga.yoghee.core.ui.R
@@ -159,9 +162,11 @@ private fun NewReviewItem(
 
 @Composable
 fun StarScore(score: Double) {
-    val scoreToInt = score.toInt()
+    val halfUnits = (score.coerceIn(0.0, 5.0) * 2).roundToInt()
+    val fullStars = halfUnits / 2
+    val hasHalfStar = halfUnits % 2 == 1
     Row {
-        repeat(scoreToInt) {
+        repeat(fullStars) {
             Image(
                 painter = painterResource(id = R.drawable.ic_star_score),
                 contentDescription = null,
@@ -169,6 +174,21 @@ fun StarScore(score: Double) {
                     .padding(start = 2.dp)
                     .width(14.dp)
                     .height(13.dp)
+            )
+        }
+        if (hasHalfStar) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_star_score),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 2.dp)
+                    .width(14.dp)
+                    .height(13.dp)
+                    .drawWithContent {
+                        clipRect(right = size.width / 2) {
+                            this@drawWithContent.drawContent()
+                        }
+                    },
             )
         }
     }

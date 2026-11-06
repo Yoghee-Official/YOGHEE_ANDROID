@@ -45,6 +45,7 @@ import com.teamyoga.yoghee.core.common.formatReviewCreatedAt
 import com.teamyoga.yoghee.core.domain.model.ClassReview
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.component.YogheeText
+import com.teamyoga.yoghee.core.ui.component.StarScore
 import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
@@ -276,7 +277,7 @@ private fun ReviewListItem(review: ClassReview) {
                 fontWeight = FontWeight.Medium,
             )
             Spacer(modifier = Modifier.weight(1f))
-            YogheeText(text = "★ ${"%.1f".format(review.rating)}", color = BLACK, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            StarScore(score = review.rating)
         }
         YogheeText(
             text = review.content,

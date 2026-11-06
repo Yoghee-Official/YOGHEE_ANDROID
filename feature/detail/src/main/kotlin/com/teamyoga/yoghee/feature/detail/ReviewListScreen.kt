@@ -3,8 +3,10 @@ package com.teamyoga.yoghee.feature.detail
 import com.teamyoga.yoghee.core.ui.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,8 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.teamyoga.yoghee.core.common.formatReviewCreatedAt
 import com.teamyoga.yoghee.core.domain.model.ClassReview
 import com.teamyoga.yoghee.core.ui.component.YogheeImage
 import com.teamyoga.yoghee.core.ui.component.YogheeText
@@ -48,7 +49,6 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
-import com.teamyoga.yoghee.core.ui.theme.MIND_ORANGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 
 @Composable
@@ -144,7 +144,9 @@ fun ReviewListScreen(
 
                     // 필터 영역 (최신순, 오래된 순, 점수 높은 순, 점수 낮은 순)
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp, horizontal = 20.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp, horizontal = 20.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         REVIEW_SORT_LABELS.forEach { (sort, label) ->
@@ -170,7 +172,9 @@ fun ReviewListScreen(
                             color = GRAY,
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(top = 64.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 64.dp),
                         )
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -216,52 +220,70 @@ private val REVIEW_SORT_LABELS = linkedMapOf(
 
 @Composable
 private fun ReviewListItem(review: ClassReview) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            YogheeImage(
-                model = review.profileUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.size(40.dp).clip(CircleShape),
-            )
-            Column(
-                modifier = Modifier.padding(start = 10.dp).weight(1f),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                YogheeText(text = review.nickname, color = BLACK, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                YogheeText(
-                    text = "Lv.${review.userLevel}",
-                    color = GRAY,
-                    fontSize = 11.sp,
-                    modifier = Modifier.padding(top = 3.dp),
-                )
-            }
-            YogheeText(text = "★ ${"%.1f".format(review.rating)}", color = BLACK, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-        }
-        YogheeText(
-            text = review.createdAt.substringBefore('T').replace('-', '.'),
-            color = GRAY,
-            fontSize = 11.sp,
-            modifier = Modifier.padding(top = 12.dp),
-        )
-        YogheeText(
-            text = review.content,
-            color = BLACK,
-            fontSize = 13.sp,
-            modifier = Modifier.padding(top = 8.dp),
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp, start = 20.dp, end = 20.dp)
+            .border(width = 1.dp, color = LIGHT_GRAY, shape = RoundedCornerShape(8.dp))
+            .padding(12.dp)
+    ) {
+        // 리뷰 이미지 영역
         if (review.thumbnail.isNotBlank()) {
             YogheeImage(
                 model = review.thumbnail,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .padding(top = 12.dp)
+                    .padding(bottom = 16.dp)
                     .fillMaxWidth()
-                    .height(190.dp)
+                    .aspectRatio(296f / 233f)
                     .clip(RoundedCornerShape(8.dp)),
             )
         }
+
+        // 회원 프로필 영역
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            YogheeImage(
+                model = review.profileUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(33.dp)
+                    .clip(CircleShape),
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                YogheeText(text = review.nickname, color = BLACK, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                YogheeText(
+                    text = "Lv.${review.userLevel}",
+                    color = BLACK,
+                    fontSize = 10.sp,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
+
+        // 날짜 및 별점 영역
+        Row(modifier = Modifier.padding(vertical = 12.dp)) {
+            YogheeText(
+                text = formatReviewCreatedAt(review.createdAt),
+                color = GRAY,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            YogheeText(text = "★ ${"%.1f".format(review.rating)}", color = BLACK, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        }
+        YogheeText(
+            text = review.content,
+            color = BLACK,
+            fontSize = 13.sp,
+            modifier = Modifier.padding(top = 8.dp),
+        )
     }
     HorizontalDivider(color = LIGHT_GRAY, thickness = 1.dp)
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.teamyoga.yoghee.core.common.formatReviewCreatedAt
 import com.teamyoga.yoghee.core.domain.model.NewReview
 import com.teamyoga.yoghee.core.ui.R
 import com.teamyoga.yoghee.core.ui.theme.BLACK
@@ -41,8 +42,6 @@ import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 import com.teamyoga.yoghee.core.ui.theme.YogheeTheme
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun NewReviewSection(
@@ -121,7 +120,7 @@ private fun NewReviewItem(
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             Text(   // date
-                text = review.createdAt?.let { formatReviewDate(it) }.orEmpty(),
+                text = review.createdAt?.let(::formatReviewCreatedAt).orEmpty(),
                 fontSize = 10.sp,
                 color = GRAY,
                 fontWeight = FontWeight.Medium
@@ -174,12 +173,6 @@ fun StarScore(score: Double) {
         }
     }
 }
-
-private fun formatReviewDate(dateString: String): String = runCatching {
-    val input = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-        .parse(dateString)!!
-    SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault()).format(input)
-}.getOrDefault(dateString)
 
 @Preview(showBackground = true)
 @Composable

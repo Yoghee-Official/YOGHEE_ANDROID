@@ -182,7 +182,6 @@ fun ReviewListScreen(
                     } else {
                         val listState = rememberLazyListState()
                         LaunchedEffect(
-                            listState,
                             state.hasNext,
                             state.isLoadingNextPage,
                             state.nextPageError,

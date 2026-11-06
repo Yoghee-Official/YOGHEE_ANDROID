@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -178,7 +180,30 @@ fun ReviewListScreen(
                                 .padding(top = 64.dp),
                         )
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        val listState = rememberLazyListState()
+                        LaunchedEffect(
+                            listState,
+                            state.hasNext,
+                            state.isLoadingNextPage,
+                            state.nextPageError,
+                        ) {
+                            snapshotFlow {
+                                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                            }.collect { lastVisibleIndex ->
+                                val loadThreshold = listState.layoutInfo.totalItemsCount - 3
+                                if (
+                                    state.hasNext &&
+                                    !state.isLoadingNextPage &&
+                                    state.nextPageError == null &&
+                                    lastVisibleIndex != null &&
+                                    lastVisibleIndex >= loadThreshold
+                                ) {
+                                    viewModel.loadNextPage()
+                                }
+                            }
+                        }
+
+                        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                             items(state.reviews, key = ClassReview::reviewId) { review ->
                                 ReviewListItem(review = review)
                             }
@@ -187,7 +212,13 @@ fun ReviewListScreen(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable { viewModel.loadNextPage() }
+                                            .then(
+                                                if (state.nextPageError != null) {
+                                                    Modifier.clickable { viewModel.loadNextPage() }
+                                                } else {
+                                                    Modifier
+                                                },
+                                            )
                                             .padding(vertical = 20.dp),
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
@@ -196,7 +227,7 @@ fun ReviewListScreen(
                                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                                         } else {
                                             YogheeText(
-                                                text = state.nextPageError ?: "리뷰 더보기",
+                                                text = state.nextPageError ?: "",
                                                 color = if (state.nextPageError == null) BLACK else GRAY,
                                                 fontSize = 13.sp,
                                             )
@@ -286,6 +317,5 @@ private fun ReviewListItem(review: ClassReview) {
             fontWeight = FontWeight.Medium
         )
     }
-    HorizontalDivider(color = LIGHT_GRAY, thickness = 1.dp)
 }
 

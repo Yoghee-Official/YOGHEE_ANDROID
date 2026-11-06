@@ -282,8 +282,8 @@ private fun ReviewListItem(review: ClassReview) {
         YogheeText(
             text = review.content,
             color = BLACK,
-            fontSize = 13.sp,
-            modifier = Modifier.padding(top = 8.dp),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
         )
     }
     HorizontalDivider(color = LIGHT_GRAY, thickness = 1.dp)

@@ -52,6 +52,7 @@ import com.teamyoga.yoghee.core.ui.theme.BLACK
 import com.teamyoga.yoghee.core.ui.theme.GRAY
 import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
+import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
 
 @Composable
@@ -68,7 +69,7 @@ fun ReviewListScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(WHITE)
+            .background(SAND_BEIGE)
             .systemBarsPadding(),
     ) {
         when (val state = uiState) {
@@ -102,135 +103,135 @@ fun ReviewListScreen(
                         )
                     }
 
-                    // 상단 총 별점 / 리뷰 수 영역
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                    val listState = rememberLazyListState()
+                    LaunchedEffect(
+                        state.hasNext,
+                        state.isLoadingNextPage,
+                        state.nextPageError,
                     ) {
-                        Image(
-                            painterResource(R.drawable.ic_stardrawing),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding()
-                                .size(width = 106.dp, height = 98.dp)
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            YogheeText(
-                                text = "%.1f".format(state.rating),
-                                fontSize = 36.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = BLACK,
-                                modifier = Modifier.padding(top = 24.dp)
-                            )
-
-                            YogheeText(
-                                text = "총 리뷰 수 ${"%,d".format(state.totalCount)}건",
-                                color = GRAY,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 8.dp)
-                            )
+                        snapshotFlow {
+                            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                        }.collect { lastVisibleIndex ->
+                            val loadThreshold = listState.layoutInfo.totalItemsCount - 3
+                            if (
+                                state.hasNext &&
+                                !state.isLoadingNextPage &&
+                                state.nextPageError == null &&
+                                lastVisibleIndex != null &&
+                                lastVisibleIndex >= loadThreshold
+                            ) {
+                                viewModel.loadNextPage()
+                            }
                         }
-                        Image(
-                            painterResource(R.drawable.ic_sunface),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding()
-                                .size(width = 124.dp, height = 145.dp)
-                        )
                     }
 
-                    HorizontalDivider(color = LIGHT_GRAY, thickness = 1.dp, modifier = Modifier.padding(16.dp))
+                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                        item(key = "review_summary") {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    painterResource(R.drawable.ic_stardrawing),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(width = 106.dp, height = 98.dp),
+                                )
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    YogheeText(
+                                        text = "%.1f".format(state.rating),
+                                        fontSize = 36.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = BLACK,
+                                        modifier = Modifier.padding(top = 24.dp),
+                                    )
+                                    YogheeText(
+                                        text = "총 리뷰 수 ${"%,d".format(state.totalCount)}건",
+                                        color = GRAY,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        modifier = Modifier.padding(top = 8.dp),
+                                    )
+                                }
+                                Image(
+                                    painterResource(R.drawable.ic_sunface),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(width = 124.dp, height = 145.dp),
+                                )
+                            }
+                            HorizontalDivider(
+                                color = LIGHT_GRAY,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
 
-                    // 필터 영역 (최신순, 오래된 순, 점수 높은 순, 점수 낮은 순)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp, horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        REVIEW_SORT_LABELS.forEach { (sort, label) ->
-                            val isSelected = state.sort == sort
-                            YogheeText(
-                                text = label,
-                                color = BLACK,
-                                fontSize = 12.sp,
+                        item(key = "review_sort_filters") {
+                            Row(
                                 modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .clip(RoundedCornerShape(32.dp))
-                                    .background(if (isSelected) Green_D6F695 else LIGHT_GRAY)
-                                    .clickable { viewModel.changeSort(sort) }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                            )
-                        }
-                    }
-
-                    // 리뷰 목록
-                    if (state.reviews.isEmpty()) {
-                        YogheeText(
-                            text = "등록된 리뷰가 없습니다.",
-                            color = GRAY,
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 64.dp),
-                        )
-                    } else {
-                        val listState = rememberLazyListState()
-                        LaunchedEffect(
-                            state.hasNext,
-                            state.isLoadingNextPage,
-                            state.nextPageError,
-                        ) {
-                            snapshotFlow {
-                                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                            }.collect { lastVisibleIndex ->
-                                val loadThreshold = listState.layoutInfo.totalItemsCount - 3
-                                if (
-                                    state.hasNext &&
-                                    !state.isLoadingNextPage &&
-                                    state.nextPageError == null &&
-                                    lastVisibleIndex != null &&
-                                    lastVisibleIndex >= loadThreshold
-                                ) {
-                                    viewModel.loadNextPage()
+                                    .fillMaxWidth()
+                                    .padding(vertical = 20.dp, horizontal = 20.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                REVIEW_SORT_LABELS.forEach { (sort, label) ->
+                                    val isSelected = state.sort == sort
+                                    YogheeText(
+                                        text = label,
+                                        color = BLACK,
+                                        fontSize = 12.sp,
+                                        modifier = Modifier
+                                            .padding(horizontal = 4.dp)
+                                            .clip(RoundedCornerShape(32.dp))
+                                            .background(if (isSelected) Green_D6F695 else LIGHT_GRAY)
+                                            .clickable { viewModel.changeSort(sort) }
+                                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    )
                                 }
                             }
                         }
 
-                        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                        if (state.reviews.isEmpty()) {
+                            item(key = "empty_reviews") {
+                                YogheeText(
+                                    text = "등록된 리뷰가 없습니다.",
+                                    color = GRAY,
+                                    fontSize = 14.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 64.dp),
+                                )
+                            }
+                        } else {
                             items(state.reviews, key = ClassReview::reviewId) { review ->
                                 ReviewListItem(review = review)
                             }
-                            if (state.hasNext) {
-                                item(key = "load_more") {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .then(
-                                                if (state.nextPageError != null) {
-                                                    Modifier.clickable { viewModel.loadNextPage() }
-                                                } else {
-                                                    Modifier
-                                                },
-                                            )
-                                            .padding(vertical = 20.dp),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        if (state.isLoadingNextPage) {
-                                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                                        } else {
-                                            YogheeText(
-                                                text = state.nextPageError ?: "",
-                                                color = if (state.nextPageError == null) BLACK else GRAY,
-                                                fontSize = 13.sp,
-                                            )
-                                        }
+                        }
+
+                        if (state.hasNext) {
+                            item(key = "load_more") {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .then(
+                                            if (state.nextPageError != null) {
+                                                Modifier.clickable { viewModel.loadNextPage() }
+                                            } else {
+                                                Modifier
+                                            },
+                                        )
+                                        .padding(vertical = 20.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    if (state.isLoadingNextPage) {
+                                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                    } else if (state.nextPageError != null) {
+                                        YogheeText(
+                                            text = state.nextPageError,
+                                            color = GRAY,
+                                            fontSize = 13.sp,
+                                        )
                                     }
                                 }
                             }
@@ -255,6 +256,7 @@ private fun ReviewListItem(review: ClassReview) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp, start = 20.dp, end = 20.dp)
+            .background(color = WHITE, shape = RoundedCornerShape(8.dp))
             .border(width = 1.dp, color = LIGHT_GRAY, shape = RoundedCornerShape(8.dp))
             .padding(12.dp)
     ) {

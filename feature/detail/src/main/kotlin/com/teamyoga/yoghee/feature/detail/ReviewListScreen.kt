@@ -91,7 +91,9 @@ fun ReviewListScreen(
                         Image(
                             painterResource(R.drawable.ic_back),
                             contentDescription = "뒤로가기",
-                            modifier = Modifier.size(width = 23.dp, height = 20.dp)
+                            modifier = Modifier
+                                .size(width = 23.dp, height = 20.dp)
+                                .clickable(onClick = onBack),
                         )
                         YogheeText(
                             text = "리뷰 목록",

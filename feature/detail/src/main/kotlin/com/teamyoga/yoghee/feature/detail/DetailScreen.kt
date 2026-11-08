@@ -157,7 +157,9 @@ private fun SuccessContent(
         item {
             Box {
                 DetailImagePager(
-                    images = classDetail.images,
+                    images = classDetail.images.ifEmpty {
+                        listOf(classDetail.thumbnail).filter(String::isNotBlank)
+                    },
                 )
                 DetailTopBar(
                     isBookmarked = isBookmarked,

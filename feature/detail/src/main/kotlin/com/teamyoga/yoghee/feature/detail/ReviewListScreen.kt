@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +56,7 @@ import com.teamyoga.yoghee.core.ui.theme.Green_D6F695
 import com.teamyoga.yoghee.core.ui.theme.LIGHT_GRAY
 import com.teamyoga.yoghee.core.ui.theme.SAND_BEIGE
 import com.teamyoga.yoghee.core.ui.theme.WHITE
+import com.teamyoga.yoghee.feature.detail.components.PagerIndicator
 
 @Composable
 fun ReviewListScreen(
@@ -263,17 +266,38 @@ private fun ReviewListItem(review: ClassReview) {
             .padding(12.dp)
     ) {
         // 리뷰 이미지 영역
-        if (review.thumbnail.isNotBlank()) {
-            YogheeImage(
-                model = review.thumbnail,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+        val reviewImages = (review.images.ifEmpty { listOf(review.thumbnail) })
+            .filter(String::isNotBlank)
+        if (reviewImages.isNotEmpty()) {
+            val pagerState = rememberPagerState(pageCount = { reviewImages.size })
+            Box(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .fillMaxWidth()
                     .aspectRatio(296f / 233f)
                     .clip(RoundedCornerShape(8.dp)),
-            )
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                ) { page ->
+                    YogheeImage(
+                        model = reviewImages[page],
+                        contentDescription = "리뷰 이미지 ${page + 1}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                if (reviewImages.size > 1) {
+                    PagerIndicator(
+                        totalPages = reviewImages.size,
+                        currentPage = pagerState.currentPage,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 8.dp),
+                    )
+                }
+            }
         }
 
         // 회원 프로필 영역

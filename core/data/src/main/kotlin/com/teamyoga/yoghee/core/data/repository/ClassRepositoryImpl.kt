@@ -259,6 +259,7 @@ class ClassRepositoryImpl @Inject constructor(
         userLevel = userLevel ?: 0,
         profileUrl = profileUrl.orEmpty(),
         thumbnail = thumbnail.orEmpty(),
+        images = images.orEmpty(),
         content = content.orEmpty(),
         rating = rating ?: 0.0,
         createdAt = createdAt.orEmpty(),

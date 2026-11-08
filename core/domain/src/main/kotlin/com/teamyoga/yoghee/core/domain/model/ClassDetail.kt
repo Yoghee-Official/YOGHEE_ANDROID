@@ -45,6 +45,7 @@ data class ClassReview(
     val userLevel: Int,
     val profileUrl: String,
     val thumbnail: String,
+    val images: List<String> = emptyList(),
     val content: String,
     val rating: Double,
     val createdAt: String,

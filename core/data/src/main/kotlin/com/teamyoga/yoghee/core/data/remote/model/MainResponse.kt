@@ -56,6 +56,7 @@ data class ReviewDto(
     val reviewId: String? = null,
     val userUuid: String? = null,
     val thumbnail: String? = null,
+    val images: List<String>? = null,
     val content: String? = null,
     val rating: Double? = null,
     val createdAt: String? = null,
